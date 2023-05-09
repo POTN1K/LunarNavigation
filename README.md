@@ -48,24 +48,28 @@ In order to keep the GitHub organized, the following rules must be complied with
 - All code must be documented using the Docstring Style.
 The following introduces an example of a file with a class and a method that has a docstring:
 
-    """File to create circles and perform operations on them."""
+        """File to create circles and perform operations on them."""
 
-    \# Global Libraries
-    import math
+        # Global Libraries
+        import math
 
-    class Circle:
-    """Class to create circles and perform operations on them."""
+        class Circle:
+        """Class to create circles and perform operations on them."""
 
-        def __init__(self, radius):
-            """
-            Method to initialize a Circle object. \n
-            :param radius (float): The radius of the circle object to be created.
-            """
-            self.radius = radius
-        
-        def area(self):
-            """
-            Method to compute the Circle Area. \n
-            :return (float): The area of the circle.
-            """
-            return math.pi * self.radius ** 2
+            def __init__(self, radius):
+                """
+                Method to initialize a Circle object. \n
+                :param radius (float): The radius of the circle object to be created.
+                """
+                self.radius = radius
+
+            def area(self):
+                """
+                Method to compute the Circle Area. \n
+                :return (float): The area of the circle.
+                """
+                return math.pi * self.radius ** 2
+                
+        if __name__=="main":
+            circle1 = Circle(5)
+            print(circle1.area())
