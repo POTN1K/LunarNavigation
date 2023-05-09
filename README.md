@@ -4,6 +4,13 @@ Software to Model Orbital Mechanics around the Moon and perform design calculati
 Project developed as part of the Design Synthesis Exercise (DSE) for the obtention of the Bachelor of Science in Aerospace Engineering at the Delft University of Technology (TU Delft). The project consists of the development of a software to model orbital mechanics around the Moon and perform design calculations for a Lunar Navigation System. The software will be used to perform a trade-off analysis between different navigation systems and select the most suitable one for the mission. The project is divided into 3 phases, each one with a different focus. The first phase consists of the development of the software, the second phase consists of the trade-off analysis, and the third phase consists of the design of the selected navigation system, along with the spacecraft. The project is developed by a team of 10 students. The project is developed in Python 3.10, and the code is stored in a GitHub repository. The project is developed in 3 months, from April to June 2023.
 ## Installation
 Instructions for installation of the project.
+1. Clone the repository to your local machine.
+2. Install conda.
+3. Create a conda environment using the environment.yaml file.
+    Open terminal in the folder where the environment.yaml file is located and run the following command:
+    `conda env create -f environment.yaml`
+4. Activate the conda environment: 
+    `conda activate tudat-space`
 ### Libraries
 - pip
 - numpy
