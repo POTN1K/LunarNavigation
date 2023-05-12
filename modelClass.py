@@ -13,7 +13,7 @@ miu_moon = 4.9048695e12  # m^3/s^2
 
 class Satellite:
     """Class to define a satellite with its position and cone of view around the Moon."""
-    def __init__(self, a, e, i, w, Omega, nu, elevation=10):
+    def __init__(self, a, e, i, w, Omega, nu, elevation=10, shift=0):
         """Initialise the satellite with its Keplerian elements and calculate its position.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -22,6 +22,7 @@ class Satellite:
         :param Omega: longitude of ascending node [deg]
         :param nu: true anomaly [deg]
         :param elevation: (optional) elevation angle [deg]
+        :param shift: (optional) shift of the cone of view [deg]
         """
         self.range = None
         self.a = a
@@ -29,7 +30,8 @@ class Satellite:
         self.i = i
         self.w = w
         self.Omega = Omega
-        self.nu = nu
+        self.shift = shift
+        self.nu = nu + shift
         self.r = element_conversion.keplerian_to_cartesian_elementwise(
             gravitational_parameter=miu_moon,
             semi_major_axis=self.a,
@@ -106,19 +108,17 @@ class Satellite:
                 self.range = self.setRange()
         else:
             raise ValueError("Longitude of ascending node must be between 0 and 360°.")
-        
+
     @property
     def nu(self):
         return self._nu
     
     @nu.setter
     def nu(self, value):
-        if value >= 0 and value <= 360:
-            self._nu = np.deg2rad(value)
-            if self.range is not None:
-                self.range = self.setRange()
-        else:
-            raise ValueError("True anomaly must be between 0 and 360.")
+        value = value % 360
+        self._nu = np.deg2rad(value)
+        if self.range is not None:
+            self.range = self.setRange()
     
     @property
     def elevation(self):
@@ -242,7 +242,7 @@ class Tower:
         else:
             return False
 
-class Lagrange():
+class Lagrange:
     def __init__(self, l_point, elevation=10):
         """Initialise the Lagrange point with its position.
         :param l_point: Lagrange point
@@ -290,10 +290,13 @@ class Lagrange():
             return True
         else:
             return False
+        
+    def __repr__(self):
+        return f"Lagrange point {self.l_point}"
 
 class OrbitPlane:
     """Class to define an orbit plane, along with the satellites in it."""
-    def __init__(self, a, e, i, w, Omega, n_sat, elevation=10):
+    def __init__(self, a, e, i, w, Omega, n_sat, elevation=10, shift=0):
         """Initialise the orbit plane with its Keplerian elements and calculate the positions of the satellites.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -310,6 +313,7 @@ class OrbitPlane:
         self.w = w
         self.Omega = Omega
         self.elevation = elevation
+        self.shift = shift
         self.n_sat = n_sat
         self.satellites = self.createSatellites()
 
@@ -409,7 +413,7 @@ class OrbitPlane:
         """Create the satellites in the orbit plane."""
         satellites = []
         for n in range(self.n_sat):
-            satellites.append(Satellite(self.a, self.e, self.i, self.w, self.Omega, 360/self.n_sat*n, self.elevation))
+            satellites.append(Satellite(self.a, self.e, self.i, self.w, self.Omega, 360/self.n_sat*n, self.elevation, self.shift))
         return satellites
 
 class Model:
@@ -433,7 +437,7 @@ class Model:
         self.n_sat += orbit.n_sat
         self.n_orbit_planes += 1
 
-    def addOrbitPlane(self, a, e, i, w, Omega, n_sat):
+    def addOrbitPlane(self, a, e, i, w, Omega, n_sat, shift=0, elevation=10):
         """Add an orbit plane to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -441,8 +445,9 @@ class Model:
         :param w: argument of periapsis [deg]
         :param Omega: longitude of ascending node [deg]
         :param n_sat: number of satellites in the orbit plane
+        :param elevation: (optional) elevation angle [deg]
         """
-        n_orbit = OrbitPlane(a, e, i, w, Omega, n_sat)
+        n_orbit = OrbitPlane(a, e, i, w, Omega, n_sat, elevation, shift)
         self.orbit_planes.append(n_orbit)
         for s in n_orbit.satellites:
             self.modules.append(s)
@@ -456,7 +461,7 @@ class Model:
         self.modules.append(module)
         self.n_sat += 1
     
-    def addSatellite(self, a, e, i, w, Omega, nu, elevation=10):
+    def addSatellite(self, a, e, i, w, Omega, nu, shift=0, elevation=10):
         """Add a satellite to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -465,8 +470,9 @@ class Model:
         :param Omega: longitude of ascending node [deg]
         :param nu: true anomaly [deg]
         :param elevation: (optional) elevation angle [deg]
+        :param shift: (optional) shift of the satellite in the orbit plane [deg]
         """
-        n_sat = Satellite(a, e, i, w, Omega, nu, elevation)
+        n_sat = Satellite(a, e, i, w, Omega, nu, elevation, shift)
         self.modules.append(n_sat)
         self.n_sat += 1
 
@@ -480,7 +486,7 @@ class Model:
         self.modules.append(n_point)
         self.n_sat += 1
         
-    def addSymmetricalPlanes(self, a, e, i, w, n_planes, n_sat_per_plane):
+    def addSymmetricalPlanes(self, a, e, i, w, n_planes, n_sat_per_plane,shift=0, elevation=10):
         """Add  symmetrical orbit planes to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -488,9 +494,10 @@ class Model:
         :param w: argument of periapsis [deg]
         :param n_planes: number of orbit planes
         :param n_sat_per_plane: number of satellites in each orbit plane
+        :param shift: (optional) shift of the satellites in the orbit plane [deg]
         """
         for n in range(n_planes):
-            self.addOrbitPlane(a, e, i, w, 360/n_planes*n, n_sat_per_plane)
+            self.addOrbitPlane(a, e, i, w, 360/n_planes*n, n_sat_per_plane, elevation, shift)
 
     def createMoon(self, resolution):
         """Add the Moon to the model."""
@@ -557,30 +564,40 @@ class Model:
             if isinstance(module, Satellite):
                 print(module.getParams())
         
-
+    def __repr__(self):
+        l = f'Model with {self.n_sat} satellites and {self.n_orbit_planes} orbit planes. The modules are:\n'
+        for module in self.modules:
+            l += f'{module}\n'
+        return l
 
 if __name__ == '__main__':
     # Create model
     model = Model()
 
-    # Add satellite
-    # model.addSatellite(r_moon, 0, 58.69, 22.9, 4, 6)
+    # Add satellite (a, e, i, w, Omega, nu, shift)
+    # model.addSatellite(2.45e7, 0, 58.69, 22.9, 4, 6)
 
-    # Add tower
-    # model.addTower(20, 15, 1000)
+    # Add tower (phi, theta, h)
+    # model.addTower(20, 15, 100000)
 
     # Add Lagrange point
-    # model.addLagrange('L1')
-    # model.addLagrange('L2')
+    model.addLagrange('L1')
+    model.addLagrange('L2')
     
-    # Add orbit plane
-    # model.addOrbitPlane(2.45e7, 0, 58.69, 22.9, 4, 6)
+    # Add orbit plane (a, e, i, w, Omega, n_sat, shift)
+    s = 0
+    #model.addOrbitPlane(2.45e7, 0.5, 85, 0, 0, 4, s)
+    #model.addOrbitPlane(2.45e7, 0.5, 85, 45, 120, 4, s)
+    #model.addOrbitPlane(2.45e7, 0.5, 85, 90, 240, 4, s)
+    #model.addOrbitPlane(2.45e7, 0.5, 0, 0, 0, 4, s)
 
-    # Add multiple orbit planes
-    # model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 4, 6)
+    # Add multiple orbit planes (a, e, i, w, n_planes, n_sat_per_plane, shift, elevation)
+    # model.addSymmetricalPlanes(2.45e7, 0, 70, 22.9, 3, 5)
 
     # Get parameters for satellites in the model
-    model.getParams()
+    # model.getParams()
+
+    print(model)
 
     # Plot coverage
     model.plotCoverage()
