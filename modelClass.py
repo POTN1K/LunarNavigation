@@ -294,6 +294,52 @@ class Lagrange:
     def __repr__(self):
         return f"Lagrange point {self.l_point}"
 
+class FixPoint:
+    def __init__(self, r, elevation=10):
+        """Initialise the fixed point with its position.
+        :param r: fixed point position. Must be array (x, y, z) [m]
+        """
+        self.r = r
+        self.elevation = elevation
+        self.range = self.setRange()
+
+    @property
+    def r(self):
+        return self._r
+    
+    @r.setter
+    def r(self, value):
+        value = np.array(value)
+        if len(value) == 3:
+            self._r = value
+        else:
+            raise ValueError("Position must be a 3D vector.")
+
+    def setRange(self):
+        """Calculate the maximum range achievable by a satellite.
+        :param elevation: (optional) elevation angle [deg]
+        """
+        alpha = np.deg2rad(self.elevation + 90)  # angle between the cone and the horizontal plane
+        r_norm = np.linalg.norm(self.r)  # height of the cone
+        h_max = 0.5*(2*r_moon*np.cos(alpha) + np.sqrt(2)*np.sqrt(2*r_norm**2-r_moon**2+r_moon**2*np.cos(2*alpha)))
+        if h_max>np.sqrt(r_norm**2+r_moon**2):
+            h_max = np.sqrt(r_norm**2+r_moon**2)
+        return h_max
+    
+    def isInView(self, target):
+        """Check if a target is in view of the satellite.
+        :param target: target position [m]
+        """
+        if self.range is None:
+            self.range = self.range()
+        if np.linalg.norm(target-self.r) <= self.range:
+            return True
+        else:
+            return False
+        
+    def __repr__(self):
+        return f"Fixed point at {self.r}"
+
 class OrbitPlane:
     """Class to define an orbit plane, along with the satellites in it."""
     def __init__(self, a, e, i, w, Omega, n_sat, elevation=10, shift=0):
@@ -486,6 +532,11 @@ class Model:
         self.modules.append(n_point)
         self.n_sat += 1
         
+    def addFixPoint(self, r, elevation=10):
+        n_point = FixPoint(r, elevation)
+        self.modules.append(n_point)
+        self.n_sat += 1
+    
     def addSymmetricalPlanes(self, a, e, i, w, n_planes, n_sat_per_plane,shift=0, elevation=10):
         """Add  symmetrical orbit planes to the model.
         :param a: semi-major axis [m]
@@ -581,11 +632,11 @@ if __name__ == '__main__':
     # model.addTower(20, 15, 100000)
 
     # Add Lagrange point
-    model.addLagrange('L1')
-    model.addLagrange('L2')
+    # model.addLagrange('L1')
+    # model.addLagrange('L2')
     
     # Add orbit plane (a, e, i, w, Omega, n_sat, shift)
-    s = 0
+    # s = 0
     #model.addOrbitPlane(2.45e7, 0.5, 85, 0, 0, 4, s)
     #model.addOrbitPlane(2.45e7, 0.5, 85, 45, 120, 4, s)
     #model.addOrbitPlane(2.45e7, 0.5, 85, 90, 240, 4, s)
@@ -593,6 +644,9 @@ if __name__ == '__main__':
 
     # Add multiple orbit planes (a, e, i, w, n_planes, n_sat_per_plane, shift, elevation)
     # model.addSymmetricalPlanes(2.45e7, 0, 70, 22.9, 3, 5)
+
+    # Add fixed point (r, elevation)
+    model.addFixPoint([2.45e7, 3e6, 1e3], 10)
 
     # Get parameters for satellites in the model
     # model.getParams()
