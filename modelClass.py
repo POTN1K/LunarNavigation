@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pylab import cm
 from tudatpy.kernel.astro import element_conversion
+from Earth_Const import *
 
 
 # Constants
@@ -632,8 +633,8 @@ if __name__ == '__main__':
     # model.addTower(20, 15, 100000)
 
     # Add Lagrange point
-    # model.addLagrange('L1')
-    # model.addLagrange('L2')
+    model.addLagrange('L1')
+    model.addLagrange('L2')
     
     # Add orbit plane (a, e, i, w, Omega, n_sat, shift)
     # s = 0
@@ -646,7 +647,20 @@ if __name__ == '__main__':
     # model.addSymmetricalPlanes(2.45e7, 0, 70, 22.9, 3, 5)
 
     # Add fixed point (r, elevation)
-    model.addFixPoint([2.45e7, 3e6, 1e3], 10)
+    # model.addFixPoint([2.45e7, 3e6, 1e3], 10)
+    ### Max dist
+    model.addFixPoint(rc_S3_Mn_max, 10)  # Satellite 3 (S3)
+    model.addFixPoint(rc_S4_Mn_max, 10)  # S4
+    model.addFixPoint(rc_S5_Mn_max, 10)  # S5
+    model.addFixPoint(rc_S6_Mn_max, 10)  # S6
+
+    ### Min dist (probably limiting for coverage)
+    model.addFixPoint(rc_S3_Mn_min, 10)
+    model.addFixPoint(rc_S4_Mn_min, 10)
+    model.addFixPoint(rc_S5_Mn_min, 10)
+    model.addFixPoint(rc_S6_Mn_min, 10)
+
+
 
     # Get parameters for satellites in the model
     # model.getParams()
