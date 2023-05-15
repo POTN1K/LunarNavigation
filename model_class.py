@@ -1,4 +1,19 @@
-"""File with all necessary classes for modelling coverage at a static time. """
+"""
+File with all necessary classes for modelling coverage at a static time. 
+It is a fixed Moon model, with a rough coverage of the elements orbiting the satellite. \n
+The file is divided into five classes. Each class adds to the final class Model, encapsulating the other four.
+The classes are:
+    - Satellite: Class to create a satellite in a given orbit. \n
+    - Tower: Class to create a fixed tower on the moon surface with a given height. \n
+    - Lagrange: Class to position a satellite in a Lagrange point. \n
+    - FixPoint: Class to position a satellite in a fix point in space. \n
+    - OrbitPlane: Class to create a line of satellites on a plane. \n
+
+Class Model creates the environment and calculates the coverage of the satellites. It can add existing elements or create new ones.
+It measures coverage, and plots the results.
+
+By Nikolaus Ricker
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -644,21 +659,21 @@ if __name__ == '__main__':
     #model.addOrbitPlane(2.45e7, 0.5, 0, 0, 0, 4, s)
 
     # Add multiple orbit planes (a, e, i, w, n_planes, n_sat_per_plane, shift, elevation)
-    # model.addSymmetricalPlanes(2.45e7, 0, 70, 22.9, 3, 5)
+    model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4, 90)
 
     # Add fixed point (r, elevation)
     # model.addFixPoint([2.45e7, 3e6, 1e3], 10)
     ### Max dist
-    model.addFixPoint(rc_S3_Mn_max, 10)  # Satellite 3 (S3)
-    model.addFixPoint(rc_S4_Mn_max, 10)  # S4
-    model.addFixPoint(rc_S5_Mn_max, 10)  # S5
-    model.addFixPoint(rc_S6_Mn_max, 10)  # S6
+    # model.addFixPoint(rc_S3_Mn_max, 10)  # Satellite 3 (S3)
+    # model.addFixPoint(rc_S4_Mn_max, 10)  # S4
+    # model.addFixPoint(rc_S5_Mn_max, 10)  # S5
+    # model.addFixPoint(rc_S6_Mn_max, 10)  # S6
 
     ### Min dist (probably limiting for coverage)
-    model.addFixPoint(rc_S3_Mn_min, 10)
-    model.addFixPoint(rc_S4_Mn_min, 10)
-    model.addFixPoint(rc_S5_Mn_min, 10)
-    model.addFixPoint(rc_S6_Mn_min, 10)
+    #model.addFixPoint(rc_S3_Mn_min, 10)
+    #model.addFixPoint(rc_S4_Mn_min, 10)
+    #model.addFixPoint(rc_S5_Mn_min, 10)
+    #model.addFixPoint(rc_S6_Mn_min, 10)
 
 
 
