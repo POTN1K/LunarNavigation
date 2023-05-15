@@ -6,10 +6,11 @@ Project developed as part of the Design Synthesis Exercise (DSE) for the obtenti
 Instructions for installation of the project.
 1. Clone the repository to your local machine.
 2. Install conda.
-3. Create a conda environment using the environment.yaml file.
+3. Download the envorinment.yaml file. https://docs.tudat.space/en/latest/_downloads/dfbbca18599275c2afb33b6393e89994/environment.yaml
+4. Create a conda environment using the environment.yaml file.
     Open terminal in the folder where the environment.yaml file is located and run the following command:
     `conda env create -f environment.yaml`
-4. Activate the conda environment: 
+5. Activate the conda environment: 
     `conda activate tudat-space`
 ### Libraries
 - pip
@@ -17,6 +18,8 @@ Instructions for installation of the project.
 - scipy
 - matplotlib
 - pandas
+- tudatpy
+-mpl_toolkits
 
 ## Rules
 ### GitHub Rules
