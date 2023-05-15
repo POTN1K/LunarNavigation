@@ -1,5 +1,5 @@
 """
-File with all necessary classes for modelling coverage at a static time. 
+File with all necessary classes for modelling coverage at a static time.
 It is a fixed Moon model, with a rough coverage of the elements orbiting the satellite. \n
 The file is divided into five classes. Each class adds to the final class Model, encapsulating the other four.
 The classes are:

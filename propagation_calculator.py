@@ -314,7 +314,6 @@ class PropagationTime:
 
         fig1 = plt.figure(figsize=(8, 8))
         ax1 = fig1.add_subplot(111, projection='3d')
-        ax1.set_title(f'System state evolution of all bodies w.r.t the Moon')
 
         # Add the moon
         # generate sphere coordinates
@@ -349,9 +348,9 @@ class PropagationTime:
 
         # Add a legend, labels, and use a tight layout to save space
         ax1.legend()
-        ax1.set_xlabel('x [m]')
-        ax1.set_ylabel('y [m]')
-        ax1.set_zlabel('z [m]')
+        ax1.set_xlabel('x [$10^7$ m]')
+        ax1.set_ylabel('y [$10^7$ m]')
+        ax1.set_zlabel('z [$10^7$ m]')
         plt.tight_layout()
         plt.show()
 
@@ -369,7 +368,6 @@ class PropagationTime:
         kepler_elements = self.dep_vars_array[:,1+  6 * satellite_number:7 + 6 * satellite_number]
         # kepler_elements = dep_vars_array[:, 4 + 6 * self.satellite_number:10 + 6 * self.satellite_number]
         fig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(3, 2, figsize=(9, 12))
-        fig.suptitle('Evolution of Kepler elements over the course of the propagation.')
         # Semi-major Axis
         semi_major_axis = kepler_elements[:, 0] / 1e3
         ax1.plot(time_hours, semi_major_axis)
@@ -407,6 +405,3 @@ class PropagationTime:
 
         plt.tight_layout()
         plt.show()
-
-
-
