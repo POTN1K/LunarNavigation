@@ -1,3 +1,16 @@
+
+"""
+Code in order to simulate multiple satellites and their positions(history) for a certain time period around the Moon.
+The code is made user friendly to allow the user to fill in an array of satellites, final time, resolution for integra-
+ting, satellite mass, radiation area satellite to allow everything to be computed. The user is able to specify a certain
+satellite to see its kepler characteristic history. The user can also receive the delta V required for orbit maintenance
+between a self specified time period.
+
+By Kyle Scherpenzeel
+
+"""
+
+
 # Load standard modules
 import numpy as np
 from matplotlib import pyplot as plt
@@ -19,10 +32,13 @@ class PropagationTime:
         """Initialize the initial state of the satellite(s) with Keplerian elements,final time and resolution to see the final position
         :param orbit_parameters: array of Keplarian elements [[sat1],[sat2],[[sat3]]
         :param final_time: Time for the end of the simulation [s]
-        :param resolution: Number of outputs between start and end of simulation [-]
+        :param resolution: Number of outputs between integration [-]
         :param mass_sat: Mass of each satellite [kg]
-        :param mass_sat: Radiation area sat [m^2]
-        :param mass_sat: Coefficient radiation pressure [-]
+        :param area_sat: Radiation area sat [m^2]
+        :param c_radiation: Coefficient radiation pressure [-]
+        :param satellite_number: Number of what satellite kepler you are plotting [-]
+
+
         """
         self.resolution = resolution
         self.final_time = final_time
@@ -44,17 +60,22 @@ class PropagationTime:
         self.initial_state = self.create_initial_state()
         self.propagator_settings = self.create_propagator_settings()
         self.kepler_elements = None
+        self.simulate()
 
 
 
 
     def create_bodies(self):
+        """
+        Method to create celestial bodies and satellites for the simulation to use. \n
+        :return (class,list,list): Class of bodies setup, list of propagating bodies (satellites), list of central bodies (Moon)
+        """
         # Define string names for bodies to be created from default.
-        bodies_to_create = ["Sun", "Earth", "Moon"]
+        bodies_to_create = ["Sun", "Earth", "Moon"]  # Perturbing bodies
 
         # Use "Earth"/"J2000" as global frame origin and orientation.
         global_frame_origin = "Moon"
-        global_frame_orientation = "J2000"
+        global_frame_orientation = "J2000"  # Starting time (January 2000)
 
         # Create default body settings, usually from `spice`.
         body_settings = environment_setup.get_default_body_settings(
@@ -76,6 +97,11 @@ class PropagationTime:
         return bodies, bodies_to_propagate, central_bodies
 
     def add_vehicle_radiation_pressure(self):
+        """
+        Function to add area and radiation pressure coefficient to the vehicles. Updates environment_setup and does not
+        return anything.
+
+        """
         occulting_bodies = ["Earth"]
         radiation_pressure_settings = environment_setup.radiation_pressure.cannonball(
             "Sun", self.area_sat, self.c_radiation, occulting_bodies
@@ -86,6 +112,13 @@ class PropagationTime:
             )
 
     def create_acceleration_models(self):
+        """
+        Creates the acceleration settings and models for the system. The settings are assumed to be identical for each
+        satellite. Assumptions: Sun = point mass, radiation = cannonball, Earth = spherical harmonic and moon =
+        spherical harmonic. The code loops through all satellites and creates a dictionary with all satellites and their
+        settings. Then makes the acceleration models using tudat-space. \n
+        :return (object) : Propagation Setup
+        """
         accelerations_settings_lunar_sats = dict(
             Sun=[
                 propagation_setup.acceleration.cannonball_radiation_pressure(),
@@ -95,7 +128,7 @@ class PropagationTime:
                 propagation_setup.acceleration.spherical_harmonic_gravity(5, 5)
             ],
             Moon=[
-                propagation_setup.acceleration.spherical_harmonic_gravity(5, 5)
+                propagation_setup.acceleration.spherical_harmonic_gravity(10, 10)
             ]
         )
         acceleration_settings = {}
@@ -111,6 +144,11 @@ class PropagationTime:
         return acceleration_models
 
     def create_initial_state(self):
+        """
+        Create the initial states of all the vehicles in cartesian coordinates.\n
+        :return (array): 1D array of all the initial cartesian states.
+
+        """
         moon_gravitational_parameter = self.bodies.get("Moon").gravitational_parameter
         cartesian_states = []
         for x in range(len(self.orbit_parameters)):
@@ -128,6 +166,11 @@ class PropagationTime:
         return np.array(cartesian_states).reshape(len(self.orbit_parameters)*6, 1)
 
     def saving(self):
+        """
+        Function to add different variables to save within the simulation. Can uncomment the outputs but does require
+        changes to the plotting. /n
+        :return (list): 1D list with objects including outputs.
+        """
         # Define list of dependent variables to save
         dependent_variables_to_save = []
         for i, satellite_name in enumerate(self.bodies_to_propagate):
@@ -157,6 +200,11 @@ class PropagationTime:
         self.dependent_variables_to_save = list(np.array(dependent_variables_to_save).ravel())
 
     def create_propagator_settings(self):
+        """
+        Function to set up the initial simulation settings for tudat-space. User should not edit any variables. \n
+        :return (object): returns the settings for the simulation
+
+        """
         # Set simulation start and end epochs
         simulation_start_epoch = 0.0
         simulation_end_epoch = self.final_time
@@ -181,6 +229,10 @@ class PropagationTime:
         return propagator_settings
 
     def simulate(self):
+        """
+        Initializes and runs the simulation using all the settings from earlier stages. Updates states_array, dep_vars_
+        array and kepler_elements for all time steps for later use in the plots.
+        """
         # Create simulation object and propagate the dynamics
         dynamics_simulator = numerical_simulation.create_dynamics_simulator(
             self.bodies, self.propagator_settings
@@ -197,42 +249,68 @@ class PropagationTime:
 
     def inclination_change(self, v, delta_i):
         """
-        Inclination change: calculates the delta V required for an inclination change.
-        v: velocity of the spacecraft (m/s)
-        delta_i: change in inclination (rad)
+        Inclination change: calculates the delta V required for an inclination change.\n
+        :param v (float): velocity of the spacecraft (m/s)
+        :param delta_i (float): change in inclination (rad)
         """
         return 2 * v * np.sin(delta_i / 2)
+
     def hohmann_delta_v(self, a1, a2):
+        """
+        Function to calculate delta v from a hohmann transfer. \n
+        :param a1 (float): semi major axis of initial orbit
+        :param a2 (float): semi major axis of final orbit orbi
+        :return delta_v (float): Returns delta_v for specific transfer
+        """
         term1 = np.sqrt(self.bodies.get("Moon").gravitational_parameter / a1)
         term2 = np.sqrt(2 * a2 / (a1 + a2)) - 1
         return term1 * term2
 
     def delta_v_to_maintain_orbit(self, satellite_name, start_time, end_time):
+        """
+        Function to calculate delta_v for a specific satellite between certain time periods. Uses in plane hohmann and
+        out of plane inclination change.
+        :param satellite_name (string): name of the satellite
+        :param start_time (int): start time for the time period
+        :param end_time (int): final time for the time period
+        :return delta_v (float): Returns the delta_v required for maintenance between 2 times
+        """
         # Get the necessary orbital parameters
         satellite_name_index = self.bodies_to_propagate.index(satellite_name)
-        a1 = self.kepler_elements[int(start_time/10)][satellite_name_index*6]
-        a2 = self.kepler_elements[int(end_time/10)][satellite_name_index * 6]
-        i1 = self.kepler_elements[int(start_time/10)][satellite_name_index*6 + 2]
-        i2 = self.kepler_elements[int(end_time/10)][satellite_name_index*6 + 2]
-        print(a1, a2, i1, i2)
-
-
+        a1 = self.kepler_elements[int(start_time/self.fixed_step_size)][satellite_name_index*6]
+        a2 = self.kepler_elements[int(end_time/self.fixed_step_size)][satellite_name_index * 6]
+        i1 = self.kepler_elements[int(start_time/self.fixed_step_size)][satellite_name_index*6 + 2]
+        i2 = self.kepler_elements[int(end_time/self.fixed_step_size)][satellite_name_index*6 + 2]
 
 
         # Calculate delta V for the inclination change
-        v2 = np.sqrt(self.bodies.get("Moon").mass/a2)
+        v2 = np.sqrt(self.bodies.get("Moon").gravitational_parameter/a2)
         delta_v_inclination = self.inclination_change(v2, abs(i2 - i1))
 
-        print(self.bodies.get("Moon").mass)
         # Calculate the delta-v for the Hohmann transfer
         delta_v1 = self.hohmann_delta_v(a1, a2)
         delta_v2 = self.hohmann_delta_v(a2, a1)
-
         return abs(delta_v1) + abs(delta_v2) + abs(delta_v_inclination)
-
+    def complete_delta_v(self, start_time, end_time):
+        """
+        Function to calculate delta_v for the entire constellation between 2 times/n
+        :param start_time (int): Starting time for the delta_v maintenance
+        :param end_time (int): Final time for the delta_v maintenance
+        :return delta_v_list (list): List with all delta_v for the satellites during th
+        """
+        delta_v_list = []
+        for i, satellite_name in enumerate(self.bodies_to_propagate):
+            delta_v = self.delta_v_to_maintain_orbit(satellite_name, start_time, end_time)
+            print(f"Delta-v for {satellite_name}: {delta_v}")
+            delta_v_list.append(delta_v)
+        return delta_v_list
 
 
     def plot_time(self):
+        """
+        Plots the history and current location for all bodies. First this function creates the lunar surface and then
+        loops through the vehicles in order to plot their positions.
+        """
 
         fig1 = plt.figure(figsize=(8, 8))
         ax1 = fig1.add_subplot(111, projection='3d')
@@ -277,13 +355,18 @@ class PropagationTime:
         plt.tight_layout()
         plt.show()
 
-    def plot_kepler(self):
+    def plot_kepler(self, satellite_number):
+        """
+        Plots the history of the 6 kepler elements over the entire orbit.
+        :param satellite_number (int): Integer starting from 0 for the index of the satellite number
+        """
+
 
         # Convert time from seconds to hours
         time_hours = self.states_array[:, 0] / 3600
 
         # Plot Kepler elements as a function of time
-        kepler_elements = self.dep_vars_array[:,1+  6 * self.satellite_number:7 + 6 * self.satellite_number]
+        kepler_elements = self.dep_vars_array[:,1+  6 * satellite_number:7 + 6 * satellite_number]
         # kepler_elements = dep_vars_array[:, 4 + 6 * self.satellite_number:10 + 6 * self.satellite_number]
         fig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(3, 2, figsize=(9, 12))
         fig.suptitle('Evolution of Kepler elements over the course of the propagation.')
@@ -326,28 +409,4 @@ class PropagationTime:
         plt.show()
 
 
-satellites = [[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 0.0, 0.17453292519943295],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 0.0, 1.4311699866353502],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 0.0, 2.6878070480712677],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 0.0, 3.944444109507185],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 0.0, 5.201081170943102],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 2.0943951023931953, 0.17453292519943295],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 2.0943951023931953, 1.4311699866353502],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 2.0943951023931953, 2.6878070480712677],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 2.0943951023931953, 3.944444109507185],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 2.0943951023931953, 5.201081170943102],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 4.1887902047863905, 0.17453292519943295],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 4.1887902047863905, 1.4311699866353502],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 4.1887902047863905, 2.6878070480712677],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 4.1887902047863905, 3.944444109507185],
-[24500000.0, 0, 1.2217304763960306, 0.39968039870670147, 4.1887902047863905, 5.201081170943102]]
-
-if __name__ == '__main__':
-    propagation_time = PropagationTime(satellites, 100000, 10, 250, 2, 0, 0)
-    propagation_time.simulate()
-    for i, satellite_name in enumerate(propagation_time.bodies_to_propagate):
-        delta_v = propagation_time.delta_v_to_maintain_orbit(satellite_name, 0, 20)
-        print(f"Delta-v for {satellite_name}: {delta_v}")
-    propagation_time.plot_kepler()
-    propagation_time.plot_time()
 
