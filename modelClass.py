@@ -633,8 +633,8 @@ if __name__ == '__main__':
     # model.addTower(20, 15, 100000)
 
     # Add Lagrange point
-    model.addLagrange('L1')
-    model.addLagrange('L2')
+    # model.addLagrange('L1')
+    # model.addLagrange('L2')
     
     # Add orbit plane (a, e, i, w, Omega, n_sat, shift)
     # s = 0
@@ -648,18 +648,37 @@ if __name__ == '__main__':
 
     # Add fixed point (r, elevation)
     # model.addFixPoint([2.45e7, 3e6, 1e3], 10)
-    ### Max dist
-    model.addFixPoint(rc_S3_Mn_max, 10)  # Satellite 3 (S3)
-    model.addFixPoint(rc_S4_Mn_max, 10)  # S4
-    model.addFixPoint(rc_S5_Mn_max, 10)  # S5
-    model.addFixPoint(rc_S6_Mn_max, 10)  # S6
+    ### Max dist coords of S3 and S5
+    model.addFixPoint(rc_L1_Mn_S3max, 10)  # Satellite 1 at Lagrange point 1 (L1)
+    model.addFixPoint(rc_L2_Mn_S3max, 10)  # S2 at L2
+    model.addFixPoint(rc_S3_Mn_max, 10)  # S3
+    model.addFixPoint(rc_S4_Mn_S3max, 10)  # S4
+    model.addFixPoint(rc_S5_Mn_S3max, 10)  # S5
+    model.addFixPoint(rc_S6_Mn_S3max, 10)  # S6
 
-    ### Min dist (probably limiting for coverage)
-    model.addFixPoint(rc_S3_Mn_min, 10)
-    model.addFixPoint(rc_S4_Mn_min, 10)
-    model.addFixPoint(rc_S5_Mn_min, 10)
-    model.addFixPoint(rc_S6_Mn_min, 10)
+    ### Max dist coords of S4 and S6
+    # model.addFixPoint(rc_L1_Mn_S4max, 10)  # S1
+    # model.addFixPoint(rc_L2_Mn_S4max, 10)  # S2
+    # model.addFixPoint(rc_S3_Mn_S4max, 10)  # S3
+    # model.addFixPoint(rc_S4_Mn_max, 10)  # S4
+    # model.addFixPoint(rc_S5_Mn_S4max, 10)  # S5
+    # model.addFixPoint(rc_S6_Mn_S4max, 10)  # S6
 
+    ### Min dist coords of S3 and S5
+    # model.addFixPoint(rc_L1_Mn_S3min, 10)  # S1
+    # model.addFixPoint(rc_L2_Mn_S3min, 10)  # S2
+    # model.addFixPoint(rc_S3_Mn_min, 10)  # S3
+    # model.addFixPoint(rc_S4_Mn_S3min, 10)  # S4
+    # model.addFixPoint(rc_S5_Mn_S3min, 10)  # S5
+    # model.addFixPoint(rc_S6_Mn_S3min, 10)  # S6
+
+    ### Min dist coords of S3 and S5
+    # model.addFixPoint(rc_L1_Mn_S4min, 10)  # S1
+    # model.addFixPoint(rc_L2_Mn_S4min, 10)  # S2
+    # model.addFixPoint(rc_S3_Mn_S4min, 10)  # S3
+    # model.addFixPoint(rc_S4_Mn_min, 10)  # S4
+    # model.addFixPoint(rc_S5_Mn_S4min, 10)  # S5
+    # model.addFixPoint(rc_S6_Mn_S4min, 10)  # S6
 
 
     # Get parameters for satellites in the model
