@@ -287,7 +287,6 @@ class Lagrange:
         
     def setRange(self):
         """Calculate the maximum range achievable by a satellite.
-        :param elevation: (optional) elevation angle [deg]
         """
         alpha = np.deg2rad(self.elevation + 90)  # angle between the cone and the horizontal plane
         r_norm = np.linalg.norm(self.r)  # height of the cone
@@ -618,10 +617,14 @@ class Model:
         ax.scatter(*zip(*self.moon), marker='s', s=1, c=self.mod_inView, cmap='PiYG')
         plt.colorbar(color_map)
 
-        ax.set_title('Satellite coverage')
-        ax.set_xlabel('x [m]')
-        ax.set_ylabel('y [m]')
-        ax.set_zlabel('z [m]')
+        # ax.set_title('Satellite coverage')
+        ax.set_xlabel('x [$10^7$ m]')
+        ax.set_ylabel('y [$10^7$ m]')
+        ax.set_zlabel('z [$10^7$ m]')
+
+        ax.set_xlim(-r_moon*1.5, r_moon*1.5)
+        ax.set_ylim(-r_moon*1.5, r_moon*1.5)
+        ax.set_zlim(-r_moon*1.5, r_moon*1.5)
         ax.set_aspect('equal')
         plt.show()
 
@@ -637,29 +640,35 @@ class Model:
             l += f'{module}\n'
         return l
 
-if __name__ == '__main__':
+    def getSatellites(self):
+        satellites_params = []
+        for module in self.modules:
+            if isinstance(module, Satellite):
+                satellites_params.append(list(module.getParams()))
+        return satellites_params
+
+if __name__=='__main__':
     # Create model
     model = Model()
 
-    # Add satellite (a, e, i, w, Omega, nu, shift)
-    # model.addSatellite(2.45e7, 0, 58.69, 22.9, 4, 6)
+# Add satellite (a, e, i, w, Omega, nu, shift)
+# model.addSatellite(2.45e7, 0, 58.69, 22.9, 4, 6)
 
-    # Add tower (phi, theta, h)
-    # model.addTower(20, 15, 100000)
+# Add tower (phi, theta, h)
+# model.addTower(20, 15, 100000)
 
-    # Add Lagrange point
-    # model.addLagrange('L1')
-    # model.addLagrange('L2')
+# Add Lagrange point
+# model.addLagrange('L1')
+# model.addLagrange('L2')
     
-    # Add orbit plane (a, e, i, w, Omega, n_sat, shift)
-    # s = 0
-    #model.addOrbitPlane(2.45e7, 0.5, 85, 0, 0, 4, s)
-    #model.addOrbitPlane(2.45e7, 0.5, 85, 45, 120, 4, s)
-    #model.addOrbitPlane(2.45e7, 0.5, 85, 90, 240, 4, s)
-    #model.addOrbitPlane(2.45e7, 0.5, 0, 0, 0, 4, s)
+# Add orbit plane (a, e, i, w, Omega, n_sat, shift)
+# model.addOrbitPlane(2.45e7, 0.5, 85, 0, 0, 4)
+# model.addOrbitPlane(2.45e7, 0.5, 85, 45, 120, 4)
+# model.addOrbitPlane(2.45e7, 0.5, 85, 90, 240, 4)
+# model.addOrbitPlane(2.45e7, 0.5, 0, 0, 0, 4)
 
-    # Add multiple orbit planes (a, e, i, w, n_planes, n_sat_per_plane, shift, elevation)
-    # model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4, 90)
+# Add multiple orbit planes (a, e, i, w, n_planes, n_sat_per_plane, shift, elevation)
+# model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4, 90)
 
     # Add fixed point (r, elevation)
     # model.addFixPoint([2.45e7, 3e6, 1e3], 10)
@@ -696,8 +705,8 @@ if __name__ == '__main__':
     # model.addFixPoint(rc_S6_Mn_S4min, 10)  # S6
 
 
-    # Get parameters for satellites in the model
-    # model.getParams()
+# Get parameters for satellites in the model
+# model.getParams()
 
     print(model)
 
