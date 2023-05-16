@@ -15,11 +15,15 @@ model = Model()
 # model.addLagrange('L2')
 
 # Add multiple orbit planes (a, e, i, w, n_planes, n_sat_per_plane, shift, elevation)
-model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4, 90)
+model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4)
 
 # Plot coverage
 model.plotCoverage()
 
+# Continue?
+flag = input("Press Enter to continue... 'e' to exit.\n")
+if flag != '':
+    exit()
 # -----------------------------------------------------------------------------
 # Dynamic Simulation
 

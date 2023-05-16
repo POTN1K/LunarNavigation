@@ -287,7 +287,6 @@ class Lagrange:
         
     def setRange(self):
         """Calculate the maximum range achievable by a satellite.
-        :param elevation: (optional) elevation angle [deg]
         """
         alpha = np.deg2rad(self.elevation + 90)  # angle between the cone and the horizontal plane
         r_norm = np.linalg.norm(self.r)  # height of the cone
@@ -618,10 +617,14 @@ class Model:
         ax.scatter(*zip(*self.moon), marker='s', s=1, c=self.mod_inView, cmap='PiYG')
         plt.colorbar(color_map)
 
-        ax.set_title('Satellite coverage')
-        ax.set_xlabel('x [m]')
-        ax.set_ylabel('y [m]')
-        ax.set_zlabel('z [m]')
+        # ax.set_title('Satellite coverage')
+        ax.set_xlabel('x [$10^7$ m]')
+        ax.set_ylabel('y [$10^7$ m]')
+        ax.set_zlabel('z [$10^7$ m]')
+        
+        ax.set_xlim(-r_moon*1.5, r_moon*1.5)
+        ax.set_ylim(-r_moon*1.5, r_moon*1.5)
+        ax.set_zlim(-r_moon*1.5, r_moon*1.5)
         ax.set_aspect('equal')
         plt.show()
 
