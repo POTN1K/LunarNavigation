@@ -659,7 +659,7 @@ if __name__ == '__main__':
     #model.addOrbitPlane(2.45e7, 0.5, 0, 0, 0, 4, s)
 
     # Add multiple orbit planes (a, e, i, w, n_planes, n_sat_per_plane, shift, elevation)
-    model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4, 90)
+    # model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4, 90)
 
     # Add fixed point (r, elevation)
     # model.addFixPoint([2.45e7, 3e6, 1e3], 10)
