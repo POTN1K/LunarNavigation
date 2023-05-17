@@ -2,7 +2,7 @@
 
 # Local Libraries
 from model_class import Model
-from Earth_Const import *
+from earth_constellation import *
 from propagation_calculator import PropagationTime
 
 # -----------------------------------------------------------------------------
@@ -11,12 +11,13 @@ from propagation_calculator import PropagationTime
 model = Model()
 
 # Add Lagrange point
-# model.addLagrange('L1')
+model.addLagrange('L1')
 # model.addLagrange('L2')
 
 # Add multiple orbit planes (a, e, i, w, n_planes, n_sat_per_plane, shift, elevation)
-model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4)
+# model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4)
 
+print(model.modules[0].range)
 # Plot coverage
 model.plotCoverage()
 
