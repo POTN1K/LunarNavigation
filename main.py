@@ -11,15 +11,18 @@ from propagation_calculator import PropagationTime
 model = Model()
 
 # Add Lagrange point
-model.addLagrange('L1')
+# model.addLagrange('L1')
 # model.addLagrange('L2')
 
 # Add multiple orbit planes (a, e, i, w, n_planes, n_sat_per_plane, shift, elevation)
-# model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4)
+model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4)
 
-print(model.modules[0].range)
 # Plot coverage
 model.plotCoverage()
+
+# Get satellites in view for a point (Point on the moon surface 0-999)
+# r is the cartesian coordinates of a satellite
+print([sat.r for sat in model.mod_inView_obj[5]])
 
 # Continue?
 flag = input("Press Enter to continue... 'e' to exit.\n")
