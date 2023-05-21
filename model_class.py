@@ -162,7 +162,7 @@ class Satellite:
     
     def isInView(self, target):
         """Check if a target is in view of the satellite.
-        :param target: target position [m]
+        :param target: target position "Array 3D" [m]
         """
         if self.range is None:
             self.range = self.range()
@@ -180,7 +180,7 @@ class Satellite:
     
 class Tower:
     """Class to define a communication tower."""
-    def __init__(self, phi, theta, height, elevation=10):
+    def __init__(self, phi=0, theta=0, height=0, elevation=10):
         """Initialise the ground station with its position.
         :param phi: longitude [deg]
         :param theta: latitude [deg]
@@ -357,7 +357,7 @@ class FixPoint:
 
 class OrbitPlane:
     """Class to define an orbit plane, along with the satellites in it."""
-    def __init__(self, a, e, i, w, Omega, n_sat, elevation=10, shift=0):
+    def __init__(self, a=r_moon, e=0, i=0, w=0, Omega=0, n_sat=1, elevation=10, shift=0):
         """Initialise the orbit plane with its Keplerian elements and calculate the positions of the satellites.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -368,8 +368,8 @@ class OrbitPlane:
         :param elevation: (optional) elevation angle [deg]
         """
         self.satellites = []
-        self.a = a
         self.e = e
+        self.a = a
         self.i = i
         self.w = w
         self.Omega = Omega
@@ -385,12 +385,12 @@ class OrbitPlane:
     
     @a.setter
     def a(self, value):
-        if value > 0:
+        if value >= r_moon/(1-self.e):
             self._a = value
             if self.satellites:
                 self.satellites = self.createSatellites()
         else:
-            raise ValueError("Semi-major axis must be positive.")
+            raise ValueError("Pericenter must be larger than the Moon's radius.")
         
     @property
     def e(self):
@@ -486,9 +486,21 @@ class Model:
         self.modules = []
         self.n_sat = 0
         self.n_orbit_planes = 0
-        self.moon = self.createMoon(resolution)
-        self.mod_inView = np.zeros(len(self.moon))
-        self.mod_inView_obj = {i:[] for i in range(len(self.moon))}
+        self.resolution = resolution
+
+    @property
+    def resolution(self):
+        return self._resolution
+    
+    @resolution.setter
+    def resolution(self, value):
+        if value > 0:
+            self._resolution = value
+            self.moon = self.createMoon(value)
+            self.mod_inView = np.zeros(len(self.moon))
+            self.mod_inView_obj = {i:[] for i in range(len(self.moon))}
+        else:
+            raise ValueError("Resolution must be positive.")
 
     def addExistingOrbitPlane(self, orbit):
         """Add an existing orbit plane to the model.
