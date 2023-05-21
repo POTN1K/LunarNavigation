@@ -110,26 +110,26 @@ def Dist_req(sat):
 
 aS3 = Dist_req(rc_S3_R)[1]
 DS3 = Dist_req(rc_S3_R)[0]
-print(np.min(DS3), np.argmin(DS3), np.max(DS3), np.argmax(DS3), t[np.argmax(DS3)]/(3600*24), round(moon_sat_cart_pos(S3, t)[1][np.argmax(DS3)]*180/np.pi))
+# print(np.min(DS3), np.argmin(DS3), np.max(DS3), np.argmax(DS3), t[np.argmax(DS3)]/(3600*24), round(moon_sat_cart_pos(S3, t)[1][np.argmax(DS3)]*180/np.pi))
 
 aS4 = Dist_req(rc_S4_R)[1]
 DS4 = Dist_req(rc_S4_R)[0]
-print(np.min(DS4), np.argmin(DS4), np.max(DS4), np.argmax(DS4))
+# print(np.min(DS4), np.argmin(DS4), np.max(DS4), np.argmax(DS4))
 
 aS5 = Dist_req(rc_S5_R)[1]
 DS5 = Dist_req(rc_S5_R)[0]
-print(np.min(DS5), np.argmin(DS5), np.max(DS5), np.argmax(DS5))
+# print(np.min(DS5), np.argmin(DS5), np.max(DS5), np.argmax(DS5))
 
 aS6 = Dist_req(rc_S6_R)[1]
 DS6 = Dist_req(rc_S6_R)[0]
-print(np.min(DS6), np.argmin(DS6), np.max(DS6), np.argmax(DS6))
+# print(np.min(DS6), np.argmin(DS6), np.max(DS6), np.argmax(DS6))
 
 aS = [0]
 aS.extend(aS3)
 aS.extend(aS4)
 aS.extend(aS5)
 aS.extend(aS6)
-print(len(aS)-1)
+# print(len(aS)-1)
 
 
 ### Transformation from R to M (Niko's Moon coordinates)

@@ -488,6 +488,7 @@ class Model:
         self.n_orbit_planes = 0
         self.moon = self.createMoon(resolution)
         self.mod_inView = np.zeros(len(self.moon))
+        self.mod_inView_obj = {i:[] for i in range(len(self.moon))}
 
     def addExistingOrbitPlane(self, orbit):
         """Add an existing orbit plane to the model.
@@ -585,6 +586,7 @@ class Model:
             for i, point in enumerate(self.moon):
                 if mod.isInView(point):
                     self.mod_inView[i] += 1
+                    self.mod_inView_obj[i].append(mod)
 
     def plotCoverage(self):
         """Plot the coverage of the satellites."""

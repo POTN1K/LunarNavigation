@@ -28,7 +28,7 @@ from tudatpy.util import result2array
 
 class PropagationTime:
     """Class to input satellite(s) and see their change of position over time"""
-    def __init__(self, orbit_parameters, final_time, resolution, mass_sat, area_sat, c_radiation, satellite_number):
+    def __init__(self, orbit_parameters, final_time, resolution, mass_sat, area_sat, c_radiation):
         """Initialize the initial state of the satellite(s) with Keplerian elements,final time and resolution to see the final position
         :param orbit_parameters: array of Keplarian elements [[sat1],[sat2],[[sat3]]
         :param final_time: Time for the end of the simulation [s]
@@ -36,7 +36,7 @@ class PropagationTime:
         :param mass_sat: Mass of each satellite [kg]
         :param area_sat: Radiation area sat [m^2]
         :param c_radiation: Coefficient radiation pressure [-]
-        :param satellite_number: Number of what satellite kepler you are plotting [-]
+
 
 
         """
@@ -46,7 +46,6 @@ class PropagationTime:
         self.mass_sat = mass_sat
         self.area_sat = area_sat
         self.c_radiation = c_radiation
-        self.satellite_number = satellite_number
         self.fixed_step_size = resolution
 
         spice.load_standard_kernels()
@@ -102,7 +101,7 @@ class PropagationTime:
         return anything.
 
         """
-        occulting_bodies = ["Earth"]
+        occulting_bodies = ["Moon"]
         radiation_pressure_settings = environment_setup.radiation_pressure.cannonball(
             "Sun", self.area_sat, self.c_radiation, occulting_bodies
         )
@@ -301,10 +300,38 @@ class PropagationTime:
         delta_v_list = []
         for i, satellite_name in enumerate(self.bodies_to_propagate):
             delta_v = self.delta_v_to_maintain_orbit(satellite_name, start_time, end_time)
-            print(f"Delta-v for {satellite_name}: {delta_v}")
+            # print(f"Delta-v for {satellite_name}: {delta_v}")
             delta_v_list.append(delta_v)
+        delta_v_array = np.array(delta_v_list)
+        print(f" Range of Delta-v:{np.ptp(delta_v_array)}, max Delta-v {np.max(delta_v_array)}, min Delta-v "
+              f"{np.min(delta_v_array)}, average Delta-v {np.mean(delta_v_array)}, SD Delta-v: {np.std(delta_v_array)}")
         return delta_v_list
 
+    def min_max_kepler(self):
+        """
+        Function to calculate the range of Kepler elements for the whole simulation
+        """
+        # Delete the first column (time)
+        kepler_elements = np.delete(self.dep_vars_array, 0, axis=1)
+        # Delete the initial position as this is not yet updated according to the simulation
+        kepler_elements = np.delete(kepler_elements, 0, axis=0)
+
+
+        kepler_elements_3d = kepler_elements.reshape(kepler_elements.shape[0], -1, 6)
+
+        # Compute the range (max - min) for each Kepler element for every satellite
+        ranges = np.ptp(kepler_elements_3d, axis=1)
+
+        # Compute the average of these ranges
+        avg_ranges = np.mean(ranges, axis=0)
+
+        # Compute the standard deviation of these average ranges
+        std_dev = np.std(ranges, axis=0)
+        max_ranges = np.max(ranges, axis=0)
+
+        print(f"Average range for Kepler element for all satellites: {avg_ranges}")
+        print(f"Standard deviation of the average ranges: {std_dev}")
+        print(f"Maximum range of each element across all groups: {max_ranges}")
 
     def plot_time(self):
         """

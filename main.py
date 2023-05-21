@@ -2,7 +2,7 @@
 
 # Local Libraries
 from model_class import Model
-from Earth_Const import *
+from earth_constellation import *
 from propagation_calculator import PropagationTime
 
 # -----------------------------------------------------------------------------
@@ -19,6 +19,12 @@ model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4)
 
 # Plot coverage
 model.plotCoverage()
+
+# Get satellites in view for a point (Point on the moon surface 0-999)
+# r is the cartesian coordinates of a satellite
+point = 5
+print(f"Surface coordinates: {model.moon[point]}")
+print([sat.r for sat in model.mod_inView_obj[point]])
 
 # Continue?
 flag = input("Press Enter to continue... 'e' to exit.\n")
