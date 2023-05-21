@@ -29,7 +29,7 @@ miu_moon = 4.9048695e12  # m^3/s^2
 
 class Satellite:
     """Class to define a satellite with its position and cone of view around the Moon."""
-    def __init__(self, a, e, i, w, Omega, nu, elevation=10, shift=0):
+    def __init__(self, a=r_moon, e = 0, i=0, w=0, Omega=0, nu=0, elevation=10, shift=0):
         """Initialise the satellite with its Keplerian elements and calculate its position.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -41,8 +41,8 @@ class Satellite:
         :param shift: (optional) shift of the cone of view [deg]
         """
         self.range = None
-        self.a = a
         self.e = e
+        self.a = a
         self.i = i
         self.w = w
         self.Omega = Omega
@@ -66,12 +66,12 @@ class Satellite:
     
     @a.setter
     def a(self, value):
-        if value > 0:
+        if value >= r_moon/(1-self.e):
             self._a = value
             if self.range is not None:
                 self.range = self.setRange()
         else:
-            raise ValueError("Semi-major axis must be positive.")
+            raise ValueError("Pericenter must be larger than Moon's radius.")
         
     @property
     def e(self):
@@ -149,10 +149,6 @@ class Satellite:
         else:
             raise ValueError("Elevation must be between 0 and 90°.")
         
-    def getParams(self):
-        """Return the Keplerian elements of the satellite."""
-        return self.a, self.e, self.i, self.w, self.Omega, self.nu
-        
     def setRange(self):
         """Calculate the maximum range achievable by a satellite.
         :param elevation: (optional) elevation angle [deg]
@@ -174,6 +170,10 @@ class Satellite:
             return True
         else:
             return False
+        
+    def getParams(self):
+        """Return the Keplerian elements of the satellite."""
+        return self.a, self.e, self.i, self.w, self.Omega, self.nu
 
     def __repr__(self):
         return f"Satellite(a={self.a}, e={self.e}, i={self.i}, w={self.w}, Omega={self.Omega}, nu={self.nu})"
@@ -566,8 +566,9 @@ class Model:
         for n in range(n_planes):
             self.addOrbitPlane(a, e, i, w, 360/n_planes*n, n_sat_per_plane, elevation, shift)
 
-    def createMoon(self, resolution):
-        """Add the Moon to the model."""
+    def createMoon(self, resolution=100):
+        """Add the Moon to the model.
+        :param resolution: (optional) resolution of the meshgrid"""
         phi = np.linspace(0, 2 * np.pi, resolution)
         theta = np.linspace(0, np.pi, resolution)
 
@@ -630,6 +631,13 @@ class Model:
         ax.set_aspect('equal')
         plt.show()
 
+    def getSatellites(self):
+        satellites_params = []
+        for module in self.modules:
+            if isinstance(module, Satellite):
+                satellites_params.append(list(module.getParams()))
+        return satellites_params
+        
     def getParams(self):
         """Get the parameters of the model."""
         for module in self.modules:
@@ -641,13 +649,7 @@ class Model:
         for module in self.modules:
             l += f'{module}\n'
         return l
-    
-    def getSatellites(self):
-        satellites_params = []
-        for module in self.modules:
-            if isinstance(module, Satellite):
-                satellites_params.append(list(module.getParams()))
-        return satellites_params
+
 
 if __name__=='__main__':
     # Create model

@@ -22,7 +22,7 @@ model.plotCoverage()
 
 # Get satellites in view for a point (Point on the moon surface 0-999)
 # r is the cartesian coordinates of a satellite
-point = 5
+point = 682
 print(f"Surface coordinates: {model.moon[point]}")
 print([sat.r for sat in model.mod_inView_obj[point]])
 
