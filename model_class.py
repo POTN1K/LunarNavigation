@@ -637,9 +637,9 @@ class Model:
         ax.set_ylabel('y [$10^7$ m]')
         ax.set_zlabel('z [$10^7$ m]')
         
-        ax.set_xlim(-r_moon*1.5, r_moon*1.5)
-        ax.set_ylim(-r_moon*1.5, r_moon*1.5)
-        ax.set_zlim(-r_moon*1.5, r_moon*1.5)
+        #ax.set_xlim(-r_moon*1.5, r_moon*1.5)
+        #ax.set_ylim(-r_moon*1.5, r_moon*1.5)
+        #ax.set_zlim(-r_moon*1.5, r_moon*1.5)
         ax.set_aspect('equal')
         plt.show()
 

@@ -30,7 +30,7 @@ class PropagationTime:
     """Class to input satellite(s) and see their change of position over time"""
     def __init__(self, orbit_parameters, final_time, resolution, mass_sat, area_sat, c_radiation):
         """Initialize the initial state of the satellite(s) with Keplerian elements,final time and resolution to see the final position
-        :param orbit_parameters: array of Keplarian elements [[sat1],[sat2],[[sat3]]
+        :param orbit_parameters: array of Keplarian elements [[sat1],[sat2],[[sat3]] #Radians
         :param final_time: Time for the end of the simulation [s]
         :param resolution: Number of outputs between integration [-]
         :param mass_sat: Mass of each satellite [kg]

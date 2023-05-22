@@ -17,7 +17,7 @@ class UserErrors:
         self.parameter_covariance_matrix()
         self.dop_calculator()
         self.user_error()
-        self.allowable_error()
+        # self.allowable_error()
 
     def satellite_error(self):
         CLOCK_ERROR = 1.1
