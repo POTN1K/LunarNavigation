@@ -32,6 +32,7 @@ In order to keep the GitHub organized, the following rules must be complied with
 - The main branch is READ ONLY. Final working code should be here, and to append new code, need to perform a Pull Request.
 - Use .gitignore to avoid pushing unnecessary files to the repository. Such files can be temporary files created by the IDE, or simple Excel files used for calculations.
 - Confirm which files are being pushed before pushing. If you are not sure, ask the team.
+- When you code, add your name to the file so everyone knows who worked on it.
 
 ### Coding Rules
 - All code must be written using at least Python 3.10
@@ -58,7 +59,8 @@ In order to keep the GitHub organized, the following rules must be complied with
 - All code must be documented using the Docstring Style.
 The following introduces an example of a file with a class and a method that has a docstring:
 
-        """File to create circles and perform operations on them."""
+        """File to create circles and perform operations on them.
+        By Jose"""
 
         # Global Libraries
         import math

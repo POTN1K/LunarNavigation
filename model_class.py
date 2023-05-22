@@ -19,7 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pylab import cm
 from tudatpy.kernel.astro import element_conversion
-from Earth_Const import *
+
 
 
 # Constants
@@ -29,7 +29,7 @@ miu_moon = 4.9048695e12  # m^3/s^2
 
 class Satellite:
     """Class to define a satellite with its position and cone of view around the Moon."""
-    def __init__(self, a, e, i, w, Omega, nu, elevation=10, shift=0):
+    def __init__(self, a=r_moon, e = 0, i=0, w=0, Omega=0, nu=0, elevation=10, shift=0):
         """Initialise the satellite with its Keplerian elements and calculate its position.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -41,8 +41,8 @@ class Satellite:
         :param shift: (optional) shift of the cone of view [deg]
         """
         self.range = None
-        self.a = a
         self.e = e
+        self.a = a
         self.i = i
         self.w = w
         self.Omega = Omega
@@ -66,12 +66,12 @@ class Satellite:
     
     @a.setter
     def a(self, value):
-        if value > 0:
+        if value >= r_moon/(1-self.e):
             self._a = value
             if self.range is not None:
                 self.range = self.setRange()
         else:
-            raise ValueError("Semi-major axis must be positive.")
+            raise ValueError("Pericenter must be larger than Moon's radius.")
         
     @property
     def e(self):
@@ -148,11 +148,7 @@ class Satellite:
                 self.range = self.setRange()
         else:
             raise ValueError("Elevation must be between 0 and 90°.")
-        
-    def getParams(self):
-        """Return the Keplerian elements of the satellite."""
-        return self.a, self.e, self.i, self.w, self.Omega, self.nu
-        
+
     def setRange(self):
         """Calculate the maximum range achievable by a satellite.
         :param elevation: (optional) elevation angle [deg]
@@ -166,7 +162,7 @@ class Satellite:
     
     def isInView(self, target):
         """Check if a target is in view of the satellite.
-        :param target: target position [m]
+        :param target: target position "Array 3D" [m]
         """
         if self.range is None:
             self.range = self.range()
@@ -175,12 +171,16 @@ class Satellite:
         else:
             return False
 
+    def getParams(self):
+        """Return the Keplerian elements of the satellite."""
+        return self.a, self.e, self.i, self.w, self.Omega, self.nu
+
     def __repr__(self):
         return f"Satellite(a={self.a}, e={self.e}, i={self.i}, w={self.w}, Omega={self.Omega}, nu={self.nu})"
     
 class Tower:
     """Class to define a communication tower."""
-    def __init__(self, phi, theta, height, elevation=10):
+    def __init__(self, phi=0, theta=0, height=0, elevation=10):
         """Initialise the ground station with its position.
         :param phi: longitude [deg]
         :param theta: latitude [deg]
@@ -357,7 +357,7 @@ class FixPoint:
 
 class OrbitPlane:
     """Class to define an orbit plane, along with the satellites in it."""
-    def __init__(self, a, e, i, w, Omega, n_sat, elevation=10, shift=0):
+    def __init__(self, a=r_moon, e=0, i=0, w=0, Omega=0, n_sat=1, elevation=10, shift=0):
         """Initialise the orbit plane with its Keplerian elements and calculate the positions of the satellites.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -368,8 +368,8 @@ class OrbitPlane:
         :param elevation: (optional) elevation angle [deg]
         """
         self.satellites = []
-        self.a = a
         self.e = e
+        self.a = a
         self.i = i
         self.w = w
         self.Omega = Omega
@@ -385,12 +385,12 @@ class OrbitPlane:
     
     @a.setter
     def a(self, value):
-        if value > 0:
+        if value >= r_moon/(1-self.e):
             self._a = value
             if self.satellites:
                 self.satellites = self.createSatellites()
         else:
-            raise ValueError("Semi-major axis must be positive.")
+            raise ValueError("Pericenter must be larger than the Moon's radius.")
         
     @property
     def e(self):
@@ -486,9 +486,21 @@ class Model:
         self.modules = []
         self.n_sat = 0
         self.n_orbit_planes = 0
-        self.moon = self.createMoon(resolution)
-        self.mod_inView = np.zeros(len(self.moon))
-        self.mod_inView_obj = {i:[] for i in range(len(self.moon))}
+        self.resolution = resolution
+
+    @property
+    def resolution(self):
+        return self._resolution
+
+    @resolution.setter
+    def resolution(self, value):
+        if value > 0:
+            self._resolution = value
+            self.moon = self.createMoon(value)
+            self.mod_inView = np.zeros(len(self.moon))
+            self.mod_inView_obj = {i:[] for i in range(len(self.moon))}
+        else:
+            raise ValueError("Resolution must be positive.")
 
     def addExistingOrbitPlane(self, orbit):
         """Add an existing orbit plane to the model.
@@ -566,8 +578,9 @@ class Model:
         for n in range(n_planes):
             self.addOrbitPlane(a, e, i, w, 360/n_planes*n, n_sat_per_plane, elevation, shift)
 
-    def createMoon(self, resolution):
-        """Add the Moon to the model."""
+    def createMoon(self, resolution=100):
+        """Add the Moon to the model.
+        :param resolution: (optional) resolution of the meshgrid"""
         phi = np.linspace(0, 2 * np.pi, resolution)
         theta = np.linspace(0, np.pi, resolution)
 
@@ -623,12 +636,19 @@ class Model:
         ax.set_xlabel('x [$10^7$ m]')
         ax.set_ylabel('y [$10^7$ m]')
         ax.set_zlabel('z [$10^7$ m]')
-
-        ax.set_xlim(-r_moon*1.5, r_moon*1.5)
-        ax.set_ylim(-r_moon*1.5, r_moon*1.5)
-        ax.set_zlim(-r_moon*1.5, r_moon*1.5)
+        
+        #ax.set_xlim(-r_moon*1.5, r_moon*1.5)
+        #ax.set_ylim(-r_moon*1.5, r_moon*1.5)
+        #ax.set_zlim(-r_moon*1.5, r_moon*1.5)
         ax.set_aspect('equal')
         plt.show()
+
+    def getSatellites(self):
+        satellites_params = []
+        for module in self.modules:
+            if isinstance(module, Satellite):
+                satellites_params.append(list(module.getParams()))
+        return satellites_params
 
     def getParams(self):
         """Get the parameters of the model."""
@@ -642,12 +662,6 @@ class Model:
             l += f'{module}\n'
         return l
 
-    def getSatellites(self):
-        satellites_params = []
-        for module in self.modules:
-            if isinstance(module, Satellite):
-                satellites_params.append(list(module.getParams()))
-        return satellites_params
 
 if __name__=='__main__':
     # Create model
@@ -715,4 +729,3 @@ if __name__=='__main__':
     # Plot coverage
     model.plotCoverage()
 
-        
