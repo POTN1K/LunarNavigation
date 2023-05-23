@@ -93,7 +93,7 @@ class UnitTests(unittest.TestCase):
         propagation = PropagationTime([[20e6, 0, 0, 0, 0, 0], [20e6, 0, 0, 0, 0, 0]], 86400, 900, 250, 1, 1)
         self.assertEqual(len(propagation.bodies_to_propagate), len(propagation.orbit_parameters))
 
-    def test_bodies_to_propagate_count(self):
+    def test_central_bodies(self):
         """Test that multiple satellites are correctly counted"""
         propagation = PropagationTime([[20e6, 0, 0, 0, 0, 0], [20e6, 0, 0, 0, 0, 0]], 86400, 900, 250, 1, 1)
         self.assertEqual(len(propagation.central_bodies), 2)

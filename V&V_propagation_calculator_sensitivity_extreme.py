@@ -125,9 +125,9 @@ def sensitivity_resolution():
 
 
 
-# sensitivity_mass() #larger mass gives more stable kepler elements
-# sensitivity_a()
-# sensitivity_resolution()
+sensitivity_mass() #larger mass gives more stable kepler elements
+sensitivity_a()
+sensitivity_resolution()
 
 
 
