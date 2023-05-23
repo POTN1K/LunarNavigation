@@ -326,7 +326,10 @@ class FixPoint:
     def r(self, value):
         value = np.array(value)
         if len(value) == 3:
-            self._r = value
+            if np.linalg.norm(value) >= r_moon:
+                self._r = value
+            else:
+                raise ValueError("Fixed point must be outside the Moon.")
         else:
             raise ValueError("Position must be a 3D vector.")
 
@@ -476,6 +479,13 @@ class OrbitPlane:
         for n in range(self.n_sat):
             satellites.append(Satellite(self.a, self.e, self.i, self.w, self.Omega, 360/self.n_sat*n, self.elevation, self.shift))
         return satellites
+    
+    def relDistSatellites(self):
+        """Calculate the relative distance between the satellites in the orbit plane."""
+        rel_dist = []
+        for i in range(self.n_sat):
+            rel_dist.append(np.linalg.norm(self.satellites[i].r-self.satellites[(i+1)%self.n_sat].r))
+        return rel_dist
 
 class Model:
     """Class to define the model of the satellite constellation."""
@@ -511,7 +521,7 @@ class Model:
         self.n_sat += orbit.n_sat
         self.n_orbit_planes += 1
 
-    def addOrbitPlane(self, a, e, i, w, Omega, n_sat, shift=0, elevation=10):
+    def addOrbitPlane(self, a=r_moon, e=0, i=0, w=0, Omega=0, n_sat=1, shift=0, elevation=10):
         """Add an orbit plane to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -535,7 +545,7 @@ class Model:
         self.modules.append(module)
         self.n_sat += 1
     
-    def addSatellite(self, a, e, i, w, Omega, nu, shift=0, elevation=10):
+    def addSatellite(self, a=r_moon, e=0, i=0, w=0, Omega=0, nu=0, shift=0, elevation=10):
         """Add a satellite to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -550,12 +560,12 @@ class Model:
         self.modules.append(n_sat)
         self.n_sat += 1
 
-    def addTower(self, phi, theta, h):
+    def addTower(self, phi=0, theta=0, h=0):
         n_tower = Tower(phi, theta, h)
         self.modules.append(n_tower)
         self.n_sat += 1
 
-    def addLagrange(self, l_point):
+    def addLagrange(self, l_point='L1'):
         n_point = Lagrange(l_point)
         self.modules.append(n_point)
         self.n_sat += 1
@@ -565,7 +575,7 @@ class Model:
         self.modules.append(n_point)
         self.n_sat += 1
     
-    def addSymmetricalPlanes(self, a, e, i, w, n_planes, n_sat_per_plane,shift=0, elevation=10):
+    def addSymmetricalPlanes(self, a=r_moon, e=0, i=0, w=0, n_planes=1, n_sat_per_plane=1, dist_type=0, f=0, shift=0, elevation=10):
         """Add  symmetrical orbit planes to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -573,10 +583,19 @@ class Model:
         :param w: argument of periapsis [deg]
         :param n_planes: number of orbit planes
         :param n_sat_per_plane: number of satellites in each orbit plane
+        :param dist_type: (optional) type of distribution of the orbit planes. 0- Divide over 180°, 1- Divide over 360°
+        :param f: (optional) phase between planes (0-1)
         :param shift: (optional) shift of the satellites in the orbit plane [deg]
+        :param elevation: (optional) elevation angle [deg]
         """
-        for n in range(n_planes):
-            self.addOrbitPlane(a, e, i, w, 360/n_planes*n, n_sat_per_plane, elevation, shift)
+        if dist_type == 0:
+            for n in range(n_planes):
+                self.addOrbitPlane(a, e, i, w, 180/n_planes*n, n_sat_per_plane, shift+f*180*n, elevation)
+        elif dist_type == 1:
+            for n in range(n_planes):
+                self.addOrbitPlane(a, e, i, w, 360/n_planes*n, n_sat_per_plane, shift, elevation)
+        else:
+            raise ValueError("Invalid distribution type.")
 
     def createMoon(self, resolution=100):
         """Add the Moon to the model.
@@ -595,6 +614,8 @@ class Model:
     
     def setCoverage(self):
         """Set the coverage of the modules."""
+        if self.modules == []:
+            raise ValueError("No modules in the model.")
         for mod in self.modules:
             for i, point in enumerate(self.moon):
                 if mod.isInView(point):
