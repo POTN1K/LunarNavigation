@@ -12,7 +12,7 @@ import numpy as np
 # define radius of the moon
 radius_moon = 1737.4
 # define a set of altitudes
-altitudes = np.array([2500, 5000, 10000, 25000])
+altitudes = np.array([3500, 4000, 4500, 40000])
 # define a set of number of satellites per orbit that needs to be checked
 S = np.arange(10, 15, 1)
 
@@ -57,7 +57,7 @@ def n_sats(theta, S, radius, inclination, lagrange):
     return n_sats, n_orbits
 
 
-def loop(altitudes, S):
+def loop(altitudes, S, lagrange):
     inclination_angles = []
     theta_angles = []
     j = 0
@@ -76,9 +76,9 @@ def loop(altitudes, S):
 
     n = 0
     while n < len(S):
-        n_sats_array = np.vstack((n_sats_array, n_sats(theta_angles, S[n], radius_moon, inclination_angles, True)[0]))
+        n_sats_array = np.vstack((n_sats_array, n_sats(theta_angles, S[n], radius_moon, inclination_angles, lagrange)[0]))
         n_orbits_array = np.vstack(
-            (n_orbits_array, n_sats(theta_angles, S[n], radius_moon, inclination_angles, True)[1]))
+            (n_orbits_array, n_sats(theta_angles, S[n], radius_moon, inclination_angles, lagrange)[1]))
         n += 1
     print(n_sats_array)
     print(n_orbits_array)
@@ -86,4 +86,4 @@ def loop(altitudes, S):
 
 
 if __name__ == '__main__':
-    loop(altitudes, S)
+    loop(altitudes, S, True)

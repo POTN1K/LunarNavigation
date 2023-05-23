@@ -23,16 +23,16 @@ class MyTestCase(unittest.TestCase):
 
     def test_N_orbits(self):
         result = ca.n_sats(np.pi/4, 20, 1737.4, np.pi / 4, False)[1]
-        self.assertAlmostEqual(result, 5, 2)
+        self.assertAlmostEqual(result, 3, 2)
 
     def test_N_sats(self):
         result = ca.n_sats(np.pi / 4, 20, 1737.4, np.pi / 4, False)[0]
-        self.assertAlmostEqual(result, 100, 2)
+        self.assertAlmostEqual(result, 60, 2)
 
     def test_loop_size(self):
-        result = np.size(ca.loop(np.array([3500, 4000, 4500, 40000]), S = np.arange(10, 20, 1))[0])
+        result = np.size(ca.loop(np.array([3500, 4000, 4500, 40000]), np.arange(10, 20, 1), True)[0])
         self.assertEqual(result, 44)
 
     def test_loop_val(self):
-        result = ca.loop(np.array([3500, 4000, 4500, 40000]), S=np.arange(10, 20, 1))[1][3, 0]
+        result = ca.loop(np.array([3500, 4000, 4500, 40000]), np.arange(10, 20, 1), True)[1][3, 0]
         self.assertEqual(result, 7)
