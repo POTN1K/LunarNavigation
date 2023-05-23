@@ -1,7 +1,7 @@
 
 """
 Code in order to simulate multiple satellites and their positions(history) for a certain time period around the Moon.
-The code is made user friendly to allow the user to fill in an array of satellites, final time, resolution for integra-
+The code is made user-friendly to allow the user to fill in an array of satellites, final time, resolution for integra-
 ting, satellite mass, radiation area satellite to allow everything to be computed. The user is able to specify a certain
 satellite to see its kepler characteristic history. The user can also receive the delta V required for orbit maintenance
 between a self specified time period.
@@ -499,7 +499,7 @@ class PropagationTime:
 
         plt.tight_layout()
         plt.show()
-propagation_time = PropagationTime(resolution=900)
-# # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
-propagation_time.plot_kepler(0)
-propagation_time.plot_time()
+# propagation_time = PropagationTime(resolution=900)
+# # # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
+# propagation_time.plot_kepler(0)
+# propagation_time.plot_time()

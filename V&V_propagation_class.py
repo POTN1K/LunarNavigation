@@ -8,7 +8,7 @@ miu_moon = 4.9048695e12  # m^3/s^2
 
 #Unit test
 
-class MyTestCase(unittest.TestCase):
+class UnitTests(unittest.TestCase):
     def setUp(self):
         """Set up a test case with known parameters and results"""
         self.orbit_parameters = [[20e6, 0, 0, 0, 0, 0], [20e6, 0, 0, 0, 180, 0]]
@@ -139,8 +139,11 @@ class MyTestCase(unittest.TestCase):
 
 
 
-# Model module tests
+# Module tests
 # Extreme value tests
+
+
+
 
 # Sensitivity Analysis
 

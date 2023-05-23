@@ -1,4 +1,8 @@
 """
+This script works together with the code from Niko to be able to get all the DOP values on the discritized moon. I am
+planning to add the same with velocity, but I need to output velocity in the simulation for that to
+work. The code also gives a budget for allowable ephemeris error w.r.t the requirements.
+
 MADE BY KYLE SCHERPENZEEL :(
 """
 
