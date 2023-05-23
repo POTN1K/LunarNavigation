@@ -1,3 +1,8 @@
+"""
+Created by Kyle scherpenzeel
+"""
+
+
 import numpy as np
 from propagation_calculator import PropagationTime
 from model_class import Model

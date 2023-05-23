@@ -1,3 +1,9 @@
+"""
+Created by Kyle scherpenzeel
+
+"""
+
+
 import unittest
 import numpy as np
 from propagation_calculator import PropagationTime
