@@ -399,7 +399,7 @@ class PropagationTime:
         print(f"Average range for Kepler element for all satellites: {avg_ranges}")
         print(f"Standard deviation of the average ranges: {std_dev}")
         print(f"Maximum range of each element across all groups: {max_ranges}")
-
+        return(avg_ranges, std_dev, max_ranges)
     def plot_time(self):
         """
         Plots the history and current location for all bodies. First this function creates the lunar surface and then

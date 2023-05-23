@@ -51,8 +51,6 @@ class MyTestCase(unittest.TestCase):
         expected_c_radiation = 1
         self.assertEqual(self.propagation.c_radiation, expected_c_radiation)
 
-
-
     def test_init_with_invalid_orbital_parameters(self):
         """Test initialization with invalid orbital parameters"""
         with self.assertRaises(ValueError):
@@ -115,6 +113,19 @@ class MyTestCase(unittest.TestCase):
         delta_v = self.propagation.inclination_change(v, delta_i)
         self.assertAlmostEqual(delta_v, expected_delta_v, places=1)
 
+
+# Module tests
+    def test_min_max_kepler(self):
+        # Call the method to be tested
+        avg_ranges, std_dev, max_ranges = self.propagation.min_max_kepler()
+
+        # Check that the results are numpy arrays of the expected size
+        self.assertIsInstance(avg_ranges, np.ndarray)
+        self.assertEqual(avg_ranges.shape, (6,))
+        self.assertIsInstance(std_dev, np.ndarray)
+        self.assertEqual(std_dev.shape, (6,))
+        self.assertIsInstance(max_ranges, np.ndarray)
+        self.assertEqual(max_ranges.shape, (6,))
     def test_delta_v_to_maintain_orbit(self):
         """Test the delta_v_to_maintain_orbit method with known inputs and output"""
         satellite_name = "LunarSat1"
@@ -126,7 +137,7 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(delta_v, expected_delta_v, places=1)
 
 
-# Model unittests
+
 
 # Model module tests
 # Extreme value tests
@@ -135,9 +146,9 @@ class MyTestCase(unittest.TestCase):
 
 # Model system tests
 
-#Sensitivity Analysis
+#Sensitivity Analysis change kepler parameters, resolution, mass,
 #system Test
-#Extreme value test
+#Extreme value test 0 perturbation
 
 if __name__ == '__main__':
     unittest.main()

@@ -5,7 +5,7 @@ import numpy as np
 from model_class import Model
 from earth_constellation import *
 from propagation_calculator import PropagationTime
-from user_position_calculator import UserErrors
+from user_error_calculator import UserErrors
 
 # -----------------------------------------------------------------------------
 # Static Simulation
