@@ -19,6 +19,7 @@ P_M = 27.45189357205398 * 24 * 3600  # [s] => Period of a revolution of the Moon
 # for the satellites to be out of the SOI at all times for an inclination angle of 12.7235891 [deg]
 alpha0 = 0.1732387  # 0.172796400948 min angle for no penetration of SOI for i = ir_max
                     # 0.17217 [rad] is the min for no penetration at the intersection
+
 # Inclination
 ir_max = np.arctan2(R_SOI, R_M)  # [rad] => maximum inclination angle of the red orbit
 if np.abs(ir_max*180/np.pi - 9.75694912) > 10**(-9):  # VERIF
@@ -29,7 +30,7 @@ ig = - ir  # [rad] => inclination angle of the green orbit
 # Time
 t0 = 0
 tf = P_M
-Nb_pts = 20000
+Nb_pts = 400
 dt = P_M/(Nb_pts)
 t = np.arange(t0, tf, dt)
 
@@ -69,7 +70,8 @@ rc_S4_Rr = moon_sat_cart_pos(S4, t)[0]
 rc_S5_Rr = moon_sat_cart_pos(S5, t)[0]
 rc_S6_Rr = moon_sat_cart_pos(S6, t)[0]
 
-## Transormation of cartesian coordinates of satellites to the R frame from Rr or Rg
+
+### Transormation of cartesian coordinates of satellites to the R frame from Rr or Rg
 def transf(sat, rc):
     i = sat[2]
     TR_Rrg = np.array([[np.cos(i), 0, -np.sin(i)],
@@ -85,6 +87,11 @@ rc_S4_R = transf(S4, rc_S4_Rr)
 rc_S5_R = transf(S5, rc_S5_Rr)
 rc_S6_R = transf(S6, rc_S6_Rr)
 
+### Validation
+# rs_S3_R = np.zeros(np.shape(rc_S3_R))
+# for i in range(len(t)):
+#     rs_S3_R[i, :] = np.array([np.sqrt(rc_S3_R[i, 0]**2 + rc_S3_R[i, 1]**2 + rc_S3_R[i, 2]**2), np.arctan2(rc_S3_R[i, 1], rc_S3_R[i, 0])*180/np.pi, np.arccos(rc_S3_R[i, 2]/np.sqrt(rc_S3_R[i, 0]**2 + rc_S3_R[i, 1]**2 + rc_S3_R[i, 2]**2))*180/np.pi])
+# print(rs_S3_R)
 
 ### Distance requirement
 
@@ -196,8 +203,8 @@ Dist_S6_max = np.sqrt(rc_S6_Mn_S4max[0] ** 2 + rc_S6_Mn_S4max[1] ** 2 + rc_S6_Mn
 
 ### Plots
 
-# fig = plt.figure()
-# ax = fig.add_subplot(projection='3d')
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
 # ax.scatter(rc_M[np.argmin(DS3), 0], rc_M[np.argmin(DS3), 1], rc_M[np.argmin(DS3), 2], c='r', marker='^')
 # ax.scatter(rc_L1_R[np.argmin(DS3), 0], rc_L1_R[np.argmin(DS3), 1], rc_L1_R[np.argmin(DS3), 2], c='y', marker='o')
 # ax.scatter(rc_L2_R[np.argmin(DS3), 0], rc_L2_R[np.argmin(DS3), 1], rc_L2_R[np.argmin(DS3), 2], c='y', marker='o')
@@ -230,18 +237,18 @@ Dist_S6_max = np.sqrt(rc_S6_Mn_S4max[0] ** 2 + rc_S6_Mn_S4max[1] ** 2 + rc_S6_Mn
 # ax.scatter(rc_S5_R[np.argmax(DS4), 0], rc_S5_R[np.argmax(DS4), 1], rc_S5_R[np.argmax(DS4), 2], c='y', marker='o')
 # ax.scatter(rc_S6_R[np.argmax(DS4), 0], rc_S6_R[np.argmax(DS4), 1], rc_S6_R[np.argmax(DS4), 2], c='y', marker='o')
 #
-# for i in range(len(t)):
-#    ax.scatter(rc_M[i, 0], rc_M[i, 1], rc_M[i, 2], c='b', marker='o')
-#    ax.scatter(rc_L1_R[i, 0], rc_L1_R[i, 1], rc_L1_R[i, 2], c='g', marker='^')
-#    ax.scatter(rc_L2_R[i, 0], rc_L2_R[i, 1], rc_L2_R[i, 2], c='g', marker='^')
-# for i in range(len(t)):
-#    if i in aS :
-#        continue
-#    else :
-#        ax.scatter(rc_S3_R[i, 0], rc_S3_R[i, 1], rc_S3_R[i, 2], c='g', marker='^')
-#        ax.scatter(rc_S4_R[i, 0], rc_S4_R[i, 1], rc_S4_R[i, 2], c='g', marker='^')
-#        ax.scatter(rc_S5_R[i, 0], rc_S5_R[i, 1], rc_S5_R[i, 2], c='g', marker='^')
-#        ax.scatter(rc_S6_R[i, 0], rc_S6_R[i, 1], rc_S6_R[i, 2], c='g', marker='^')
+for i in range(len(t)):
+   ax.scatter(rc_M[i, 0], rc_M[i, 1], rc_M[i, 2], c='b', marker='o')
+   ax.scatter(rc_L1_R[i, 0], rc_L1_R[i, 1], rc_L1_R[i, 2], c='y', marker='^')
+   ax.scatter(rc_L2_R[i, 0], rc_L2_R[i, 1], rc_L2_R[i, 2], c='y', marker='^')
+for i in range(len(t)):
+   if i in aS :
+       continue
+   else :
+       ax.scatter(rc_S3_R[i, 0], rc_S3_R[i, 1], rc_S3_R[i, 2], c='r', marker='x')
+       ax.scatter(rc_S4_R[i, 0], rc_S4_R[i, 1], rc_S4_R[i, 2], c='r', marker='x')
+       ax.scatter(rc_S5_R[i, 0], rc_S5_R[i, 1], rc_S5_R[i, 2], c='g', marker='x')
+       ax.scatter(rc_S6_R[i, 0], rc_S6_R[i, 1], rc_S6_R[i, 2], c='g', marker='x')
 # # for j in range(len(aS3)):
 # #    ax.scatter(rc_S3_R[aS3[j], 0], rc_S3_R[aS3[j], 1], rc_S3_R[aS3[j], 2], c='r', marker='^')
 # #    ax.scatter(rc_S4_R[aS4[j], 0], rc_S4_R[aS4[j], 1], rc_S4_R[aS4[j], 2], c='r', marker='^')
@@ -252,4 +259,4 @@ Dist_S6_max = np.sqrt(rc_S6_Mn_S4max[0] ** 2 + rc_S6_Mn_S4max[1] ** 2 + rc_S6_Mn
 # #    ax.scatter(rc_S4_R[k, 0], rc_S4_R[k, 1], rc_S4_R[k, 2], c='y', marker='^')
 # #    ax.scatter(rc_S5_R[k, 0], rc_S5_R[k, 1], rc_S5_R[k, 2], c='y', marker='^')
 # #    ax.scatter(rc_S6_R[k, 0], rc_S6_R[k, 1], rc_S6_R[k, 2], c='y', marker='^')
-# plt.show()
+plt.show()

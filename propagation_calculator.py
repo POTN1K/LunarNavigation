@@ -1,7 +1,7 @@
 
 """
 Code in order to simulate multiple satellites and their positions(history) for a certain time period around the Moon.
-The code is made user friendly to allow the user to fill in an array of satellites, final time, resolution for integra-
+The code is made user-friendly to allow the user to fill in an array of satellites, final time, resolution for integra-
 ting, satellite mass, radiation area satellite to allow everything to be computed. The user is able to specify a certain
 satellite to see its kepler characteristic history. The user can also receive the delta V required for orbit maintenance
 between a self specified time period.
@@ -28,7 +28,7 @@ from tudatpy.util import result2array
 
 class PropagationTime:
     """Class to input satellite(s) and see their change of position over time"""
-    def __init__(self, orbit_parameters, final_time, resolution, mass_sat, area_sat, c_radiation):
+    def __init__(self, orbit_parameters=None, final_time=86400, resolution=900, mass_sat=250, area_sat=1, c_radiation=1):
         """Initialize the initial state of the satellite(s) with Keplerian elements,final time and resolution to see the final position
         :param orbit_parameters: array of Keplarian elements [[sat1],[sat2],[[sat3]] #Radians
         :param final_time: Time for the end of the simulation [s]
@@ -40,9 +40,11 @@ class PropagationTime:
 
 
         """
+        if orbit_parameters is None:
+            orbit_parameters = np.array([[20e6, 0, 0, 0, 0, 0], [20e6, 0, 0, 0, 180, 0]])
         self.resolution = resolution
         self.final_time = final_time
-        self.orbit_parameters = orbit_parameters
+        self.orbit_parameters = np.array(orbit_parameters)
         self.mass_sat = mass_sat
         self.area_sat = area_sat
         self.c_radiation = c_radiation
@@ -61,8 +63,73 @@ class PropagationTime:
         self.kepler_elements = None
         self.simulate()
 
+    @property
+    def orbit_parameters(self):
+        return self._orbit_parameters
 
+    @orbit_parameters.setter
+    def orbit_parameters(self, value):
 
+        if len(value.shape) >= 2 and value.shape[0] >= 2:
+            self._orbit_parameters = value
+        else:
+            raise ValueError("At least 2 satellites must be given")
+
+    @property
+    def final_time(self):
+        return self._final_time
+
+    @final_time.setter
+    def final_time(self, value):
+        if value >= 1:
+            self._final_time = value
+        else:
+            raise ValueError("Time must be positive")
+
+    @property
+    def resolution(self):
+        return self._resolution
+
+    @resolution.setter
+    def resolution(self, value):
+        if value > 0:
+            self._resolution = value
+        else:
+            raise ValueError("Resolution must be above 0")
+
+    @property
+    def mass_sat(self):
+        return self._mass_sat
+
+    @mass_sat.setter
+    def mass_sat(self, value):
+        if value > 0:
+            self._mass_sat= value
+        else:
+            raise ValueError("Mass of satellites must be above 0")
+
+    @property
+    def area_sat(self):
+        return self._area_sat
+
+    @area_sat.setter
+    def area_sat(self, value):
+        if value > 0:
+            self._area_sat = value
+        else:
+            raise ValueError("Area of the satellites must be equal or above 0\n (can be 0 of radiation pressure is not considered)")
+
+    @property
+    def c_radiation(self):
+        return self._c_radiation
+
+    @c_radiation.setter
+    def c_radiation(self, value):
+        if value > 0:
+            self._c_radiation = value
+        else:
+            raise ValueError(
+                "Coefficient of radiation must be above 0")
 
     def create_bodies(self):
         """
@@ -329,10 +396,10 @@ class PropagationTime:
         std_dev = np.std(ranges, axis=0)
         max_ranges = np.max(ranges, axis=0)
 
-        print(f"Average range for Kepler element for all satellites: {avg_ranges}")
-        print(f"Standard deviation of the average ranges: {std_dev}")
-        print(f"Maximum range of each element across all groups: {max_ranges}")
-
+        # print(f"Average range for Kepler element for all satellites: {avg_ranges}")
+        # print(f"Standard deviation of the average ranges: {std_dev}")
+        # print(f"Maximum range of each element across all groups: {max_ranges}")
+        return(avg_ranges, std_dev, max_ranges)
     def plot_time(self):
         """
         Plots the history and current location for all bodies. First this function creates the lunar surface and then
@@ -432,3 +499,7 @@ class PropagationTime:
 
         plt.tight_layout()
         plt.show()
+# propagation_time = PropagationTime(resolution=900)
+# # # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
+# propagation_time.plot_kepler(0)
+# propagation_time.plot_time()

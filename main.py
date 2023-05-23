@@ -4,7 +4,7 @@ import numpy as np
 # Local Libraries
 from model_class import Model
 from propagation_calculator import PropagationTime
-from user_position_calculator import UserErrors
+from user_error_calculator import UserErrors
 
 # -----------------------------------------------------------------------------
 # Static Simulation

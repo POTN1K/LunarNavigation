@@ -19,7 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pylab import cm
 from tudatpy.kernel.astro import element_conversion
-
+from earth_constellation import *
 
 
 # Constants
@@ -148,7 +148,7 @@ class Satellite:
                 self.range = self.setRange()
         else:
             raise ValueError("Elevation must be between 0 and 90°.")
-        
+
     def setRange(self):
         """Calculate the maximum range achievable by a satellite.
         :param elevation: (optional) elevation angle [deg]
@@ -170,7 +170,7 @@ class Satellite:
             return True
         else:
             return False
-        
+
     def getParams(self):
         """Return the Keplerian elements of the satellite."""
         return self.a, self.e, self.i, self.w, self.Omega, self.nu
@@ -501,7 +501,7 @@ class Model:
     @property
     def resolution(self):
         return self._resolution
-    
+
     @resolution.setter
     def resolution(self, value):
         if value > 0:
@@ -670,7 +670,7 @@ class Model:
             if isinstance(module, Satellite):
                 satellites_params.append(list(module.getParams()))
         return satellites_params
-        
+
     def getParams(self):
         """Get the parameters of the model."""
         for module in self.modules:
@@ -707,25 +707,46 @@ if __name__=='__main__':
 # Add multiple orbit planes (a, e, i, w, n_planes, n_sat_per_plane, shift, elevation)
 # model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4, 90)
 
-# Add fixed point (r, elevation)
-# model.addFixPoint([2.45e7, 3e6, 1e3], 10)
+    # Add fixed point (r, elevation)
+    # model.addFixPoint([2.45e7, 3e6, 1e3], 10)
+    ### Max dist coords of S3 and S5
+    # model.addFixPoint(rc_L1_Mn_S3max, 10)  # Satellite 1 at Lagrange point 1 (L1)
+    # model.addFixPoint(rc_L2_Mn_S3max, 10)  # S2 at L2
+    # model.addFixPoint(rc_S3_Mn_max, 10)  # S3
+    # model.addFixPoint(rc_S4_Mn_S3max, 10)  # S4
+    # model.addFixPoint(rc_S5_Mn_S3max, 10)  # S5
+    # model.addFixPoint(rc_S6_Mn_S3max, 10)  # S6
 
-# Add Earth coverage
-## Max Distance
-# model.addFixPoint(rc_S3_Mn_max, 10)  # Satellite 3 (S3)
-# model.addFixPoint(rc_S4_Mn_max, 10)  # S4
-# model.addFixPoint(rc_S5_Mn_max, 10)  # S5
-# model.addFixPoint(rc_S6_Mn_max, 10)  # S6
+    ### Max dist coords of S4 and S6
+    # model.addFixPoint(rc_L1_Mn_S4max, 10)  # S1
+    # model.addFixPoint(rc_L2_Mn_S4max, 10)  # S2
+    # model.addFixPoint(rc_S3_Mn_S4max, 10)  # S3
+    # model.addFixPoint(rc_S4_Mn_max, 10)  # S4
+    # model.addFixPoint(rc_S5_Mn_S4max, 10)  # S5
+    # model.addFixPoint(rc_S6_Mn_S4max, 10)  # S6
 
-## Min dist (probably limiting for coverage)
-# model.addFixPoint(rc_S3_Mn_min, 10)
-# model.addFixPoint(rc_S4_Mn_min, 10)
-# model.addFixPoint(rc_S5_Mn_min, 10)
-# model.addFixPoint(rc_S6_Mn_min, 10)
+    ### Min dist coords of S3 and S5
+    model.addFixPoint(rc_L1_Mn_S3min, 10)  # S1
+    model.addFixPoint(rc_L2_Mn_S3min, 10)  # S2
+    model.addFixPoint(rc_S3_Mn_min, 10)  # S3
+    model.addFixPoint(rc_S4_Mn_S3min, 10)  # S4
+    model.addFixPoint(rc_S5_Mn_S3min, 10)  # S5
+    model.addFixPoint(rc_S6_Mn_S3min, 10)  # S6
+
+    ### Min dist coords of S4 and S6
+    # model.addFixPoint(rc_L1_Mn_S4min, 10)  # S1
+    # model.addFixPoint(rc_L2_Mn_S4min, 10)  # S2
+    # model.addFixPoint(rc_S3_Mn_S4min, 10)  # S3
+    # model.addFixPoint(rc_S4_Mn_min, 10)  # S4
+    # model.addFixPoint(rc_S5_Mn_S4min, 10)  # S5
+    # model.addFixPoint(rc_S6_Mn_S4min, 10)  # S6
 
 
 # Get parameters for satellites in the model
 # model.getParams()
 
-# Plot coverage
-# model.plotCoverage()
+    print(model)
+
+    # Plot coverage
+    model.plotCoverage()
+

@@ -1,4 +1,8 @@
 """
+This script works together with the code from Niko to be able to get all the DOP values on the discritized moon. I am
+planning to add the same with velocity, but I need to output velocity in the simulation for that to
+work. The code also gives a budget for allowable ephemeris error w.r.t the requirements.
+
 MADE BY KYLE SCHERPENZEEL :(
 """
 
@@ -19,6 +23,57 @@ class UserErrors:
         self.user_error()
         self.allowable_error()
 
+    @property
+    def sats(self):
+        return self._sats
+
+    @sats.setter
+    def sats(self, value):
+        if len(value.shape) >= 2 and value.shape[0] >=4:
+            self._sats = value
+        else:
+            raise ValueError("Must be at least 4 satellites")
+
+    @property
+    def position_surface(self):
+        return self._position_surface
+
+    @position_surface.setter
+    def position_surface(self, value):
+        if len(value.shape) == (1, 3):
+            self._position_surface = value
+        else:
+            raise ValueError("Must be 3D coordinates")
+
+    @property
+    def allowable(self):
+        return self._allowable
+
+    @allowable.setter
+    def allowable(self, value):
+        if np.array(value).shape == (6,):
+            self._allowable = value
+        else:
+            raise ValueError("Must give 6 error requirements")
+
+    @property
+    def pos_error(self):
+        return self._pos_error
+
+    @pos_error.setter
+    def pos_error(self, value):
+        if value >= 0:
+            self._pos_error = value
+        else:
+            raise ValueError("Ephemeris error must be equal or greater than 0")
+
+
+
+
+
+
+
+
     def satellite_error(self):
         CLOCK_ERROR = 1.1
         RECIEVER_NOISE_AND_RESOLUTION = 0.1
@@ -35,10 +90,10 @@ class UserErrors:
         vecs = self.sats - self.position_user
 
         # Compute distances
-        dists = np.linalg.norm(vecs, axis=1)
+        self.dists = np.linalg.norm(vecs, axis=1)
 
         # Compute unit vectors
-        uvecs = vecs / dists[:, np.newaxis]
+        uvecs = vecs / self.dists[:, np.newaxis]
 
         # Insert unit vectors into geometry matrix
         H[:, :3] = uvecs
