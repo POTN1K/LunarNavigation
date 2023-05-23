@@ -19,7 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pylab import cm
 from tudatpy.kernel.astro import element_conversion
-from earth_constellation import *
+#from earth_constellation import *
 
 
 # Constants
@@ -687,66 +687,4 @@ class Model:
 if __name__=='__main__':
     # Create model
     model = Model()
-
-# Add satellite (a, e, i, w, Omega, nu, shift)
-# model.addSatellite(2.45e7, 0, 58.69, 22.9, 4, 6)
-
-# Add tower (phi, theta, h)
-# model.addTower(20, 15, 100000)
-
-# Add Lagrange point
-# model.addLagrange('L1')
-# model.addLagrange('L2')
-    
-# Add orbit plane (a, e, i, w, Omega, n_sat, shift)
-# model.addOrbitPlane(2.45e7, 0.5, 85, 0, 0, 4)
-# model.addOrbitPlane(2.45e7, 0.5, 85, 45, 120, 4)
-# model.addOrbitPlane(2.45e7, 0.5, 85, 90, 240, 4)
-# model.addOrbitPlane(2.45e7, 0.5, 0, 0, 0, 4)
-
-# Add multiple orbit planes (a, e, i, w, n_planes, n_sat_per_plane, shift, elevation)
-# model.addSymmetricalPlanes(2.45e7, 0, 58.69, 22.9, 6, 4, 90)
-
-    # Add fixed point (r, elevation)
-    # model.addFixPoint([2.45e7, 3e6, 1e3], 10)
-    ### Max dist coords of S3 and S5
-    # model.addFixPoint(rc_L1_Mn_S3max, 10)  # Satellite 1 at Lagrange point 1 (L1)
-    # model.addFixPoint(rc_L2_Mn_S3max, 10)  # S2 at L2
-    # model.addFixPoint(rc_S3_Mn_max, 10)  # S3
-    # model.addFixPoint(rc_S4_Mn_S3max, 10)  # S4
-    # model.addFixPoint(rc_S5_Mn_S3max, 10)  # S5
-    # model.addFixPoint(rc_S6_Mn_S3max, 10)  # S6
-
-    ### Max dist coords of S4 and S6
-    # model.addFixPoint(rc_L1_Mn_S4max, 10)  # S1
-    # model.addFixPoint(rc_L2_Mn_S4max, 10)  # S2
-    # model.addFixPoint(rc_S3_Mn_S4max, 10)  # S3
-    # model.addFixPoint(rc_S4_Mn_max, 10)  # S4
-    # model.addFixPoint(rc_S5_Mn_S4max, 10)  # S5
-    # model.addFixPoint(rc_S6_Mn_S4max, 10)  # S6
-
-    ### Min dist coords of S3 and S5
-    model.addFixPoint(rc_L1_Mn_S3min, 10)  # S1
-    model.addFixPoint(rc_L2_Mn_S3min, 10)  # S2
-    model.addFixPoint(rc_S3_Mn_min, 10)  # S3
-    model.addFixPoint(rc_S4_Mn_S3min, 10)  # S4
-    model.addFixPoint(rc_S5_Mn_S3min, 10)  # S5
-    model.addFixPoint(rc_S6_Mn_S3min, 10)  # S6
-
-    ### Min dist coords of S4 and S6
-    # model.addFixPoint(rc_L1_Mn_S4min, 10)  # S1
-    # model.addFixPoint(rc_L2_Mn_S4min, 10)  # S2
-    # model.addFixPoint(rc_S3_Mn_S4min, 10)  # S3
-    # model.addFixPoint(rc_S4_Mn_min, 10)  # S4
-    # model.addFixPoint(rc_S5_Mn_S4min, 10)  # S5
-    # model.addFixPoint(rc_S6_Mn_S4min, 10)  # S6
-
-
-# Get parameters for satellites in the model
-# model.getParams()
-
-    print(model)
-
-    # Plot coverage
-    model.plotCoverage()
 

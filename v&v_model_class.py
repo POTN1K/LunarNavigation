@@ -251,7 +251,7 @@ class TestOrbitPlane(unittest.TestCase):
         self.assertEqual(s1.satellites[3].nu, np.deg2rad(216))
         self.assertEqual(s1.satellites[4].nu, np.deg2rad(288))
 
-    def test_relDistSatellites(self):
+    def test_rel_dist_satellites(self):
         """Checks that satellites are distributed correctly relative to each other"""
         s1 = OrbitPlane(a=2e6, e=0, n_sat=6)
         self.assertAlmostEqual(2e6, np.linalg.norm(s1.satellites[0].r-s1.satellites[1].r))
@@ -343,7 +343,6 @@ class TestModel(unittest.TestCase):
             m.plotCoverage()
 
 # Model module tests
-# Error, Extreme value tests, Sensitivity Analysis
 def plotErrorMesh():
     """Plot error as a function of mesh resolution"""
     coverage = []
@@ -419,7 +418,6 @@ def plotChangeInHeight():
     plt.xlabel('Height [m]')
     plt.ylabel('Coverage [%]')
     plt.show()
-
 class TestExtreme(unittest.TestCase):
     """Class to test extreme value cases"""
 
@@ -449,8 +447,6 @@ class TestExtreme(unittest.TestCase):
         self.assertAlmostEqual(np.count_nonzero(m.mod_inView), m.resolution**2/2, delta=1.1e2)
 
 # Model system tests
-"""Combine multiple classes, use plots"""
-
 def plotFolds():
     """Checks that the system works with folds"""
     m = Model(resolution=100)
@@ -459,8 +455,6 @@ def plotFolds():
     m.plotCoverage()
 
 # Validation
-"""Compare to other models and real life data"""
-
 def plotModelFromSOC1():
     """Plot model from Streets of Coverage"""
     m = Model(resolution=100)
