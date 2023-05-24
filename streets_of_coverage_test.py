@@ -33,6 +33,14 @@ class MyTestCase(unittest.TestCase):
         result = np.size(ca.loop(np.array([3500, 4000, 4500, 40000]), np.arange(10, 20, 1), True)[0])
         self.assertEqual(result, 44)
 
+    def test_loop_extreme_min(self):
+        result = ca.loop(np.array([0]), np.arange(100, 1000, 100), False)[1][3, 0]
+        self.assertEqual(result, 'Fail')
+
+    def test_loop_extreme_max(self):
+        result = ca.loop(np.array([100000000]), np.arange(10, 20, 1), False)[1][3, 0]
+        self.assertEqual(result, 2)
+
     def test_loop_val(self):
         result = ca.loop(np.array([3500, 4000, 4500, 40000]), np.arange(10, 20, 1), True)[1][3, 0]
         self.assertEqual(result, 7)

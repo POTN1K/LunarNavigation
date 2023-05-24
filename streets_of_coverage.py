@@ -6,6 +6,7 @@ different amount of orbital planes with the satellites distributed over more orb
 
 By Ian Maes
 """
+import numpy
 
 import numpy as np
 
@@ -80,9 +81,14 @@ def loop(altitudes, S, lagrange):
         n_orbits_array = np.vstack(
             (n_orbits_array, n_sats(theta_angles, S[n], radius_moon, inclination_angles, lagrange)[1]))
         n += 1
-    print(n_sats_array)
-    print(n_orbits_array)
-    return n_sats_array, n_orbits_array
+    # Change nan values to 'Fail' string. This means the combination of number of satellites per orbital plane
+    # and altitude can not provide 4-fold coverage
+    n_sats_array_str = np.where(np.isnan(n_sats_array), 'Fail', n_sats_array.astype(object))
+    n_orbits_array_str = np.where(np.isnan(n_orbits_array), 'Fail', n_orbits_array.astype(object))
+
+    print(n_sats_array_str)
+    print(n_orbits_array_str)
+    return n_sats_array_str, n_orbits_array_str
 
 
 if __name__ == '__main__':
