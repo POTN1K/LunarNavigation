@@ -14,9 +14,9 @@ model = Model()
 
 # Add preliminary orbit
 model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1)
-
+model.setCoverage()
 # # Plot coverage
-model.plotCoverage()
+# model.plotCoverage()
 
 # -----------------------------------------------------------------------------
 # Continue?
