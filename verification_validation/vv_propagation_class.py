@@ -1,6 +1,17 @@
+"""
+Created by Kyle scherpenzeel
+
+"""
+
 import unittest
 import numpy as np
-from orbit_calculations import PropagationTime
+
+# Local Libraries
+import sys
+sys.path.append('.')
+
+# Local objects
+from scripts import PropagationTime
 
 r_moon = 1.737e6  # m
 miu_moon = 4.9048695e12  # m^3/s^2

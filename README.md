@@ -2,6 +2,29 @@
 Software to Model Orbital Mechanics around the Moon and perform design calculations
 ## Project Description
 Project developed as part of the Design Synthesis Exercise (DSE) for the obtention of the Bachelor of Science in Aerospace Engineering at the Delft University of Technology (TU Delft). The project consists of the development of a software to model orbital mechanics around the Moon and perform design calculations for a Lunar Navigation System. The software will be used to perform a trade-off analysis between different navigation systems and select the most suitable one for the mission. The project is divided into 3 phases, each one with a different focus. The first phase consists of the development of the software, the second phase consists of the trade-off analysis, and the third phase consists of the design of the selected navigation system, along with the spacecraft. The project is developed by a team of 10 students. The project is developed in Python 3.10, and the code is stored in a GitHub repository. The project is developed in 3 months, from April to June 2023.
+
+## Directory Structure
+The directory structure of the project is as follows:
+- **/old_sample_codes**: Folder containing sample codes used to test the tudat-space library used in the project. These codes are not used in the final version of the project.
+- **/scripts**: Folder containing the scripts used to run the code. The main script is main.py, which is the one that should be run to execute the code. The other scripts are used to run specific parts of the code, and are imported to main.py.
+    - **/scripts/earth_constellation.py**: Script used to run the code for the Earth Constellation scenario.
+    - **/scripts/link_budget.py**: Script used to run the code for the Power Link Budget.
+    - **/scripts/model_class.py**: Script used to run the code for the Coverage Model class.
+    - **/scripts/propagation_calculator.py**: Script used to run the code for the Dynamic Simulation class.
+    - **/scripts/trade_off_sensitivity_analysis.py**: Script used to run the code for the Trade-Off Sensitivity Analysis.
+    - **/scripts/user_error_calculator.py**: Script used to run the code for the User Error Calculator by the navigation system.
+- **/verification_validation**: Folder containing the verification and validation files. The verification and validation files are used to test the code and ensure that it is working properly. The verification and validation files are not used in the final version of the project.
+    - **/verification_validation/Group22_NavigatingtheMoon_Verification_code.pdf**: File summarizing the verification of the codes in the folder.
+    - **/verification_validation/vv_earth_constellation.py**: File containing the verification and validation files for the Earth Constellation scenario.
+    - **/verification_validation/vv_link_budget.py**: File containing the verification and validation files for the Power Link Budget.
+    - **/verification_validation/vv_model_class.py**: File containing the verification and validation files for the Coverage Model class.
+    - **/verification_validation/vv_propagation_calculator.py**: File containing the verification and validation files for the Dynamic Simulation class.
+    - **/verification_validation/vv_trade_off_sensitivity_analysis.py**: File containing the verification and validation files for the Trade-Off Sensitivity Analysis.
+    - **/verification_validation/vv_user_error_calculator.py**: File containing the verification and validation files for the User Error Calculator by the navigation system.
+- **/.gitignore**: File containing the files that should not be pushed to the GitHub repository.
+- **/main.py**: File containing the main script to run the code.
+- **/README.md**: File containing the description, installation, and rules of the project.
+
 ## Installation
 Instructions for installation of the project.
 1. Clone the repository to your local machine.
@@ -19,7 +42,9 @@ Instructions for installation of the project.
 - matplotlib
 - pandas
 - tudatpy
--mpl_toolkits
+- mpl_toolkits
+- unittest
+- itertools
 
 ## Rules
 ### GitHub Rules
@@ -53,7 +78,6 @@ In order to keep the GitHub organized, the following rules must be complied with
     - Private Variables: _lower_case
     - Files: lower_case.py
 - Use Object Oriented Programming (OOP) as much as possible.
-
 
 ### Documentation Rules
 - All code must be documented using the Docstring Style.

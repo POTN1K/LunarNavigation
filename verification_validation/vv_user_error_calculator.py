@@ -1,3 +1,6 @@
+"""
+Created by Kyle scherpenzeel
+"""
 
 # Global Libraries
 import unittest
@@ -8,7 +11,7 @@ import sys
 sys.path.append('.')
 
 # Local objects
-from orbit_calculations import UserErrors
+from scripts import UserErrors
 
 
 class TestUserErrors(unittest.TestCase):

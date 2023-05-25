@@ -10,7 +10,7 @@ import sys
 sys.path.append('.')
 
 # Internal Libraries
-from orbit_calculations import sensitivity_analysis
+from scripts import sensitivity_analysis
 
 
 class TestSensitivity(unittest.TestCase):

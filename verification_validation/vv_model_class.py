@@ -5,11 +5,13 @@ By Nikolaus Ricker"""
 import unittest
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
 
+# Local Libraries
+import sys
 sys.path.append('.')
+
 # Local objects
-from orbit_calculations import Satellite, Tower, Lagrange, FixPoint, OrbitPlane, Model
+from scripts import Satellite, Tower, Lagrange, FixPoint, OrbitPlane, Model
 
 # Constants
 r_moon = 1.737e6  # m

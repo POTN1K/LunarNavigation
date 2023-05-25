@@ -6,7 +6,7 @@ ting, satellite mass, radiation area satellite to allow everything to be compute
 satellite to see its kepler characteristic history. The user can also receive the delta V required for orbit maintenance
 between a self specified time period.
 
-By Kyle Scherpenzeel
+By K. Scherpenzeel
 
 """
 
@@ -114,7 +114,7 @@ class PropagationTime:
 
     @area_sat.setter
     def area_sat(self, value):
-        if value > 0:
+        if value >= 0:
             self._area_sat = value
         else:
             raise ValueError("Area of the satellites must be equal or above 0\n (can be 0 of radiation pressure is not considered)")
@@ -125,7 +125,7 @@ class PropagationTime:
 
     @c_radiation.setter
     def c_radiation(self, value):
-        if value > 0:
+        if value >= 0:
             self._c_radiation = value
         else:
             raise ValueError(

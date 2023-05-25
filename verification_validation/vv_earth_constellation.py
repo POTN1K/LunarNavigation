@@ -5,11 +5,12 @@ By S. Nedelcu"""
 import unittest
 import numpy as np
 
+# Local Libraries
 import sys
 sys.path.append('.')
 
 # Local objects
-from orbit_calculations import general_calculations
+from scripts import general_calculations
 
 t, ir, ig, Phi, M, L1, L2, S3, S4, S5, S6, rc_M, rc_L1_R, rc_L2_R, rc_S3_Rr, rc_S4_Rr, rc_S5_Rr, rc_S6_Rr, rc_S3_R,\
     rc_S4_R, rc_S5_R, rc_S6_R, aS3, DS3, aS4, DS4, aS5, DS5, aS6, DS6, aS = general_calculations()

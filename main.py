@@ -5,7 +5,7 @@ Maintained by Nikolaus Ricker"""
 import numpy as np
 
 # Local Libraries
-from orbit_calculations import Model, PropagationTime, UserErrors
+from scripts import Model, PropagationTime, UserErrors
 
 # -----------------------------------------------------------------------------
 # Static Simulation

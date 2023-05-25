@@ -1,7 +1,15 @@
+# External Libraries
 import unittest
-from orbit_calculations import Gpeak_helical, alpha1_over_2_helical, Lpr, dB, snr, snr_margin, S_lagrange, \
-    L_s
 import numpy as np
+
+# Local Libraries
+import sys
+sys.path.append('.')
+
+# Local objects
+from scripts import Gpeak_helical, alpha1_over_2_helical, Lpr, dB, snr, snr_margin, S_lagrange, \
+    L_s
+
 
 
 class Testlink_budget2(unittest.TestCase):
