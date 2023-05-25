@@ -19,6 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pylab import cm
 from tudatpy.kernel.astro import element_conversion
+from itertools import product
 
 # Constants
 r_moon = 1.737e6  # m
@@ -572,6 +573,16 @@ class Model:
         n_sat = Satellite(a, e, i, w, Omega, nu, elevation, shift)
         self.modules.append(n_sat)
         self.n_sat += 1
+
+    def addSatelliteComb(self, a, e, i, w, Omega, nu, shift=0, elevation=10):
+        """Add any combination of satellites to the model."""
+        args = [a, e, i, w, Omega, nu]
+        args = [[arg] if isinstance(arg, (int, float)) else arg for arg in args]
+        print(args)
+        comb = list(product(*args))
+        for c in comb:
+            self.addSatellite(c[0], c[1], c[2], c[3], c[4], c[5], shift, elevation)
+
 
     def addTower(self, phi=0, theta=0, h=0):
         n_tower = Tower(phi, theta, h)

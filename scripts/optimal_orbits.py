@@ -4,6 +4,9 @@ Maintained by Nikolaus Ricker"""
 # External Libraries
 import numpy as np
 
+import sys
+sys.path.append('.')
+
 # Local Libraries
 from scripts import Model, PropagationTime, UserErrors
 
@@ -12,19 +15,22 @@ from scripts import Model, PropagationTime, UserErrors
 model = Model()
 
 
-model.addOrbitPlane(a=8049, i=45, e=0.4082, w=90, n_planes=1, n_sat_per_plane=3, f=0, dist_type=1) #constellation_12_orbits_orbit_1
-model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_12_orbits_orbit_2
-model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_12_orbits_orbit_3
-model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_12_orbits_orbit_4
-model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_1
-model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_2
-model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_3
-model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_4
+#model.addOrbitPlane(a=8049, i=45, e=0.4082, w=90, n_planes=1, n_sat_per_plane=3, f=0, dist_type=1) #constellation_12_orbits_orbit_1
+#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_12_orbits_orbit_2
+#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_12_orbits_orbit_3
+#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_12_orbits_orbit_4
+#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_1
+#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_2
+#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_3
+#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_4
 
-constellation_NP_orbits = np.array([[]])
-constellation_SP_orbits = np.array([[]])
-JCT_M20 = np.array([[]])
-MLO = np.array([[]])
+#constellation_NP_orbits = np.array([[]])
+#constellation_SP_orbits = np.array([[]])
+#JCT_M20 = np.array([[]])
+#MLO = np.array([[]])
+
+model.addSatelliteComb(a=8049e3, e=0.4082, i=45, w=[90, 270], Omega=0, nu=[0,150,210])
+print(model.modules)
 
 
 
