@@ -1,7 +1,14 @@
+
+# Global Libraries
 import unittest
 import numpy as np
 
-from user_error_calculator import UserErrors
+# Local Libraries
+import sys
+sys.path.append('.')
+
+# Local objects
+from orbit_calculations import UserErrors
 
 
 class TestUserErrors(unittest.TestCase):

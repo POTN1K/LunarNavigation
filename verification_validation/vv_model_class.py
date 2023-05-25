@@ -5,9 +5,12 @@ By Nikolaus Ricker"""
 import unittest
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
+sys.path.append('.')
 # Local objects
-from model_class import Satellite, Tower, Lagrange, FixPoint, OrbitPlane, Model
+from orbit_calculations import Satellite, Tower, Lagrange, FixPoint, OrbitPlane, Model
+
 # Constants
 r_moon = 1.737e6  # m
 miu_moon = 4.9048695e12  # m^3/s^2
@@ -353,9 +356,10 @@ def plotErrorMesh():
         m.setCoverage()
         coverage.append(np.count_nonzero(m.mod_inView)/m.resolution**2)
 
-    plt.plot(res**2, coverage)
+    coverage = np.array(coverage)
+    plt.plot(np.array(res)**2, np.abs(coverage-coverage[-1])/coverage[-1]*100)
     plt.xlabel('Mesh resolution [pixels]')
-    plt.ylabel('Coverage [%]')
+    plt.ylabel('Discretisation Error [%]')
     plt.show()
 
 def plotChangeInA():
@@ -418,6 +422,7 @@ def plotChangeInHeight():
     plt.xlabel('Height [m]')
     plt.ylabel('Coverage [%]')
     plt.show()
+
 class TestExtreme(unittest.TestCase):
     """Class to test extreme value cases"""
 
@@ -492,7 +497,7 @@ def plotModelFromPaper2():
     m.plotCoverage()
 
 if __name__ == '__main__':
-    # unittest.main()
+    unittest.main()
     # plotErrorMesh()
     # plotChangeInA()
     # plotFolds()
@@ -500,4 +505,4 @@ if __name__ == '__main__':
     # plotModelFromSOC2()
     # plotModelFromSOC3()
     # plotModelFromSOC4()
-    plotModelFromPaper2()
+    # plotModelFromPaper2()

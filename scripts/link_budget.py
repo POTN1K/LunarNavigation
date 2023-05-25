@@ -84,56 +84,54 @@ def S(_Rp, _d):       # Formula from slides, slightly modified for lagrange, as 
 def L_s(_lamba, _S):
     return (_lamba/(4*np.pi*_S))**2
 
-
-#helical
-# alpha1_over_2_tr = alpha1_over_2_helical(Dt, L, lamba)
-# Gt_dB = Gpeak_helical(Dt, L, lamba)
-# Lpr_tr_dB = Lpr(et_tr, alpha1_over_2_tr)
-# Lpr_re_dB = Lpr(0.1, 1)
-# Lpr_tot_dB = Lpr_tr_dB + Lpr_re_dB
-
-
-#parabolic
-Gt_dB = Gpeak_parabolic_t(D_tr, f)
-Gr = Gpeak_parabolic_r(D_r, eta, lamba)
-Lpr_tr_dB = Lpr(et_tr, alpha1_over_2_parabolic(f, D_tr))
-Lpr_re_dB = Lpr(0.1, 1)
-Lpr_tot_dB = Lpr_tr_dB+Lpr_re_dB
+if __name__ == "__main__":
+    #helical
+    # alpha1_over_2_tr = alpha1_over_2_helical(Dt, L, lamba)
+    # Gt_dB = Gpeak_helical(Dt, L, lamba)
+    # Lpr_tr_dB = Lpr(et_tr, alpha1_over_2_tr)
+    # Lpr_re_dB = Lpr(0.1, 1)
+    # Lpr_tot_dB = Lpr_tr_dB + Lpr_re_dB
 
 
-#check to see if lagrange point or not.
-S1 = S(Rm_km, d_lagrange_km)*1000 
-# S1 = S_lagrange(Rm_km, d_lagrange_km)*1000 
+    #parabolic
+    Gt_dB = Gpeak_parabolic_t(D_tr, f)
+    Gr = Gpeak_parabolic_r(D_r, eta, lamba)
+    Lpr_tr_dB = Lpr(et_tr, alpha1_over_2_parabolic(f, D_tr))
+    Lpr_re_dB = Lpr(0.1, 1)
+    Lpr_tot_dB = Lpr_tr_dB+Lpr_re_dB
 
-Ls = L_s(lamba, S1)  # just a formula from slides
 
-SNR_req = 10 # dB max that is possible
+    #check to see if lagrange point or not.
+    S1 = S(Rm_km, d_lagrange_km)*1000
+    # S1 = S_lagrange(Rm_km, d_lagrange_km)*1000
 
-Ptr_dB = dB(Ptr)
-Gr_dB = dB(Gr)
-Ll_dB = dB(Ll)
-Ls_dB = dB(Ls)
-Lr_dB = dB(Lr)
-R_dB = dB(R)
-k_dB = dB(BOLTZMANN)
-Tsys_dB = dB(Tsys)
+    Ls = L_s(lamba, S1)  # just a formula from slides
 
-SNR_act = snr_with_La(Ptr_dB, Ll_dB, Gt_dB, Gr_dB, Ls_dB, Lpr_tot_dB, Lr_dB, R_dB, k_dB, Tsys_dB, La_dB)
+    SNR_req = 10 # dB max that is possible
 
-print(f'{Ptr_dB=}')
-print(f'{Ll_dB=}')
-print(f'{Gt_dB=}')
-print(f'{La_dB=}')
-print(f'{Gr_dB=}')
-print(f'{Ls_dB=}')
-print(f'{Lpr_tr_dB=}')
-print(f'{Lpr_re_dB=}')
-print(f'{Lpr_tot_dB=}')
-print(f'{Lr_dB=}')
-print(f'{R_dB=}')
-print(f'{k_dB=}')
-print(f'{Tsys_dB=}')
+    Ptr_dB = dB(Ptr)
+    Gr_dB = dB(Gr)
+    Ll_dB = dB(Ll)
+    Ls_dB = dB(Ls)
+    Lr_dB = dB(Lr)
+    R_dB = dB(R)
+    k_dB = dB(BOLTZMANN)
+    Tsys_dB = dB(Tsys)
 
-print(snr_margin(SNR_act, SNR_req))
+    SNR_act = snr_with_La(Ptr_dB, Ll_dB, Gt_dB, Gr_dB, Ls_dB, Lpr_tot_dB, Lr_dB, R_dB, k_dB, Tsys_dB, La_dB)
 
-#this proves that the 
+    print(f'{Ptr_dB=}')
+    print(f'{Ll_dB=}')
+    print(f'{Gt_dB=}')
+    print(f'{La_dB=}')
+    print(f'{Gr_dB=}')
+    print(f'{Ls_dB=}')
+    print(f'{Lpr_tr_dB=}')
+    print(f'{Lpr_re_dB=}')
+    print(f'{Lpr_tot_dB=}')
+    print(f'{Lr_dB=}')
+    print(f'{R_dB=}')
+    print(f'{k_dB=}')
+    print(f'{Tsys_dB=}')
+
+    print(snr_margin(SNR_act, SNR_req))

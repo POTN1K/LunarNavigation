@@ -4,10 +4,13 @@ By Nikolaus Ricker"""
 # External Libraries
 import numpy as np
 import unittest
-from itertools import product
+
+# Local Libraries
+import sys
+sys.path.append('.')
 
 # Internal Libraries
-from trade_off_sensitivity_analysis import sensitivity_analysis
+from orbit_calculations import sensitivity_analysis
 
 
 class TestSensitivity(unittest.TestCase):

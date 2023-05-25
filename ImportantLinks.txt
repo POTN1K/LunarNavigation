@@ -1,2 +1,0 @@
-https://py.api.tudat.space/en/latest/gravity_field_variation.html
-https://py.api.tudat.space/en/latest/ephemeris.html

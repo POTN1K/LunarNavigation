@@ -1,12 +1,12 @@
 import unittest
 import numpy as np
-from propagation_calculator import PropagationTime
+from orbit_calculations import PropagationTime
 
 r_moon = 1.737e6  # m
 miu_moon = 4.9048695e12  # m^3/s^2
 
 
-#Unit test
+# Unit test
 
 class UnitTests(unittest.TestCase):
     def setUp(self):
@@ -18,8 +18,8 @@ class UnitTests(unittest.TestCase):
         self.area_sat = 1
         self.c_radiation = 1
         self.propagation = PropagationTime(self.orbit_parameters, self.final_time,
-                                          self.resolution, self.mass_sat,
-                                          self.area_sat, self.c_radiation)
+                                           self.resolution, self.mass_sat,
+                                           self.area_sat, self.c_radiation)
 
     def test_orbital_parameters(self):
         """Test the orbital parameters are being set correctly"""
@@ -59,12 +59,12 @@ class UnitTests(unittest.TestCase):
     def test_init_with_invalid_final_time(self):
         """Test initialization with invalid final time"""
         with self.assertRaises(ValueError):
-            PropagationTime([[20e6, 0, 0, 0, 0, 0],[25e6, 0, 0, 0, 0, 0]], -100, 900, 250, 1, 1)
+            PropagationTime([[20e6, 0, 0, 0, 0, 0], [25e6, 0, 0, 0, 0, 0]], -100, 900, 250, 1, 1)
 
     def test_init_with_invalid_resolution(self):
         """Test initialization with invalid resolution"""
         with self.assertRaises(ValueError):
-            PropagationTime([[20e6, 0, 0, 0, 0, 0],[25e6, 0, 0, 0, 0, 0]], 86400, 0, 250, 1, 1)
+            PropagationTime([[20e6, 0, 0, 0, 0, 0], [25e6, 0, 0, 0, 0, 0]], 86400, 0, 250, 1, 1)
 
     def test_init_with_invalid_mass_sat(self):
         """Test initialization with invalid satellite mass"""
@@ -81,7 +81,6 @@ class UnitTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             PropagationTime([[20e6, 0, 0, 0, 0, 0], [25e6, 0, 0, 0, 0, 0]], 86400, 900, 250, 1, -1)
 
-
     def test_satellites_count(self):
         """Test that satellites are added correctly"""
         propagation = PropagationTime([[20e6, 0, 0, 0, 0, 0], [20e6, 0, 0, 0, 0, 0]], 86400, 900, 250, 1, 1)
@@ -97,8 +96,6 @@ class UnitTests(unittest.TestCase):
         for satellite, models in self.propagation.acceleration_models.items():
             self.assertEqual(len(models), 3)
 
-
-
     def test_hohmann_delta_v(self):
         # Check if hohmann is correct by hand
 
@@ -113,8 +110,7 @@ class UnitTests(unittest.TestCase):
         delta_v = self.propagation.inclination_change(v, delta_i)
         self.assertAlmostEqual(delta_v, expected_delta_v, places=1)
 
-
-# Module tests
+    # Module tests
     def test_min_max_kepler(self):
         # Call the method to be tested
         avg_ranges, std_dev, max_ranges = self.propagation.min_max_kepler()
@@ -126,6 +122,7 @@ class UnitTests(unittest.TestCase):
         self.assertEqual(std_dev.shape, (6,))
         self.assertIsInstance(max_ranges, np.ndarray)
         self.assertEqual(max_ranges.shape, (6,))
+
     def test_delta_v_to_maintain_orbit(self):
         """Test the delta_v_to_maintain_orbit method with known inputs and output"""
         satellite_name = "LunarSat1"
@@ -137,21 +134,17 @@ class UnitTests(unittest.TestCase):
         self.assertAlmostEqual(delta_v, expected_delta_v, places=1)
 
 
-
-
 # Module tests
 # Extreme value tests
-
-
 
 
 # Sensitivity Analysis
 
 # Model system tests
 
-#Sensitivity Analysis change kepler parameters, resolution, mass,
-#system Test
-#Extreme value test 0 perturbation
+# Sensitivity Analysis change kepler parameters, resolution, mass,
+# system Test
+# Extreme value test 0 perturbation
 
 if __name__ == '__main__':
     unittest.main()
