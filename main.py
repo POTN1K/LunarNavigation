@@ -5,7 +5,7 @@ Maintained by Nikolaus Ricker"""
 import numpy as np
 
 # Local Libraries
-from scripts import Model, PropagationTime, UserErrors
+from mission_design import Model, PropagationTime, UserErrors
 
 # -----------------------------------------------------------------------------
 # Static Simulation
@@ -13,7 +13,7 @@ from scripts import Model, PropagationTime, UserErrors
 model = Model()
 
 # Add preliminary orbit
-model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1)
+model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, dist_type=1)
 
 # # Plot coverage
 model.plotCoverage()
@@ -31,12 +31,12 @@ error_budget = []
 
 for i in range(0, 1000):
     point = i
-    Errors = UserErrors(np.array([sat.r for sat in model.mod_inView_obj[point]]), 0,
+    Errors = UserErrors(np.array([sat.r for sat in model.mod_inView_obj[point]]), 0, 0,
                         model.moon[point], [20, 10, 10, 10, 10, 3.5])
-    DOP_with_error.append(Errors.Error)
-    error_budget.append(Errors.ErrorBudget)
+
 
 print(f"GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP")
+print(error)
 print(f"DOP WITH ERROR, PERFECT ORBIT, mean:{np.mean(DOP_with_error, axis=0)}, max: {np.max(DOP_with_error, axis=0)}, "
       f"min: {np.min(DOP_with_error, axis=0)}, ptp: {np.ptp(DOP_with_error, axis=0)},SD: {np.std(DOP_with_error, axis=0)}")
 print(f"ORBIT BUDGET FOR REQUIREMENT, mean:{np.mean(error_budget, axis=0)}, max: {np.max(error_budget, axis=0)}, "
