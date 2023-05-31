@@ -369,7 +369,7 @@ class Model:
         self.n_sat += n_sat
         self.n_orbit_planes += 1
 
-    def addSatellite(self, a=r_moon, e=0, i=0, w=0, Omega=0, nu=0, elevation=15):
+    def addSatellite(self, a=r_moon, e=0, i=0, w=0, Omega=0, nu=0, elevation=15, id=0):
         """Add a satellite to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -378,6 +378,7 @@ class Model:
         :param Omega: longitude of ascending node [deg]
         :param nu: true anomaly [deg]
         :param elevation: (optional) elevation angle [deg]
+        :param id: id of the satellite
         """
         n_sat = Satellite(a, e, i, w, Omega, nu, elevation)
         self.modules.append(n_sat)
@@ -453,7 +454,9 @@ class Model:
 
         # Plot modules
         mod_pos = [mod.r for mod in self.modules]
-        ax.scatter(*zip(*mod_pos), s=10)
+        for i, m in enumerate(mod_pos):
+            ax.scatter(*m, s=10, label=i)
+
 
         # Plot satellites in view
         color_map = cm.ScalarMappable(cmap='PiYG')
@@ -470,6 +473,7 @@ class Model:
         # ax.set_xlim(-r_moon*1.5, r_moon*1.5)
         # ax.set_ylim(-r_moon*1.5, r_moon*1.5)
         # ax.set_zlim(-r_moon*1.5, r_moon*1.5)
+        ax.legend()
         ax.set_aspect('equal')
         plt.show()
 
