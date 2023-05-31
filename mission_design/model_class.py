@@ -111,6 +111,10 @@ class Satellite:
             self._w = np.deg2rad(value)
             if self.range is not None:
                 self.range = self.setRange()
+        elif value >= 360 and value <720:
+            self._w = np.deg2rad(value-360)
+            if self.range is not None:
+                self.range = self.setRange()
         else:
             raise ValueError("Argument of periapsis must be between 0 and 360°.")
 
