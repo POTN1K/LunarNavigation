@@ -3,7 +3,7 @@ Maintained by Nikolaus Ricker"""
 
 # External Libraries
 import numpy as np
-
+from tudatpy.kernel.astro import element_conversion
 import sys
 sys.path.append('.')
 
@@ -14,31 +14,41 @@ from scripts import Model, PropagationTime, UserErrors
 #Create Kepler array
 model = Model()
 
+def M_to_nu(e, M):
+    eccentric_anomaly = element_conversion.true_to_eccentric_anomaly(M, e)
+    mean_anomaly = element_conversion.eccentric_to_mean_anomaly(eccentric_anomaly, e)
+    return mean_anomaly
 
-#model.addOrbitPlane(a=8049, i=45, e=0.4082, w=90, n_planes=1, n_sat_per_plane=3, f=0, dist_type=1) #constellation_12_orbits_orbit_1
-#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_12_orbits_orbit_2
-#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_12_orbits_orbit_3
-#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_12_orbits_orbit_4
-#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_1
-#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_2
-#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_3
-#model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1) #constellation_8_orbits_orbit_4
-
-#constellation_NP_orbits = np.array([[]])
+constellation_8orbits = np.array([[8049e3, 0.4082, 45, 90, 0, M_to_nu(0.4082, 0)],
+                                  [8049e3, 0.4082, 45, 90, 0, M_to_nu(0.4082, 180)],
+                                  [8049e3, 0.4082, 45, 270, 0, M_to_nu(0.4082, 0)],
+                                  [8049e3, 0.4082, 45, 270, 0, M_to_nu(0.4082, 180)],
+                                  [8049e3, 0.4082, 45, 90, 0, M_to_nu(0.4082, 132)],
+                                  [8049e3, 0.4082, 45, 90, 0, M_to_nu(0.4082, 228)],
+                                  [8049e3, 0.4082, 45, 270, 0, M_to_nu(0.4082, 132)],
+                                  [8049e3, 0.4082, 45, 270, 0, M_to_nu(0.4082, 228)]])
 #constellation_SP_orbits = np.array([[]])
 #JCT_M20 = np.array([[]])
-#MLO = np.array([[]])
+# #MLO = np.array([[]])
 
-model.addSatelliteComb(a=8049e3, e=0.4082, i=45, w=[90, 270], Omega=0, nu=[0,150,210])
-print(model.modules)
+
+
+
+satellites_initial = constellation_8orbits
+for i in range(0, len(satellites_initial)):
+    model.addSatellite(satellites_initial[i][0],satellites_initial[i][1],satellites_initial[i][2],satellites_initial[i][3],satellites_initial[i][4],satellites_initial[i][5])
+model.setCoverage()
+
+# model.addSatelliteComb(a=8049e3, e=0.4082, i=45, w=[90, 270], Omega=0, nu=[0,150,210])
+# print(model.modules)
 
 # Static Simulation
 # Create model
 
 
-# Add preliminary orbit
-model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, f=0.2118, dist_type=1)
-model.setCoverage()
+# # Add preliminary orbit
+# model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4 dist_type=1)
+# model.setCoverage()
 # # Plot coverage
 # model.plotCoverage()
 
@@ -55,7 +65,7 @@ error_budget = []
 
 for i in range(0, 1000):
     point = i
-    Errors = UserErrors(np.array([sat.r for sat in model.mod_inView_obj[point]]), 0,
+    Errors = UserErrors(np.array([sat.r for sat in model.mod_inView_obj[point]]),0, 0,
                         model.moon[point], [20, 10, 10, 10, 10, 3.5])
     DOP_with_error.append(Errors.Error)
     # error_budget.append(Errors.ErrorBudget)
