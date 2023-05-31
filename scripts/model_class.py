@@ -19,6 +19,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pylab import cm
 from tudatpy.kernel.astro import element_conversion
+#from earth_constellation import *
+
 
 # Constants
 r_moon = 1.737e6  # m
@@ -27,9 +29,9 @@ miu_moon = 4.9048695e12  # m^3/s^2
 
 class Satellite:
     """Class to define a satellite with its position and cone of view around the Moon."""
-
-    def __init__(self, a=r_moon, e=0, i=0, w=0, Omega=0, nu=0, elevation=10, shift=0):
+    def __init__(self, a=r_moon, e = 0, i=0, w=0, Omega=0, nu=0, elevation=15, shift=0, id=0):
         """Initialise the satellite with its Keplerian elements and calculate its position.
+        :param id: Satellite ID
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
         :param i: inclination [deg]
@@ -39,6 +41,7 @@ class Satellite:
         :param elevation: (optional) elevation angle [deg]
         :param shift: (optional) shift of the cone of view [deg]
         """
+        self.id = id
         self.range = None
         self.e = e
         self.a = a
@@ -62,20 +65,20 @@ class Satellite:
     @property
     def a(self):
         return self._a
-
+    
     @a.setter
     def a(self, value):
-        if value >= r_moon / (1 - self.e):
+        if value >= r_moon/(1-self.e):
             self._a = value
             if self.range is not None:
                 self.range = self.setRange()
         else:
             raise ValueError("Pericenter must be larger than Moon's radius.")
-
+        
     @property
     def e(self):
         return self._e
-
+    
     @e.setter
     def e(self, value):
         if value >= 0 and value < 1:
@@ -84,11 +87,11 @@ class Satellite:
                 self.range = self.setRange()
         else:
             raise ValueError("Eccentricity must be between 0 and 1.")
-
+        
     @property
     def i(self):
         return self._i
-
+    
     @i.setter
     def i(self, value):
         if value >= 0 and value <= 180:
@@ -97,11 +100,11 @@ class Satellite:
                 self.range = self.setRange()
         else:
             raise ValueError("Inclination must be between 0 and 180°.")
-
+        
     @property
     def w(self):
         return self._w
-
+    
     @w.setter
     def w(self, value):
         if value >= 0 and value <= 360:
@@ -110,11 +113,11 @@ class Satellite:
                 self.range = self.setRange()
         else:
             raise ValueError("Argument of periapsis must be between 0 and 360°.")
-
+        
     @property
     def Omega(self):
         return self._Omega
-
+    
     @Omega.setter
     def Omega(self, value):
         if value >= 0 and value <= 360:
@@ -127,18 +130,18 @@ class Satellite:
     @property
     def nu(self):
         return self._nu
-
+    
     @nu.setter
     def nu(self, value):
         value = value % 360
         self._nu = np.deg2rad(value)
         if self.range is not None:
             self.range = self.setRange()
-
+    
     @property
     def elevation(self):
         return self._elevation
-
+    
     @elevation.setter
     def elevation(self, value):
         if value >= 0 and value <= 90:
@@ -154,19 +157,18 @@ class Satellite:
         """
         alpha = np.deg2rad(self.elevation + 90)  # angle between the cone and the horizontal plane
         r_norm = np.linalg.norm(self.r)  # height of the cone
-        h_max = 0.5 * (2 * r_moon * np.cos(alpha) + np.sqrt(2) * np.sqrt(
-            2 * r_norm ** 2 - r_moon ** 2 + r_moon ** 2 * np.cos(2 * alpha)))
-        if h_max > np.sqrt(r_norm ** 2 + r_moon ** 2):
-            h_max = np.sqrt(r_norm ** 2 + r_moon ** 2)
+        h_max = 0.5*(2*r_moon*np.cos(alpha) + np.sqrt(2)*np.sqrt(2*r_norm**2-r_moon**2+r_moon**2*np.cos(2*alpha)))
+        if h_max>np.sqrt(r_norm**2+r_moon**2):
+            h_max = np.sqrt(r_norm**2+r_moon**2)
         return h_max
-
+    
     def isInView(self, target):
         """Check if a target is in view of the satellite.
         :param target: target position "Array 3D" [m]
         """
         if self.range is None:
             self.range = self.range()
-        if np.linalg.norm(target - self.r) <= self.range:
+        if np.linalg.norm(target-self.r) <= self.range:
             return True
         else:
             return False
@@ -176,13 +178,11 @@ class Satellite:
         return self.a, self.e, self.i, self.w, self.Omega, self.nu
 
     def __repr__(self):
-        return f"Satellite(a={self.a}, e={self.e}, i={self.i}, w={self.w}, Omega={self.Omega}, nu={self.nu})"
-
-
+        return f"Satellite(id={self.id}, a={self.a}, e={self.e}, i={self.i}, w={self.w}, Omega={self.Omega}, nu={self.nu})"
+    
 class Tower:
     """Class to define a communication tower."""
-
-    def __init__(self, phi=0, theta=0, height=0, elevation=10):
+    def __init__(self, phi=0, theta=0, height=0, elevation=15):
         """Initialise the ground station with its position.
         :param phi: longitude [deg]
         :param theta: latitude [deg]
@@ -198,29 +198,29 @@ class Tower:
     @property
     def phi(self):
         return self._phi
-
+    
     @phi.setter
     def phi(self, value):
         if value >= -180 and value <= 180:
             self._phi = value
         else:
             raise ValueError("Longitude must be between -180 and 180°.")
-
+        
     @property
     def theta(self):
         return self._theta
-
+    
     @theta.setter
     def theta(self, value):
         if value >= -90 and value <= 90:
             self._theta = value
         else:
             raise ValueError("Latitude must be between -90 and 90°.")
-
+        
     @property
     def height(self):
         return self._height
-
+    
     @height.setter
     def height(self, value):
         if value >= 0:
@@ -236,9 +236,7 @@ class Tower:
         """
         phi = np.deg2rad(phi)
         theta = np.deg2rad(theta)
-        return np.array(
-            [(r_moon + height) * np.cos(theta) * np.cos(phi), (r_moon + height) * np.cos(theta) * np.sin(phi),
-             (r_moon + height) * np.sin(theta)])
+        return np.array([(r_moon+height)*np.cos(theta)*np.cos(phi), (r_moon+height)*np.cos(theta)*np.sin(phi), (r_moon+height)*np.sin(theta)])
 
     def setRange(self):
         """Calculate the maximum range achievable by a satellite.
@@ -246,79 +244,75 @@ class Tower:
         """
         alpha = np.deg2rad(self.elevation + 90)  # angle between the cone and the horizontal plane
         r_norm = np.linalg.norm(self.r)  # height of the cone
-        h_max = 0.5 * (2 * r_moon * np.cos(alpha) + np.sqrt(2) * np.sqrt(
-            2 * r_norm ** 2 - r_moon ** 2 + r_moon ** 2 * np.cos(2 * alpha)))
-        if h_max > np.sqrt(r_norm ** 2 + r_moon ** 2):
-            h_max = np.sqrt(r_norm ** 2 + r_moon ** 2)
+        h_max = 0.5*(2*r_moon*np.cos(alpha) + np.sqrt(2)*np.sqrt(2*r_norm**2-r_moon**2+r_moon**2*np.cos(2*alpha)))
+        if h_max>np.sqrt(r_norm**2+r_moon**2):
+            h_max = np.sqrt(r_norm**2+r_moon**2)
         return h_max
-
+    
     def isInView(self, target):
         """Check if a target is in view of the satellite.
         :param target: target position [m]
         """
         if self.range is None:
             self.range = self.range()
-        if np.linalg.norm(target - self.r) <= self.range:
+        if np.linalg.norm(target-self.r) <= self.range:
             return True
         else:
             return False
 
-
 class Lagrange:
-    def __init__(self, l_point, elevation=10):
+    def __init__(self, l_point, elevation=15):
         """Initialise the Lagrange point with its position.
         :param l_point: Lagrange point
         """
         self.l_point = l_point
         self.elevation = elevation
-
+        
         if self.l_point == "L1":
-            self.r = np.array([0, -66e6 * np.cos(np.deg2rad(6.68)), -66e6 * np.sin(np.deg2rad(6.68))])
+            self.r = np.array([0, -66e6*np.cos(np.deg2rad(6.68)), -66e6*np.sin(np.deg2rad(6.68))])
 
         if self.l_point == "L2":
-            self.r = np.array([0, 66e6 * np.cos(np.deg2rad(6.68)), 66e6 * np.sin(np.deg2rad(6.68))])
+            self.r = np.array([0, 66e6*np.cos(np.deg2rad(6.68)), 66e6*np.sin(np.deg2rad(6.68))])
 
         self.range = self.setRange()
 
     @property
     def l_point(self):
         return self._l_point
-
+    
     @l_point.setter
     def l_point(self, value):
         if value == "L1" or value == "L2":
             self._l_point = value
         else:
             raise ValueError("Lagrange point must be either 'L1' or 'L2'.")
-
+        
     def setRange(self):
         """Calculate the maximum range achievable by a satellite.
         """
         alpha = np.deg2rad(self.elevation + 90)  # angle between the cone and the horizontal plane
         r_norm = np.linalg.norm(self.r)  # height of the cone
-        h_max = 0.5 * (2 * r_moon * np.cos(alpha) + np.sqrt(2) * np.sqrt(
-            2 * r_norm ** 2 - r_moon ** 2 + r_moon ** 2 * np.cos(2 * alpha)))
-        if h_max > np.sqrt(r_norm ** 2 + r_moon ** 2):
-            h_max = np.sqrt(r_norm ** 2 + r_moon ** 2)
+        h_max = 0.5*(2*r_moon*np.cos(alpha) + np.sqrt(2)*np.sqrt(2*r_norm**2-r_moon**2+r_moon**2*np.cos(2*alpha)))
+        if h_max>np.sqrt(r_norm**2+r_moon**2):
+            h_max = np.sqrt(r_norm**2+r_moon**2)
         return h_max
-
+    
     def isInView(self, target):
         """Check if a target is in view of the satellite.
         :param target: target position [m]
         """
         if self.range is None:
             self.range = self.range()
-        if np.linalg.norm(target - self.r) <= self.range:
+        if np.linalg.norm(target-self.r) <= self.range:
             return True
         else:
             return False
-
+        
     def __repr__(self):
         return f"Lagrange point {self.l_point}"
 
-
 class FixPoint:
-    def __init__(self, r, elevation=10):
+    def __init__(self, r, elevation=15):
         """Initialise the fixed point with its position.
         :param r: fixed point position. Must be array (x, y, z) [m]
         """
@@ -329,7 +323,7 @@ class FixPoint:
     @property
     def r(self):
         return self._r
-
+    
     @r.setter
     def r(self, value):
         value = np.array(value)
@@ -347,31 +341,28 @@ class FixPoint:
         """
         alpha = np.deg2rad(self.elevation + 90)  # angle between the cone and the horizontal plane
         r_norm = np.linalg.norm(self.r)  # height of the cone
-        h_max = 0.5 * (2 * r_moon * np.cos(alpha) + np.sqrt(2) * np.sqrt(
-            2 * r_norm ** 2 - r_moon ** 2 + r_moon ** 2 * np.cos(2 * alpha)))
-        if h_max > np.sqrt(r_norm ** 2 + r_moon ** 2):
-            h_max = np.sqrt(r_norm ** 2 + r_moon ** 2)
+        h_max = 0.5*(2*r_moon*np.cos(alpha) + np.sqrt(2)*np.sqrt(2*r_norm**2-r_moon**2+r_moon**2*np.cos(2*alpha)))
+        if h_max>np.sqrt(r_norm**2+r_moon**2):
+            h_max = np.sqrt(r_norm**2+r_moon**2)
         return h_max
-
+    
     def isInView(self, target):
         """Check if a target is in view of the satellite.
         :param target: target position [m]
         """
         if self.range is None:
             self.range = self.range()
-        if np.linalg.norm(target - self.r) <= self.range:
+        if np.linalg.norm(target-self.r) <= self.range:
             return True
         else:
             return False
-
+        
     def __repr__(self):
         return f"Fixed point at {self.r}"
 
-
 class OrbitPlane:
     """Class to define an orbit plane, along with the satellites in it."""
-
-    def __init__(self, a=r_moon, e=0, i=0, w=0, Omega=0, n_sat=1, elevation=10, shift=0):
+    def __init__(self, a=r_moon, e=0, i=0, w=0, Omega=0, n_sat=1, elevation=15, shift=0, id_start=0):
         """Initialise the orbit plane with its Keplerian elements and calculate the positions of the satellites.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -381,6 +372,7 @@ class OrbitPlane:
         :param n_sat: number of satellites in the orbit plane
         :param elevation: (optional) elevation angle [deg]
         """
+        self.id_start= id_start
         self.satellites = []
         self.e = e
         self.a = a
@@ -392,23 +384,24 @@ class OrbitPlane:
         self.n_sat = n_sat
         self.satellites = self.createSatellites()
 
+        
     @property
     def a(self):
         return self._a
-
+    
     @a.setter
     def a(self, value):
-        if value >= r_moon / (1 - self.e):
+        if value >= r_moon/(1-self.e):
             self._a = value
             if self.satellites:
                 self.satellites = self.createSatellites()
         else:
             raise ValueError("Pericenter must be larger than the Moon's radius.")
-
+        
     @property
     def e(self):
         return self._e
-
+    
     @e.setter
     def e(self, value):
         if value >= 0 and value < 1:
@@ -417,11 +410,11 @@ class OrbitPlane:
                 self.satellites = self.createSatellites()
         else:
             raise ValueError("Eccentricity must be between 0 and 1.")
-
+        
     @property
     def i(self):
         return self._i
-
+    
     @i.setter
     def i(self, value):
         if value >= 0 and value <= 180:
@@ -430,11 +423,11 @@ class OrbitPlane:
                 self.satellites = self.createSatellites()
         else:
             raise ValueError("Inclination must be between 0 and 180°.")
-
+        
     @property
     def w(self):
         return self._w
-
+    
     @w.setter
     def w(self, value):
         if value >= 0 and value <= 360:
@@ -443,11 +436,11 @@ class OrbitPlane:
                 self.satellites = self.createSatellites()
         else:
             raise ValueError("Argument of periapsis must be between 0 and 360°.")
-
+        
     @property
     def Omega(self):
         return self._Omega
-
+    
     @Omega.setter
     def Omega(self, value):
         if value >= 0 and value <= 360:
@@ -456,11 +449,11 @@ class OrbitPlane:
                 self.satellites = self.createSatellites()
         else:
             raise ValueError("Longitude of ascending node must be between 0 and 360°.")
-
+        
     @property
     def elevation(self):
         return self._elevation
-
+    
     @elevation.setter
     def elevation(self, value):
         if value >= 0 and value <= 90:
@@ -469,11 +462,11 @@ class OrbitPlane:
                 self.satellites = self.createSatellites()
         else:
             raise ValueError("Elevation must be between 0 and 90°.")
-
+    
     @property
     def n_sat(self):
         return self._n_sat
-
+    
     @n_sat.setter
     def n_sat(self, value):
         if value > 0:
@@ -482,26 +475,23 @@ class OrbitPlane:
                 self.satellites = self.createSatellites()
         else:
             raise ValueError("Number of satellites must be positive.")
-
+        
     def createSatellites(self):
         """Create the satellites in the orbit plane."""
         satellites = []
         for n in range(self.n_sat):
-            satellites.append(
-                Satellite(self.a, self.e, self.i, self.w, self.Omega, 360 / self.n_sat * n, self.elevation, self.shift))
+            satellites.append(Satellite(self.a, self.e, self.i, self.w, self.Omega, 360/self.n_sat*n, self.elevation, self.shift, id=self.id_start+n))
         return satellites
-
+    
     def relDistSatellites(self):
         """Calculate the relative distance between the satellites in the orbit plane."""
         rel_dist = []
         for i in range(self.n_sat):
-            rel_dist.append(np.linalg.norm(self.satellites[i].r - self.satellites[(i + 1) % self.n_sat].r))
+            rel_dist.append(np.linalg.norm(self.satellites[i].r-self.satellites[(i+1)%self.n_sat].r))
         return rel_dist
-
 
 class Model:
     """Class to define the model of the satellite constellation."""
-
     def __init__(self, resolution=100):
         """Initialise environment.
         :param resolution: (optional) resolution of the model."""
@@ -521,7 +511,7 @@ class Model:
             self._resolution = value
             self.moon = self.createMoon(value)
             self.mod_inView = np.zeros(len(self.moon))
-            self.mod_inView_obj = {i: [] for i in range(len(self.moon))}
+            self.mod_inView_obj = {i:[] for i in range(len(self.moon))}
         else:
             raise ValueError("Resolution must be positive.")
 
@@ -534,7 +524,7 @@ class Model:
         self.n_sat += orbit.n_sat
         self.n_orbit_planes += 1
 
-    def addOrbitPlane(self, a=r_moon, e=0, i=0, w=0, Omega=0, n_sat=1, shift=0, elevation=10):
+    def addOrbitPlane(self, a=r_moon, e=0, i=0, w=0, Omega=0, n_sat=1, shift=0, elevation=15, id_start=0):
         """Add an orbit plane to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -544,7 +534,7 @@ class Model:
         :param n_sat: number of satellites in the orbit plane
         :param elevation: (optional) elevation angle [deg]
         """
-        n_orbit = OrbitPlane(a, e, i, w, Omega, n_sat, elevation, shift)
+        n_orbit = OrbitPlane(a, e, i, w, Omega, n_sat, elevation, shift, id_start=id_start)
         self.orbit_planes.append(n_orbit)
         for s in n_orbit.satellites:
             self.modules.append(s)
@@ -557,8 +547,8 @@ class Model:
         """
         self.modules.append(module)
         self.n_sat += 1
-
-    def addSatellite(self, a=r_moon, e=0, i=0, w=0, Omega=0, nu=0, shift=0, elevation=10):
+    
+    def addSatellite(self, a=r_moon, e=0, i=0, w=0, Omega=0, nu=0, shift=0, elevation=15):
         """Add a satellite to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -582,14 +572,13 @@ class Model:
         n_point = Lagrange(l_point)
         self.modules.append(n_point)
         self.n_sat += 1
-
-    def addFixPoint(self, r, elevation=10):
+        
+    def addFixPoint(self, r, elevation=15):
         n_point = FixPoint(r, elevation)
         self.modules.append(n_point)
         self.n_sat += 1
-
-    def addSymmetricalPlanes(self, a=r_moon, e=0, i=0, w=0, n_planes=1, n_sat_per_plane=1, dist_type=0, f=0, shift=0,
-                             elevation=10):
+    
+    def addSymmetricalPlanes(self, a=r_moon, e=0, i=0, w=0, n_planes=1, n_sat_per_plane=1, dist_type=0, f=0, shift=0, elevation=15):
         """Add  symmetrical orbit planes to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -604,10 +593,10 @@ class Model:
         """
         if dist_type == 0:
             for n in range(n_planes):
-                self.addOrbitPlane(a, e, i, w, 180 / n_planes * n, n_sat_per_plane, shift + f * 180 * n, elevation)
+                self.addOrbitPlane(a, e, i, w, 180/n_planes*n, n_sat_per_plane, shift+f*180*n, elevation, id_start=n*n_sat_per_plane)
         elif dist_type == 1:
             for n in range(n_planes):
-                self.addOrbitPlane(a, e, i, w, 360 / n_planes * n, n_sat_per_plane, shift, elevation)
+                self.addOrbitPlane(a, e, i, w, 360/n_planes*n, n_sat_per_plane, shift, elevation, id_start=n*n_sat_per_plane)
         else:
             raise ValueError("Invalid distribution type.")
 
@@ -625,7 +614,7 @@ class Model:
                 z = r_moon * np.cos(j)
                 sphere_points.append([x, y, z])
         return sphere_points
-
+    
     def setCoverage(self):
         """Set the coverage of the modules."""
         if self.modules == []:
@@ -671,10 +660,10 @@ class Model:
         ax.set_xlabel('x [$10^7$ m]')
         ax.set_ylabel('y [$10^7$ m]')
         ax.set_zlabel('z [$10^7$ m]')
-
-        ax.set_xlim(-r_moon * 1.5, r_moon * 1.5)
-        ax.set_ylim(-r_moon * 1.5, r_moon * 1.5)
-        ax.set_zlim(-r_moon * 1.5, r_moon * 1.5)
+        
+        #ax.set_xlim(-r_moon*1.5, r_moon*1.5)
+        #ax.set_ylim(-r_moon*1.5, r_moon*1.5)
+        #ax.set_zlim(-r_moon*1.5, r_moon*1.5)
         ax.set_aspect('equal')
         plt.show()
 
@@ -690,7 +679,7 @@ class Model:
         for module in self.modules:
             if isinstance(module, Satellite):
                 print(module.getParams())
-
+        
     def __repr__(self):
         l = f'Model with {self.n_sat} satellites and {self.n_orbit_planes} orbit planes. The modules are:\n'
         for module in self.modules:
@@ -698,6 +687,7 @@ class Model:
         return l
 
 
-if __name__ == '__main__':
+if __name__=='__main__':
     # Create model
     model = Model()
+

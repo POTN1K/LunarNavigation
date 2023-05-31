@@ -6,7 +6,7 @@ ting, satellite mass, radiation area satellite to allow everything to be compute
 satellite to see its kepler characteristic history. The user can also receive the delta V required for orbit maintenance
 between a self specified time period.
 
-By K. Scherpenzeel
+By Kyle Scherpenzeel
 
 """
 
@@ -28,7 +28,7 @@ from tudatpy.util import result2array
 
 class PropagationTime:
     """Class to input satellite(s) and see their change of position over time"""
-    def __init__(self, orbit_parameters=None, final_time=86400, resolution=900, mass_sat=250, area_sat=1, c_radiation=1):
+    def __init__(self, orbit_parameters=None, final_time=86400, resolution=900, mass_sat=250, area_sat=0, c_radiation=1):
         """Initialize the initial state of the satellite(s) with Keplerian elements,final time and resolution to see the final position
         :param orbit_parameters: array of Keplarian elements [[sat1],[sat2],[[sat3]] #Radians
         :param final_time: Time for the end of the simulation [s]
@@ -41,7 +41,7 @@ class PropagationTime:
 
         """
         if orbit_parameters is None:
-            orbit_parameters = np.array([[20e6, 0, 0, 0, 0, 0], [20e6, 0, 0, 0, 180, 0]])
+            orbit_parameters = np.array([[20e6, 0, 0, 0, 0, 0], [20e6, 0, 0, 0, 0, 0]])
         self.resolution = resolution
         self.final_time = final_time
         self.orbit_parameters = np.array(orbit_parameters)
@@ -313,6 +313,13 @@ class PropagationTime:
         self.kepler_elements = self.dep_vars_array[:, 1:]
 
 
+        indices_velocity = np.arange(4, self.states_array.shape[1], 6).reshape(-1, 1) + np.arange(3)
+        # use advanced indexing
+        self.velocity = self.states_array[:, indices_velocity.flatten()]
+
+
+
+
     def inclination_change(self, v, delta_i):
         """
         Inclination change: calculates the delta V required for an inclination change.\n
@@ -370,8 +377,8 @@ class PropagationTime:
             # print(f"Delta-v for {satellite_name}: {delta_v}")
             delta_v_list.append(delta_v)
         delta_v_array = np.array(delta_v_list)
-        print(f" Range of Delta-v:{np.ptp(delta_v_array)}, max Delta-v {np.max(delta_v_array)}, min Delta-v "
-              f"{np.min(delta_v_array)}, average Delta-v {np.mean(delta_v_array)}, SD Delta-v: {np.std(delta_v_array)}")
+        # print(f" Range of Delta-v:{np.ptp(delta_v_array)}, max Delta-v {np.max(delta_v_array)}, min Delta-v "
+        #       f"{np.min(delta_v_array)}, average Delta-v {np.mean(delta_v_array)}, SD Delta-v: {np.std(delta_v_array)}")
         return delta_v_list
 
     def min_max_kepler(self):

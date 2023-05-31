@@ -10,18 +10,20 @@ import numpy as np
 
 
 class UserErrors:
-    def __init__(self, sats, pos_error, position_surface, allowable): #, allowable, parameter#
+    def __init__(self, sats, sats_velocity, pos_error, position_surface, allowable): #, allowable, parameter#
         self.ErrorBudget = []
         self.ORBIT = pos_error
         self.sats = sats
         self.pos_error = pos_error
+        self.sats_velocity = sats_velocity
         # self.point = point
         self.allowable = allowable
         self.position_user = position_surface
         self.parameter_covariance_matrix()
         self.dop_calculator()
         self.user_error()
-        self.allowable_error()
+        # self.allowable_error()
+
 
     @property
     def sats(self):
@@ -67,13 +69,6 @@ class UserErrors:
         else:
             raise ValueError("Ephemeris error must be equal or greater than 0")
 
-
-
-
-
-
-
-
     def satellite_error(self):
         CLOCK_ERROR = 1.1
         RECIEVER_NOISE_AND_RESOLUTION = 0.1
@@ -100,10 +95,24 @@ class UserErrors:
         HH = np.vstack((H, [[0, 0, 1, 0]]))
         HH_inv = np.linalg.pinv(HH)
         H_inv = np.linalg.pinv(H)
-
         # Compute covariance matrix
         self.Q = np.dot(H_inv, H_inv.T)
         self.HQ = np.dot(HH_inv, HH_inv.T)
+    def velocity_parameter_cov(self, time_index):
+        HV = np.ones((len(self.sats), 4))
+        # Compute vectors from receiver to satellites
+        vecs = self.sats - self.position_user
+        # Compute distances
+        self.dists = np.linalg.norm(vecs, axis=1)
+        # Compute unit vectors
+        uvecs = vecs / self.dists[:, np.newaxis]
+        HV[:, :3] = np.dot(uvecs, self.sats_velocity[time_index].reshape((3, (len(self.sats)))))
+        HV_inv = np.linalg.pinv(HV)
+        self.VQ = np.dot(HV_inv, HV_inv.T)
+        print(np.sqrt(np.trace(self.VQ)))
+
+
+
 
 
         # Now, we can compute the DOP values
@@ -135,6 +144,9 @@ class UserErrors:
             "TDOP": TDOP,
             "HHDOP": HHDOP
         }
+        self.DOP_array = []
+        for key in self.DOP:
+            self.DOP_array.append(self.DOP[key])
     def user_error(self):
         self.Error = []
         for key in self.DOP:
