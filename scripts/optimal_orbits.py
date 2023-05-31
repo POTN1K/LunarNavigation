@@ -32,17 +32,6 @@ model = Model()
 model.addSatelliteComb(a=8049e3, e=0.4082, i=45, w=[90, 270], Omega=0, nu=[0,150,210])
 print(model.modules)
 
-
-
-
-
-
-
-
-
-
-
-
 # Static Simulation
 # Create model
 
