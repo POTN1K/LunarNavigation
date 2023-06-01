@@ -27,16 +27,16 @@ class UserErrors:
         # self.allowable_error()
 
 
-    @property
-    def sats(self):
-        return self._sats
-
-    @sats.setter
-    def sats(self, value):
-        if len(value.shape) >= 2 and value.shape[0] >=4:
-            self._sats = value
-        else:
-            raise ValueError("Must be at least 4 satellites")
+    # @property
+    # def sats(self):
+    #     return self._sats
+    #
+    # @sats.setter
+    # def sats(self, value):
+    #     if len(value.shape) >= 2 and value.shape[0] >=4:
+    #         self._sats = value
+    #     else:
+    #         raise ValueError("Must be at least 4 satellites")
 
     @property
     def position_surface(self):

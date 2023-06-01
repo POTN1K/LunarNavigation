@@ -1,5 +1,5 @@
-"""Main File, used to run all simulations.
-Maintained by Nikolaus Ricker"""
+"""Frozen Orbits Simulator/Optimisation.
+Maintained by Kyle and Serban"""
 
 # External Libraries
 import numpy as np
@@ -11,6 +11,8 @@ sys.path.append('.')
 # Local Libraries
 from mission_design import Model, PropagationTime, UserErrors
 
+# cst
+miu_moon = 4.9048695e12  # m^3/s^2
 
 
 # DOP Calculation
@@ -61,76 +63,39 @@ class FrozenOrbits:
         self.moon_points = []
         self.satellite_indices = []
         self.requirements = [20, 10, 10, 10, 10, 3.5]  # GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP
+
+        self.final_orbits = np.array([[8025.9e3, 0.004, 39.53, 270, 0, mean_to_true_anomaly()],
+                                      [8049e3, 0.4082, 45, 270, 0, 0],
+                                      [8049e3, 0.4082, 45, 90, 180, 0],
+                                      [8049e3, 0.4082, 45, 270, 180, 0]])
+
         self.orbit8sat = np.array([[8049e3, 0.4082, 45, 90, 0, 0],
-                                   [8049e3, 0.4082, 45, 90, 0, 180],
                                    [8049e3, 0.4082, 45, 270, 0, 0],
-                                   [8049e3, 0.4082, 45, 270, 0, 180],
-                                   [8049e3, 0.4082, 45, 90, 180, 132],
-                                   [8049e3, 0.4082, 45, 90, 180, 228],
-                                   [8049e3, 0.4082, 45, 270, 180, 132],
-                                   [8049e3, 0.4082, 45, 270, 180, 228]])
+                                   [8049e3, 0.4082, 45, 90, 180, 0],
+                                   [8049e3, 0.4082, 45, 270, 180, 0]])
 
         self.constellation_12orbits = np.array([[8049e3, 0.4082, 45, 90, 0, 0],
-                                           [8049e3, 0.4082, 45, 90, 0, 150],
-                                           [8049e3, 0.4082, 45, 90, 0, 210],
-                                           [8049e3, 0.4082, 45, 270, 0, 0],
-                                           [8049e3, 0.4082, 45, 270, 0, 150],
-                                           [8049e3, 0.4082, 45, 270, 0, 210],
-                                           [8049e3, 0.4082, 45, 90, 180, 107],
-                                           [8049e3, 0.4082, 45, 90, 180, 180],
-                                           [8049e3, 0.4082, 45, 90, 180, 253],
-                                           [8049e3, 0.4082, 45, 270, 180, 107],
-                                           [8049e3, 0.4082, 45, 270, 180, 180],
-                                           [8049e3, 0.4082, 45, 270, 180, 253]])
+                                                [8049e3, 0.4082, 45, 270, 0, 0],
+                                                [8049e3, 0.4082, 45, 90, 180, 0],
+                                                [8049e3, 0.4082, 45, 270, 180, 0]])
 
-        self.constellation_JCT_M2O = np.array([[3737.4030e3, 0.0988, 48.2234, 89.7356, 0.0675, self.mean_to_true_anomaly(0.0988, 0.1816)],
-                                          [13677.7072e3, 0.0820, 40.3348, 86.5479, 0.41, self.mean_to_true_anomaly(0.0280, 3.14)]])
+        self.constellation_JCT_M2O = np.array([[3737.4030e3, 0.0988, 48.2234, 89.7356, 0.0675, 0],
+                                               [13677.7072e3, 0.0820, 40.3348, 86.5479, 0.41, 0]])
 
-        self.constellation_SP = np.array([[6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 0)],
-                                     [6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 120)],
-                                     [6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 240)]])
+        self.constellation_SP = np.array([[6541.4e3, 0.6, 56.2, 90, 0, 0]])
 
-        self.constellation_NP = np.array([[6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 0)],
-                                     [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 120)],
-                                     [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 240)]])
+        self.constellation_NP = np.array([[6541.4e3, 0.6, 56.2, 270, 0, 0]])
 
-        self.constellation_MLO = np.array([[3476e3, 0.038, 15, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                      [3476e3, 0.038, 15, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                      [5214e3, 0.038, 15, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                      [5214e3, 0.038, 15, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                      [10000e3, 0.038, 15, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                      [10000e3, 0.038, 15, 270, 0, self.mean_to_true_anomaly(0.038, 0)]])
+        self.constellation_MLO = np.array([[5214e3, 0.038, 15, 90, 0, 0],
+                                           [5214e3, 0.038, 15, 270, 0, 0],
+                                           [10000e3, 0.038, 10, 90, 0, 0],
+                                           [10000e3, 0.038, 10, 270, 0, 0]])
 
-        self.constellation_MLO_2 = np.array([[3476e3, 0.038, 20, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                        [3476e3, 0.038, 20, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                        [5214e3, 0.038, 20, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                        [5214e3, 0.038, 20, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                        [10000e3, 0.038, 20, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                        [10000e3, 0.038, 20, 270, 0, self.mean_to_true_anomaly(0.038, 0)]])
+        self.constellation_MLO_5 = np.array([[5214e3, 0.006, 30, 90, 0, 0],
+                                             [5214e3, 0.006, 30, 270, 0, 0],
+                                             [10000e3, 0.006, 30, 90, 0, 0],
+                                             [10000e3, 0.006, 30, 270, 0, 0]])
 
-        self.constellation_MLO_3 = np.array([[3476e3, 0.038, 25, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [3476e3, 0.038, 25, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [5214e3, 0.038, 25, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [5214e3, 0.038, 25, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [10000e3, 0.038, 25, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [10000e3, 0.038, 25, 270, 0, self.mean_to_true_anomaly(0.038, 0)]])
-
-        self.constellation_MLO_4 = np.array([[3476e3, 0.038, 30, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [3476e3, 0.038, 30, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [5214e3, 0.038, 30, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [5214e3, 0.038, 30, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [10000e3, 0.038, 30, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [10000e3, 0.038, 30, 270, 0, self.mean_to_true_anomaly(0.038, 0)]])
-
-        self.constellation_MLO_5 = np.array([[5214e3, 0.006, 30, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [5214e3, 0.006, 30, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [10000e3, 0.006, 30, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [10000e3, 0.006, 30, 270, 0, self.mean_to_true_anomaly(0.038, 0)]])
-
-        self.constellation_MLO_6 = np.array([[5214e3, 0.05, 30, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [5214e3, 0.05, 30, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [10000e3, 0.05, 30, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
-                                    [10000e3, 0.05, 30, 270, 0, self.mean_to_true_anomaly(0.038, 0)]])
     def mean_to_true_anomaly(self, e, M):
         eccentric_anomaly = element_conversion.true_to_eccentric_anomaly(np.deg2rad(M), e)
         mean_anomaly = element_conversion.eccentric_to_mean_anomaly(eccentric_anomaly, e)
@@ -146,6 +111,7 @@ class FrozenOrbits:
             self.model.addSatellite(satellites[i][0], satellites[i][1], satellites[i][2], satellites[i][3],
                                     satellites[i][4], satellites[i][5],id=i)
         self.model.setCoverage()
+        self.model.plotCoverage()
 
     def DOP_calculator(self):
         self.DOP_each_point = []
@@ -158,24 +124,30 @@ class FrozenOrbits:
             self.DOP_each_point.append(Errors.DOP_array)
             self.DOP_each_point_with_error.append(Errors.DOP_error_array)
 
-        HHDOP_ephemeris = Errors.allowable_error(self.DOP_each_point)
-        Ephemeris_error = Errors.allowable_error(self.DOP_each_point_with_error)
-        print(HHDOP_ephemeris, Ephemeris_error, np.max(self.DOP_each_point,axis=0))
+        Ephemeris_error = Errors.allowable_error(np.asarray(self.DOP_each_point_with_error)[:, :-1])
+        print(Ephemeris_error, (np.max(self.DOP_each_point, axis=0))[5])
 
-    def dyn_sim(self):
-        satellites = self.model.getSatellites()
-        duration = 86400 * 1
-        dt = 100
-        propagation_time = PropagationTime(satellites, duration, dt, 250, 0, 0)
-        # print(np.average(np.array(propagation_time.complete_delta_v(0, duration))))
-        propagation_time.plot_kepler(0)
-        propagation_time.plot_time()
+    def dyn_sim(self, satellites):
+        self.propagation_time = PropagationTime(satellites, duration, dt, 250, 0, 0)
+        #DV = np.round(np.average(np.array(self.propagation_time.complete_delta_v(0, duration))), 3)
+        self.propagation_time.plot_kepler(0)
+        self.propagation_time.plot_time()
 
-fo = FrozenOrbits()
-fo.model_adder(np.vstack((fo.constellation_12orbits, fo.constellation_MLO_6, fo.constellation_MLO_3, fo.true_anomaly_translation(fo.constellation_12orbits, 30))))
-fo.dyn_sim()
-
+    def period_calc(self, satellites):
+        P = np.zeros(np.shape(satellites)[0])
+        for i in range(np.shape(satellites)[0]):
+            P[i] = 2*np.pi * np.sqrt(satellites[i, 0]**3/miu_moon)
+        return P
 
 fo = FrozenOrbits()
-fo.model_adder(np.vstack((fo.constellation_12orbits,fo.constellation_MLO_6,fo.constellation_MLO_3,fo.true_anomaly_translation(fo.constellation_12orbits,30))))
+satellites = fo.constellation_12orbits
+
+fo.model_adder(satellites)
+P = fo.period_calc(satellites)/3600
+print(P)
+days = 18/24
+duration = 86400 * days
+dt = 1
+
+fo.dyn_sim(satellites)
 fo.DOP_calculator()
