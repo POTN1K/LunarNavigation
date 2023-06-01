@@ -63,7 +63,6 @@ class FrozenOrbits:
         self.moon_points = []
         self.satellite_indices = []
         self.requirements = [20, 10, 10, 10, 10, 3.5]  # GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP
-
         self.orbit_choices = [[8025.9e3, 0.004, 39.53, 270, 5, 4, 1, 0], [8148.8e3, 0.004, 39.51, 90, 5, 4, 1, 0],
                               [7298.6e3, 0.001, 39.71, 270, 3, 7, 1, 1], [8669.2e3, 0.024, 39.46, 270, 4, 6, 1, 0],
                               [8916.6e3, 0.000, 39.41, 90, 4, 6, 1, 1], [8904.4e3, 0.00, 39.41, 90, 24, 6, 1, 1], [7434.8e3, 0.00, 39.67, 270, 3, 7, 1, 1],
@@ -132,7 +131,8 @@ class FrozenOrbits:
 
     def model_symmetrical_planes(self, choice):
         self.model.addSymmetricalPlanes(self.orbit_choices[choice][0], self.orbit_choices[choice][1], self.orbit_choices[choice][2]
-                                        , self.orbit_choices[choice][3], self.orbit_choices[choice][4], dist_type=self.orbit_choices[choice][5], f=self.orbit_choices[choice][6])
+                                        , self.orbit_choices[choice][3], self.orbit_choices[choice][4], self.orbit_choices[choice][5], dist_type=self.orbit_choices[choice][6], f =self.orbit_choices[choice][7])
+        self.model.plotCoverage()
     def DOP_calculator(self):
         self.DOP_each_point = []
         self.DOP_each_point_with_error = []
@@ -141,7 +141,7 @@ class FrozenOrbits:
 
                 self.distances.append(np.array([sat.r for sat in self.model.mod_inView_obj[i]]))
                 self.moon_points.append(self.model.moon[i])
-                self.satellite_indices.append(np.array([sat.id for sat in self.model.mod_inView_obj[i]]))
+                # self.satellite_indices.append(np.array([sat.id for sat in self.model.mod_inView_obj[i]]))
                 Errors = UserErrors(self.distances[-1], 0, 0, self.moon_points[-1], [59, 10, 100, 100, 100, 100])
                 self.DOP_each_point.append(Errors.DOP_array)
                 self.DOP_each_point_with_error.append(Errors.DOP_error_array)
@@ -162,10 +162,7 @@ class FrozenOrbits:
             P[i] = 2*np.pi * np.sqrt(satellites[i, 0]**3/miu_moon)
         return P
 fo = FrozenOrbits()
-satellites = fo.constellation_12orbits
-P = fo.period_calc(satellites)/3600
-
-
-fo = FrozenOrbits()
-fo.model_adder(np.vstack((fo.constellation_12orbits,fo.constellation_MLO_6,fo.constellation_MLO_3,fo.true_anomaly_translation(fo.constellation_12orbits,30))))
+fo.model_symmetrical_planes(1)
 fo.DOP_calculator()
+
+

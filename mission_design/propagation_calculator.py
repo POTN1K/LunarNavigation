@@ -521,8 +521,8 @@ class PropagationTime:
 
         plt.tight_layout()
         plt.show()
-satellites = [[5740e3, 0.58, np.deg2rad(54.856), 0,  np.deg2rad(86.322), 0],[5740e3,0.58,54.856,0,86.322,0]]
-propagation_time = PropagationTime(resolution=10,final_time= 86400,orbit_parameters=satellites)
-# # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
-propagation_time.plot_kepler(0)
-propagation_time.plot_time()
+# satellites = [[5740e3, 0.58, np.deg2rad(54.856), 0,  np.deg2rad(86.322), 0],[5740e3,0.58,54.856,0,86.322,0]]
+# propagation_time = PropagationTime(resolution=10,final_time= 86400,orbit_parameters=satellites)
+# # # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
+# propagation_time.plot_kepler(0)
+# propagation_time.plot_time()
