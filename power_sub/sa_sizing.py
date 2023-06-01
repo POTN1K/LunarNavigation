@@ -81,10 +81,10 @@ def battery_size(T_eclipse, E_specific, E_density, P_req, N_b, n_dis, N_c, V_cdi
     V_cdis = voltage per cell, average during discharge, V_hdis = voltage drop in harness from battery to PRU
     Dod = maximum allowable depth of discharge in the worst case eclipse."""
 #    cap_battery = (P_req * T_eclipse) / (N_b * n_dis * ((N_c - 1) * V_cdis - V_d - V_hdis) * DoD)
-    mass_battery = (T_eclipse * P_req) / (n_dis * E_specific) #[kg]
-    volume_battery = (T_eclipse * P_req) / (n_dis * E_density) #[l]
+    mass_battery = (T_eclipse * P_req) / (n_dis * E_specific * DoD) #[kg]
+    volume_battery = (T_eclipse * P_req) / (n_dis * E_density * DoD) #[l]
     return mass_battery, volume_battery
 
-
-
+a, b = battery_size(6.79, 200, 300, 1500, 0, 0.9, 0, 0, 0, 0, 0.8)
+print(a,b)
 # print(sa_size(bol_power(1700, 0.03, 12), 0.32, sc_moon))
