@@ -13,12 +13,6 @@ from mission_design import Model, PropagationTime, UserErrors
 
 
 
-
-# Static Simulation
-# Create model
-
-
-# -----------------------------------------------------------------------------
 # DOP Calculation
 # DOP_with_error = []
 # error_budget = []
@@ -37,8 +31,6 @@ from mission_design import Model, PropagationTime, UserErrors
 # print(f"GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP")
 # print(f"DOP WITH ERROR, PERFECT ORBIT, mean:{np.mean(DOP_with_error, axis=0)}, max: {np.max(DOP_with_error, axis=0)}, "
 #       f"min: {np.min(DOP_with_error, axis=0)}, ptp: {np.ptp(DOP_with_error, axis=0)},SD: {np.std(DOP_with_error, axis=0)}")
-
-
 
 # print(f"ORBIT BUDGET FOR REQUIREMENT, mean:{np.mean(error_budget, axis=0)}, max: {np.max(error_budget, axis=0)}, "
 #       f"min: {np.min(error_budget, axis=0)}, ptp: {np.ptp(error_budget, axis=0)},SD: {np.std(error_budget, axis=0)}")
@@ -169,6 +161,15 @@ class FrozenOrbits:
         HHDOP_ephemeris = Errors.allowable_error(self.DOP_each_point)
         Ephemeris_error = Errors.allowable_error(self.DOP_each_point_with_error)
         print(HHDOP_ephemeris, Ephemeris_error, np.max(self.DOP_each_point,axis=0))
+
+    def dyn_sim(self):
+        satellites = self.model.getSatellites()
+        duration = 86400 * 1
+        dt = 100
+        propagation_time = PropagationTime(satellites, duration, dt, 250, 0, 0)
+        # print(np.average(np.array(propagation_time.complete_delta_v(0, duration))))
+        propagation_time.plot_kepler(0)
+        propagation_time.plot_time()
 
 
 
