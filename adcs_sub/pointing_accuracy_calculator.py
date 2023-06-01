@@ -57,5 +57,6 @@ if __name__=="__main__":
     sats1 = [sat.r for sat in orb1.satellites]
 
     print(rel1)
+
     #print(sats1)
 
