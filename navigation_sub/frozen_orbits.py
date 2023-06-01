@@ -1,5 +1,5 @@
-"""Frozen Orbits Simulator/Optimisation.
-Maintained by Kyle and Serban"""
+"""Main File, used to run all simulations.
+Maintained by Nikolaus Ricker"""
 
 # External Libraries
 import numpy as np
@@ -82,9 +82,16 @@ class FrozenOrbits:
         self.constellation_JCT_M2O = np.array([[3737.4030e3, 0.0988, 48.2234, 89.7356, 0.0675, 0],
                                                [13677.7072e3, 0.0820, 40.3348, 86.5479, 0.41, 0]])
 
-        self.constellation_SP = np.array([[6541.4e3, 0.6, 56.2, 90, 0, 0]])
+        self.constellation_NP = np.array([[6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 0)],
+                                     [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 120)],
+                                     [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 240)]])
 
-        self.constellation_NP = np.array([[6541.4e3, 0.6, 56.2, 270, 0, 0]])
+        self.constellation_MLO = np.array([[3476e3, 0.038, 15, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                      [3476e3, 0.038, 15, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                      [5214e3, 0.038, 15, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                      [5214e3, 0.038, 15, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                      [10000e3, 0.038, 15, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                      [10000e3, 0.038, 15, 270, 0, self.mean_to_true_anomaly(0.038, 0)]])
 
         self.constellation_MLO = np.array([[5214e3, 0.038, 15, 90, 0, 0],
                                            [5214e3, 0.038, 15, 270, 0, 0],
@@ -124,30 +131,26 @@ class FrozenOrbits:
             self.DOP_each_point.append(Errors.DOP_array)
             self.DOP_each_point_with_error.append(Errors.DOP_error_array)
 
-        Ephemeris_error = Errors.allowable_error(np.asarray(self.DOP_each_point_with_error)[:, :-1])
-        print(Ephemeris_error, (np.max(self.DOP_each_point, axis=0))[5])
+            HHDOP_ephemeris = Errors.allowable_error(self.DOP_each_point)
+            Ephemeris_error = Errors.allowable_error(self.DOP_each_point_with_error)
+            print(HHDOP_ephemeris, Ephemeris_error, np.max(self.DOP_each_point,axis=0))
 
-    def dyn_sim(self, satellites):
-        self.propagation_time = PropagationTime(satellites, duration, dt, 250, 0, 0)
-        #DV = np.round(np.average(np.array(self.propagation_time.complete_delta_v(0, duration))), 3)
-        self.propagation_time.plot_kepler(0)
-        self.propagation_time.plot_time()
-
+    def dyn_sim(self, duration=86400, dt=100, kepler_plot=0):
+        satellites = self.model.getSatellites()
+        propagation_time = PropagationTime(satellites, duration, dt, 250, 0, 0)
+        # print(np.average(np.array(propagation_time.complete_delta_v(0, duration))))
+        propagation_time.plot_kepler(kepler_plot)
+        propagation_time.plot_time()
     def period_calc(self, satellites):
         P = np.zeros(np.shape(satellites)[0])
         for i in range(np.shape(satellites)[0]):
             P[i] = 2*np.pi * np.sqrt(satellites[i, 0]**3/miu_moon)
         return P
-
 fo = FrozenOrbits()
 satellites = fo.constellation_12orbits
-
-fo.model_adder(satellites)
 P = fo.period_calc(satellites)/3600
-print(P)
-days = 18/24
-duration = 86400 * days
-dt = 1
 
-fo.dyn_sim(satellites)
+
+fo = FrozenOrbits()
+fo.model_adder(np.vstack((fo.constellation_12orbits,fo.constellation_MLO_6,fo.constellation_MLO_3,fo.true_anomaly_translation(fo.constellation_12orbits,30))))
 fo.DOP_calculator()

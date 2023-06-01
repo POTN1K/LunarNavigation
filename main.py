@@ -16,30 +16,30 @@ model = Model()
 model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, dist_type=1)
 
 # # Plot coverage
-model.plotCoverage()
-
-# -----------------------------------------------------------------------------
-# Continue?
-flag = input("Press Enter to continue... 'e' to exit.\n")
-if flag != '':
-    exit()
-
-# -----------------------------------------------------------------------------
-# DOP Calculation
-DOP_with_error = []
-error_budget = []
-
-for i in range(0, 1000):
-    point = i
-    Errors = UserErrors(np.array([sat.r for sat in model.mod_inView_obj[point]]), 0, 0,
-                        model.moon[point], [20, 10, 10, 10, 10, 3.5])
-
-
-print(f"GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP")
-print(f"DOP WITH ERROR, PERFECT ORBIT, mean:{np.mean(DOP_with_error, axis=0)}, max: {np.max(DOP_with_error, axis=0)}, "
-      f"min: {np.min(DOP_with_error, axis=0)}, ptp: {np.ptp(DOP_with_error, axis=0)},SD: {np.std(DOP_with_error, axis=0)}")
-print(f"ORBIT BUDGET FOR REQUIREMENT, mean:{np.mean(error_budget, axis=0)}, max: {np.max(error_budget, axis=0)}, "
-      f"min: {np.min(error_budget, axis=0)}, ptp: {np.ptp(error_budget, axis=0)},SD: {np.std(error_budget, axis=0)}")
+# model.plotCoverage()
+#
+# # -----------------------------------------------------------------------------
+# # Continue?
+# flag = input("Press Enter to continue... 'e' to exit.\n")
+# if flag != '':
+#     exit()
+#
+# # -----------------------------------------------------------------------------
+# # DOP Calculation
+# DOP_with_error = []
+# error_budget = []
+#
+# for i in range(0, 1000):
+#     point = i
+#     Errors = UserErrors(np.array([sat.r for sat in model.mod_inView_obj[point]]), 0, 0,
+#                         model.moon[point], [20, 10, 10, 10, 10, 3.5])
+#
+#
+# print(f"GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP")
+# print(f"DOP WITH ERROR, PERFECT ORBIT, mean:{np.mean(DOP_with_error, axis=0)}, max: {np.max(DOP_with_error, axis=0)}, "
+#       f"min: {np.min(DOP_with_error, axis=0)}, ptp: {np.ptp(DOP_with_error, axis=0)},SD: {np.std(DOP_with_error, axis=0)}")
+# print(f"ORBIT BUDGET FOR REQUIREMENT, mean:{np.mean(error_budget, axis=0)}, max: {np.max(error_budget, axis=0)}, "
+#       f"min: {np.min(error_budget, axis=0)}, ptp: {np.ptp(error_budget, axis=0)},SD: {np.std(error_budget, axis=0)}")
 
 # -----------------------------------------------------------------------------
 # Dynamic Simulation

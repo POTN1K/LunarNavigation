@@ -24,6 +24,8 @@ from tudatpy.kernel.numerical_simulation import environment_setup, propagation_s
 from tudatpy.kernel.astro import element_conversion
 from tudatpy.kernel import constants
 from tudatpy.util import result2array
+from tudatpy.kernel.numerical_simulation.estimation_setup import observation
+
 
 
 class PropagationTime:
@@ -304,7 +306,7 @@ class PropagationTime:
             self.bodies, self.propagator_settings
         )
 
-        # Extract the resulting state history and convert it to an ndarray
+        # Extract the resulting state history and convert it to a ndarray
         states = dynamics_simulator.state_history
 
         self.states_array = result2array(states)
@@ -316,6 +318,19 @@ class PropagationTime:
         indices_velocity = np.arange(4, self.states_array.shape[1], 6).reshape(-1, 1) + np.arange(3)
         # use advanced indexing
         self.velocity = self.states_array[:, indices_velocity.flatten()]
+
+
+    def observation(self):
+        """ I am trying to create a function to get observation time to earth and eclipse time for the power and thermal section
+        maybe also add a method to obtain communication time between sats for updating
+        """
+        one_way_sat_link_ends = dict()
+        one_way_sat_link_ends[observation.transmitter] = observation.body_reference_point_link_end_id("Sun")
+        one_way_sat_link_ends[observation.receiver] = observation.body_origin_link_end_id("LunarSat")
+
+
+
+
 
 
 
@@ -506,7 +521,8 @@ class PropagationTime:
 
         plt.tight_layout()
         plt.show()
-# propagation_time = PropagationTime(resolution=900)
-# # # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
-# propagation_time.plot_kepler(0)
-# propagation_time.plot_time()
+satellites = [[5740e3, 0.58, np.deg2rad(54.856), 0,  np.deg2rad(86.322), 0],[5740e3,0.58,54.856,0,86.322,0]]
+propagation_time = PropagationTime(resolution=10,final_time= 86400,orbit_parameters=satellites)
+# # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
+propagation_time.plot_kepler(0)
+propagation_time.plot_time()
