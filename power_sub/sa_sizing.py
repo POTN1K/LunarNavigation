@@ -74,5 +74,17 @@ def sa_size(p_bol, solar_efficiency, sc):
     area_sa = p_sa / sc
     return area_sa
 
+def battery_size(T_eclipse, E_specific, E_density, P_req, N_b, n_dis, N_c, V_cdis, V_d, Vhdis, DoD):
+    """Function to compute the battery size and volume. T_eclipse = maximum eclipse time [h], E_specific = specific energy [Wh/kg]
+    E_density = Energy density [Wh/l], P_req = required power from battery during eclipse [W], N_b = number of batteries in parrallel,
+    n_dis = discharge converter efficiency, N_c = number of series cells per battery, V_d = voltage drop in bypass diode in case a cell failed
+    V_cdis = voltage per cell, average during discharge, V_hdis = voltage drop in harness from battery to PRU
+    Dod = maximum allowable depth of discharge in the worst case eclipse."""
+#    cap_battery = (P_req * T_eclipse) / (N_b * n_dis * ((N_c - 1) * V_cdis - V_d - V_hdis) * DoD)
+    mass_battery = (T_eclipse * P_req) / (n_dis * E_specific) #[kg]
+    volume_battery = (T_eclipse * P_req) / (n_dis * E_density) #[l]
+    return mass_battery, volume_battery
+
+
 
 # print(sa_size(bol_power(1700, 0.03, 12), 0.32, sc_moon))
