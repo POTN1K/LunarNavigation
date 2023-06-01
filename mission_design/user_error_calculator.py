@@ -11,6 +11,9 @@ import numpy as np
 
 class UserErrors:
     def __init__(self, sats, sats_velocity, pos_error, position_surface, allowable): #, allowable, parameter#
+        self.ephemeris_budget = None
+        self.DOP_array = None
+        self.DOP_error_array = None
         self.ErrorBudget = []
         self.ORBIT = pos_error
         self.sats = sats
@@ -21,7 +24,6 @@ class UserErrors:
         self.position_user = position_surface
         self.parameter_covariance_matrix()
         self.dop_calculator()
-        self.user_error()
         # self.allowable_error()
 
 
@@ -69,12 +71,12 @@ class UserErrors:
         else:
             raise ValueError("Ephemeris error must be equal or greater than 0")
 
-    def satellite_error(self):
+    def satellite_error(self, ORBIT):
         CLOCK_ERROR = 1.1
         RECIEVER_NOISE_AND_RESOLUTION = 0.1
         OTHER = 1
         MULTIPATH = 0.2
-        return np.sqrt(CLOCK_ERROR**2 + self.ORBIT**2 + RECIEVER_NOISE_AND_RESOLUTION**2 + MULTIPATH**2 + OTHER**2)
+        return np.sqrt(CLOCK_ERROR**2 + ORBIT**2 + RECIEVER_NOISE_AND_RESOLUTION**2 + MULTIPATH**2 + OTHER**2)
 
 
 
@@ -118,48 +120,42 @@ class UserErrors:
         # Now, we can compute the DOP values
     def dop_calculator(self):
         # GDOP (Geometric DOP) - uses all elements
-        GDOP = np.sqrt(np.trace(self.Q))
+        self.GDOP = np.sqrt(np.trace(self.Q))
 
         # PDOP (Position DOP) - uses the 3D positional elements
-        PDOP = np.sqrt(np.trace(self.Q[:3, :3]))
+        self.PDOP = np.sqrt(np.trace(self.Q[:3, :3]))
 
         # HDOP (Horizontal DOP) - uses the horizontal positional elements
-        HDOP = np.sqrt(np.trace(self.Q[:2, :2]))
+        self.HDOP = np.sqrt(np.trace(self.Q[:2, :2]))
 
         # VDOP (Vertical DOP) - uses the vertical positional element
-        VDOP = np.sqrt(self.Q[2, 2])
+        self.VDOP = np.sqrt(self.Q[2, 2])
 
         # TDOP (Time DOP) - uses the time element
-        TDOP = np.sqrt(self.Q[3, 3])
+        self.TDOP = np.sqrt(self.Q[3, 3])
 
-        HHDOP = np.sqrt(np.trace(self.HQ[:2, :2]))
+        self.HHDOP = np.sqrt(np.trace(self.HQ[:2, :2]))
 
 
 
-        self.DOP = {
-            "GDOP": GDOP,
-            "PDOP": PDOP,
-            "HDOP": HDOP,
-            "VDOP": VDOP,
-            "TDOP": TDOP,
-            "HHDOP": HHDOP
-        }
-        self.DOP_array = []
-        for key in self.DOP:
-            self.DOP_array.append(self.DOP[key])
-    def user_error(self):
-        self.Error = []
-        for key in self.DOP:
-            self.Error.append(self.DOP[key] * self.satellite_error())
+        # self.DOP = {
+        #     "GDOP": GDOP,
+        #     "PDOP": PDOP,
+        #     "HDOP": HDOP,
+        #     "VDOP": VDOP,
+        #     "TDOP": TDOP,
+        #     "HHDOP": HHDOP
+        # }
 
-    def allowable_error(self):
-        for i in range(len(self.DOP)):
-            self.ORBIT = 0
-            self.user_error()
-            while self.Error[i] <= self.allowable[i]:
-                self.ORBIT = self.ORBIT + .05
-                self.user_error()
-            self.ErrorBudget.append(self.ORBIT)
-            self.ORBIT = 0
-            self.user_error()
+        self.DOP_array = np.array([self.GDOP, self.PDOP, self.HDOP, self.VDOP, self.TDOP, self.HHDOP])
+        self.DOP_error_array = self.DOP_array * self.satellite_error(0)
+        # for key in self.DOP:
+        #     self.DOP_array.append(self.DOP[key])
 
+    def allowable_error(self,DOP_array):
+        constraints = np.max(DOP_array, axis=0)
+        ephemeris_budget = []
+        for i in range(len(constraints)):
+            ephemeris_budget.append(np.sqrt((self.allowable[i]**2/constraints[i]**2)-self.satellite_error(0)**2))
+        self.ephemeris_budget = np.array(ephemeris_budget)
+        return ephemeris_budget
