@@ -170,8 +170,9 @@ class FrozenOrbits:
         propagation_time.plot_kepler(kepler_plot)
         propagation_time.plot_time()
 
-
-
+fo = FrozenOrbits()
+fo.model_adder(np.vstack((fo.constellation_12orbits, fo.constellation_MLO_6, fo.constellation_MLO_3, fo.true_anomaly_translation(fo.constellation_12orbits, 30))))
+fo.dyn_sim()
 
 
 fo = FrozenOrbits()
