@@ -12,6 +12,7 @@ sys.path.append('.')
 from mission_design import Model, PropagationTime, UserErrors
 
 
+
 # DOP Calculation
 # DOP_with_error = []
 # error_budget = []
@@ -56,9 +57,9 @@ class FrozenOrbits:
 
     def __init__(self):
         self.model = Model()
-        self.distances = np.array([])
-        self.moon_points = np.array([])
-        self.satellite_indices = np.array([])
+        self.distances = []
+        self.moon_points = []
+        self.satellite_indices = []
         self.requirements = [20, 10, 10, 10, 10, 3.5]  # GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP
         self.orbit8sat = np.array([[8049e3, 0.4082, 45, 90, 0, 0],
                                    [8049e3, 0.4082, 45, 90, 0, 180],
@@ -143,15 +144,23 @@ class FrozenOrbits:
     def model_adder(self, satellites):
         for i in range(0, len(satellites)):
             self.model.addSatellite(satellites[i][0], satellites[i][1], satellites[i][2], satellites[i][3],
-                                    satellites[i][4], satellites[i][5])
+                                    satellites[i][4], satellites[i][5],id=i)
         self.model.setCoverage()
 
-    def points_in_view(self):
+    def DOP_calculator(self):
+        self.DOP_each_point = []
+        self.DOP_each_point_with_error = []
         for i in range(0, len(self.model.moon)):
-            self.distances = np.append(self.distances, np.array([sat.r for sat in self.model.mod_inView_obj[i]]))
-            self.moon_points = np.append(self.moon_points, self.model.moon[i])
-            self.satellite_indices = np.append(self.satellite_indices,
-                                               np.array([sat.id for sat in self.model.mod_inView_obj[i]]))
+            self.distances.append(np.array([sat.r for sat in self.model.mod_inView_obj[i]]))
+            self.moon_points.append(self.model.moon[i])
+            self.satellite_indices.append(np.array([sat.id for sat in self.model.mod_inView_obj[i]]))
+            Errors = UserErrors(self.distances[-1], 0, 0, self.moon_points[-1], [59, 10, 100, 100, 100, 3.5])
+            self.DOP_each_point.append(Errors.DOP_array)
+            self.DOP_each_point_with_error.append(Errors.DOP_error_array)
+
+        HHDOP_ephemeris = Errors.allowable_error(self.DOP_each_point)
+        Ephemeris_error = Errors.allowable_error(self.DOP_each_point_with_error)
+        print(HHDOP_ephemeris, Ephemeris_error, np.max(self.DOP_each_point,axis=0))
 
     def dyn_sim(self):
         satellites = self.model.getSatellites()
@@ -165,3 +174,8 @@ class FrozenOrbits:
 fo = FrozenOrbits()
 fo.model_adder(np.vstack((fo.constellation_12orbits, fo.constellation_MLO_6, fo.constellation_MLO_3, fo.true_anomaly_translation(fo.constellation_12orbits, 30))))
 fo.dyn_sim()
+
+
+fo = FrozenOrbits()
+fo.model_adder(np.vstack((fo.constellation_12orbits,fo.constellation_MLO_6,fo.constellation_MLO_3,fo.true_anomaly_translation(fo.constellation_12orbits,30))))
+fo.DOP_calculator()
