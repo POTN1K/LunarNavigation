@@ -63,7 +63,9 @@ class FrozenOrbits:
         self.moon_points = []
         self.satellite_indices = []
         self.requirements = [20, 10, 10, 10, 10, 3.5]  # GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP
-        self.orbit_choices = [[24572000, 58.69, 0, 22.9, 6, 4, 1], [24572000, 58.69, 0, 22.9, 6, 4, 1]]
+        self.orbit_choices = [[8025.9e3, 0.004, 39.53, 270, 5, 4, 1, 0], [8148.8e3, 0.004, 39.51, 90, 5, 4, 1, 0],
+                              [7298.6e3, 0.001, 39.71, 270, 3, 7, 1, 1], [8669.2e3, 0.024, 39.46, 270, 4, 6, 1, 0],
+                              [8916.6e3, 0.000, 39.41, 90, 4, 6, 1, 1]]
         """## a: float = r_moon,
                          e: int = 0,
                          i: int = 0,
@@ -121,6 +123,7 @@ class FrozenOrbits:
             self.model.addSatellite(satellites[i][0], satellites[i][1], satellites[i][2], satellites[i][3],
                                     satellites[i][4], satellites[i][5], id=i)
         self.model.setCoverage()
+        self.model.plotCoverage()
 
     def model_symmetrical_planes(self, choice):
         self.model.addSymmetricalPlanes(self.orbit_choices[choice][0], self.orbit_choices[choice][1], self.orbit_choices[choice][2]
