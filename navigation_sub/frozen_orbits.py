@@ -63,7 +63,10 @@ class FrozenOrbits:
         self.moon_points = []
         self.satellite_indices = []
         self.requirements = [20, 10, 10, 10, 10, 3.5]  # GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP
-        self.orbit_choices = [[8855.4, 0.023, 39.41, 90, 4, 6, 1], [8904.4e3, 0, 39.41, 90, 4, 6, 1]]
+        self.orbit_choices = [[8904.4e3, 0.00, 39.41, 90, 24, 6, 1, 1], [7434.8e3, 0.00, 39.67, 270, 3, 7, 1, 1],
+                              [7298.6e3, 0.001, 39.71, 90, 3, 7, 1, 1], [8954.2e3, 0.002, 39.40, 90, 4, 6, 1, 1],
+                              [8536.0e3, 0.025, 39.47, 270, 4, 6, 1, 0], [5701.2e3, 0.002, 40.78, 90, 4, 6, 1, 1],
+                              [8855.4, 0.023, 39.43, 270, 4, 6, 1, 0], [8904.4e3, 0, 39.41, 90, 4, 6, 1, 1]]
         """## a: float = r_moon,
                          e: int = 0,
                          i: int = 0,
@@ -124,7 +127,7 @@ class FrozenOrbits:
 
     def model_symmetrical_planes(self, choice):
         self.model.addSymmetricalPlanes(self.orbit_choices[choice][0], self.orbit_choices[choice][1], self.orbit_choices[choice][2]
-                                        , self.orbit_choices[choice][3], self.orbit_choices[choice][4], self.orbit_choices[choice][5])
+                                        , self.orbit_choices[choice][3], self.orbit_choices[choice][4], dist_type=self.orbit_choices[choice][5], f=self.orbit_choices[choice][6])
     def DOP_calculator(self):
         self.DOP_each_point = []
         self.DOP_each_point_with_error = []
