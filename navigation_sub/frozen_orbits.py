@@ -61,6 +61,15 @@ class FrozenOrbits:
         self.moon_points = []
         self.satellite_indices = []
         self.requirements = [20, 10, 10, 10, 10, 3.5]  # GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP
+        self.orbit_choices = [[24572000, 58.69, 0, 22.9, 6, 4, 1], [24572000, 58.69, 0, 22.9, 6, 4, 1]]
+        """## a: float = r_moon,
+                         e: int = 0,
+                         i: int = 0,
+                         w: int = 0,
+                         n_planes: int = 1,
+                         n_sat_per_plane: int = 1,
+                         dist_type: int = 0,
+                         elevation: int = 15) -> Any"""
         self.orbit8sat = np.array([[8049e3, 0.4082, 45, 90, 0, 0],
                                    [8049e3, 0.4082, 45, 90, 0, 180],
                                    [8049e3, 0.4082, 45, 270, 0, 0],
@@ -144,8 +153,12 @@ class FrozenOrbits:
     def model_adder(self, satellites):
         for i in range(0, len(satellites)):
             self.model.addSatellite(satellites[i][0], satellites[i][1], satellites[i][2], satellites[i][3],
-                                    satellites[i][4], satellites[i][5],id=i)
+                                    satellites[i][4], satellites[i][5], id=i)
         self.model.setCoverage()
+
+    def model_symmetrical_planes(self, choice):
+        self.model.addSymmetricalPlanes(self.orbit_choices[choice][0], self.orbit_choices[choice][1], self.orbit_choices[choice][2]
+                                        , self.orbit_choices[choice][3], self.orbit_choices[choice][4], self.orbit_choices[choice][5])
     def DOP_calculator(self):
         self.DOP_each_point = []
         self.DOP_each_point_with_error = []
