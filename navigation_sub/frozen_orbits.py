@@ -237,6 +237,44 @@ class FrozenOrbits:
                                    [8049e3, 0.4082, 45, 270, 180, 132],
                                    [8049e3, 0.4082, 45, 270, 180, 228]])
 
+        self.constellation_12orbits = np.array([[8049e3, 0.4082, 45, 90, 0, 0],
+                                           [8049e3, 0.4082, 45, 90, 0, 150],
+                                           [8049e3, 0.4082, 45, 90, 0, 210],
+                                           [8049e3, 0.4082, 45, 270, 0, 0],
+                                           [8049e3, 0.4082, 45, 270, 0, 150],
+                                           [8049e3, 0.4082, 45, 270, 0, 210],
+                                           [8049e3, 0.4082, 45, 90, 180, 107],
+                                           [8049e3, 0.4082, 45, 90, 180, 180],
+                                           [8049e3, 0.4082, 45, 90, 180, 253],
+                                           [8049e3, 0.4082, 45, 270, 180, 107],
+                                           [8049e3, 0.4082, 45, 270, 180, 180],
+                                           [8049e3, 0.4082, 45, 270, 180, 253]])
+
+        self.constellation_JCT_M2O = np.array([[3737.4030e3, 0.0988, 48.2234, 89.7356, 0.0675, self.mean_to_true_anomaly(0.0988, 0.1816)],
+                                          [13677.7072e3, 0.0820, 40.3348, 86.5479, 0.41, self.mean_to_true_anomaly(0.0280, 3.14)]])
+
+        self.constellation_SP = np.array([[6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 0)],
+                                     [6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 120)],
+                                     [6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 240)]])
+
+        self.constellation_NP = np.array([[6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 0)],
+                                     [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 120)],
+                                     [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 240)]])
+
+        self.constellation_MLO = np.array([[3476e3, 0.038, 15, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                      [3476e3, 0.038, 15, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                      [5214e3, 0.038, 15, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                      [5214e3, 0.038, 15, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                      [10000e3, 0.038, 15, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                      [10000e3, 0.038, 15, 270, 0, self.mean_to_true_anomaly(0.038, 0)]])
+
+        self.constellation_MLO_2 = np.array([[3476e3, 0.038, 20, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                        [3476e3, 0.038, 20, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                        [5214e3, 0.038, 20, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                        [5214e3, 0.038, 20, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                        [10000e3, 0.038, 20, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
+                                        [10000e3, 0.038, 20, 270, 0, self.mean_to_true_anomaly(0.038, 0)]])
+
     def mean_to_true_anomaly(self, e, M):
         eccentric_anomaly = element_conversion.true_to_eccentric_anomaly(np.deg2rad(M), e)
         mean_anomaly = element_conversion.eccentric_to_mean_anomaly(eccentric_anomaly, e)
