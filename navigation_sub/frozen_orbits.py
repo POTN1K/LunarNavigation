@@ -63,7 +63,7 @@ class FrozenOrbits:
         self.moon_points = []
         self.satellite_indices = []
         self.requirements = [20, 10, 10, 10, 10, 3.5]  # GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP
-        self.orbit_choices = [[24572000, 58.69, 0, 22.9, 6, 4, 1], [24572000, 58.69, 0, 22.9, 6, 4, 1]]
+        self.orbit_choices = [[8855.4, 0.023, 39.41, 90, 4, 6, 1], [8904.4e3, 0, 39.41, 90, 4, 6, 1]]
         """## a: float = r_moon,
                          e: int = 0,
                          i: int = 0,
