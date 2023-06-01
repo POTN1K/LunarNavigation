@@ -89,23 +89,35 @@ The following introduces an example of a file with a class and a method that has
         # Global Libraries
         import math
 
-        class Circle:
-        """Class to create circles and perform operations on them."""
+        # Local Libraries
 
-            def __init__(self, radius):
-                """
-                Method to initialize a Circle object. \n
-                :param radius (float): The radius of the circle object to be created.
-                """
-                self.radius = radius
+        # Constants
+        r_moon= 1737.4e3  
 
-            def area(self):
-                """
-                Method to compute the Circle Area. \n
-                :return (float): The area of the circle.
-                """
-                return math.pi * self.radius ** 2
-                
-        if __name__=="main":
-            circle1 = Circle(5)
-            print(circle1.area())
+        def square_value(value):
+          """Returns the square of the value.
+          :param value: [float] Value to be squared. (m)
+          :return: [float] Square of the value. (m^2)
+          """
+          return value**2
+    
+          class Circle:
+          """Class to create circles and perform operations on them."""
+
+              def __init__(self, radius):
+                  """
+                  Method to initialize a Circle object. \n
+                  :param radius (float): The radius of the circle object to be created.
+                  """
+                  self.radius = radius
+
+              def area(self):
+                  """
+                  Method to compute the Circle Area. \n
+                  :return (float): The area of the circle.
+                  """
+                  return math.pi * self.radius ** 2
+ 
+          if __name__=="main":
+              circle1 = Circle(5)
+              print(circle1.area())
