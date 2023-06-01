@@ -152,9 +152,10 @@ class UserErrors:
         # for key in self.DOP:
         #     self.DOP_array.append(self.DOP[key])
 
-    def allowable_error(self):
-        constraints = np.max(self.DOP_array, axis=0)
+    def allowable_error(self,DOP_array):
+        constraints = np.max(DOP_array, axis=0)
         ephemeris_budget = []
         for i in range(len(constraints)):
-            ephemeris_budget.append(np.sqrt(constraints[i]**2/(self.allowable[i])-self.satellite_error(0)**2))
+            ephemeris_budget.append(np.sqrt((self.allowable[i]**2/constraints[i]**2)-self.satellite_error(0)**2))
         self.ephemeris_budget = np.array(ephemeris_budget)
+        return ephemeris_budget
