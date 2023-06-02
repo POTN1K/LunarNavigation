@@ -607,7 +607,7 @@ class Model:
                 self.addOrbitPlane(a, e, i, w, 180 / n_planes * n, n_sat_per_plane, shift + f * 180 * n, elevation)
         elif dist_type == 1:
             for n in range(n_planes):
-                self.addOrbitPlane(a, e, i, w, 360 / n_planes * n, n_sat_per_plane, shift, elevation)
+                self.addOrbitPlane(a, e, i, w, 360 / n_planes * n, n_sat_per_plane, shift + f * 360 * n, elevation)
         else:
             raise ValueError("Invalid distribution type.")
 
@@ -672,9 +672,9 @@ class Model:
         ax.set_ylabel('y [$10^7$ m]')
         ax.set_zlabel('z [$10^7$ m]')
 
-        ax.set_xlim(-r_moon * 1.5, r_moon * 1.5)
-        ax.set_ylim(-r_moon * 1.5, r_moon * 1.5)
-        ax.set_zlim(-r_moon * 1.5, r_moon * 1.5)
+        ax.set_xlim(-r_moon * 3, r_moon * 3)
+        ax.set_ylim(-r_moon * 3, r_moon * 3)
+        ax.set_zlim(-r_moon * 3, r_moon * 3)
         ax.set_aspect('equal')
         plt.show()
 

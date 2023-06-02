@@ -136,11 +136,10 @@ class FrozenOrbits:
         #self.model.plotCoverage()
 
     def model_symmetrical_planes(self, choice):
-        self.model.addSymmetricalPlanes(self.orbit_choices[choice, 0], self.orbit_choices[choice, 1], self.orbit_choices[choice, 2],
-                                        self.orbit_choices[choice, 3], int(self.orbit_choices[choice, 4]), int(self.orbit_choices[choice, 5]), dist_type=int(self.orbit_choices[choice, 6]), f =int(self.orbit_choices[choice, 7]))
+        self.model.addSymmetricalPlanes(self.orbit_choices[choice][0], self.orbit_choices[choice][1], self.orbit_choices[choice][2]
+                                        , self.orbit_choices[choice][3], self.orbit_choices[choice][4], self.orbit_choices[choice][5], dist_type=self.orbit_choices[choice][6], f =self.orbit_choices[choice][7])
         self.model.setCoverage()
-        self.model.plotCoverage()
-
+        # self.model.plotCoverage()
     def DOP_calculator(self):
         self.DOP_each_point = []
         self.DOP_each_point_with_error = []
@@ -155,7 +154,8 @@ class FrozenOrbits:
                 self.DOP_each_point_with_error.append(Errors.DOP_error_array)
 
             Ephemeris_error = Errors.allowable_error(self.DOP_each_point_with_error)
-            print(Ephemeris_error, np.max(self.DOP_each_point,axis=0))
+            print(Ephemeris_error, np.max(self.DOP_each_point, axis=0), np.median(self.DOP_each_point, axis=0))
+            return((Ephemeris_error, np.max(self.DOP_each_point, axis=0), np.median(self.DOP_each_point, axis=0)))
 
     def dyn_sim(self, P, dt=10, kepler_plot=0):
         satellites = self.model.getSatellites()
@@ -171,7 +171,7 @@ class FrozenOrbits:
             P[i] = 2*np.pi * np.sqrt(satellites[i, 0]**3/miu_moon)
         return P/3600
 
-
+constellations = []
 fo = FrozenOrbits()
 orbit_choice = 0
 fo.model = Model()
@@ -179,7 +179,17 @@ fo.model_adder(fo.orbit_ESA_SP)
 fo.model_symmetrical_planes(orbit_choice)
 fo.DOP_calculator()
 
+
+for i in range(0, 13):
+    fo.model = Model()
+    fo.model_symmetrical_planes(i)
+    constellations.append(fo.DOP_calculator())
+
 P = fo.period_calc(fo.orbit_choices)[orbit_choice]
 print(fo.period_calc(fo.orbit_choices)[orbit_choice])
+
+constellations = np.asarray(constellations)
+# print(fo.period_calc(fo.orbit_choices))
+print(constellations)
 
 fo.dyn_sim(P)
