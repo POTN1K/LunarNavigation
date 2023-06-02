@@ -5,6 +5,8 @@ Maintained by Nikolaus Ricker"""
 import numpy as np
 from tudatpy.kernel.astro import element_conversion
 import sys
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 sys.path.append('.')
 
@@ -134,7 +136,7 @@ class FrozenOrbits:
                                         , self.orbit_choices[choice][3], self.orbit_choices[choice][4], self.orbit_choices[choice][5], dist_type=self.orbit_choices[choice][6], f =self.orbit_choices[choice][7])
         self.model.setCoverage()
         # self.model.plotCoverage()
-    def DOP_calculator(self):
+    def DOP_calculator(self, plotting):
         self.DOP_each_point = []
         self.DOP_each_point_with_error = []
         if np.min(self.model.mod_inView) >= 4:
@@ -146,11 +148,29 @@ class FrozenOrbits:
                 Errors = UserErrors(self.distances[-1], 0, 0, self.moon_points[-1], [120.4, 10, 10, 10, 10, 120])
                 self.DOP_each_point.append(Errors.DOP_array)
                 self.DOP_each_point_with_error.append(Errors.DOP_error_array)
-
+            self.DOP_each_point = np.asarray(self.DOP_each_point)
+            self.DOP_each_point_with_error = np.asarray(self.DOP_each_point_with_error)
             # HHDOP_ephemeris = Errors.allowable_error(self.DOP_each_point)
+            if plotting == True:
+                self.boxplot(self.DOP_each_point)
+
+
+
             Ephemeris_error = Errors.allowable_error(self.DOP_each_point_with_error)
             print(Ephemeris_error, np.max(self.DOP_each_point, axis=0), np.median(self.DOP_each_point, axis=0))
             return((Ephemeris_error, np.max(self.DOP_each_point, axis=0), np.median(self.DOP_each_point, axis=0)))
+    def boxplot(self,df):
+
+        plt.figure(figsize=(12, 8))
+        column_names = ['GDOP', 'PDOP', 'HDOP', 'VDOP', 'TDOP', 'HHDOP']
+        sns.boxplot(data=df)
+        plt.xticks(range(df.shape[1]), column_names)
+        for i in range(df.shape[1]):
+            upper_limit = np.percentile(df[:, i], 95)
+            plt.plot([i - 0.5, i + 0.5], [upper_limit] * 2, color='red')
+        plt.title("Boxplots with 95% lines ")
+        plt.show()
+
 
     def dyn_sim(self, duration=86400, dt=100, kepler_plot=0):
         satellites = self.model.getSatellites()
@@ -163,13 +183,22 @@ class FrozenOrbits:
         for i in range(np.shape(satellites)[0]):
             P[i] = 2*np.pi * np.sqrt(satellites[i, 0]**3/miu_moon)
         return P
+
+    def DOP_time(self, satellites):
+        self.DOP_time = []
+        for i in range(0, len(satellites)):
+            self.model.addSatellite(satellites[i][0], satellites[i+1][1], satellites[i+2][2], satellites[i+3][3],
+                                    satellites[i+4][4], satellites[i+5][5], id=i)
+
+
+
 constellations = []
 fo = FrozenOrbits()
 
 for i in range(0, 13):
     fo.model = Model()
     fo.model_symmetrical_planes(i)
-    constellations.append(fo.DOP_calculator())
+    constellations.append(fo.DOP_calculator(True))
 
 constellations = np.asarray(constellations)
 # print(fo.period_calc(fo.orbit_choices))
