@@ -72,7 +72,7 @@ class UserErrors:
             raise ValueError("Ephemeris error must be equal or greater than 0")
 
     def satellite_error(self, ORBIT):
-        CLOCK_ERROR = 1.1
+        CLOCK_ERROR = 0.01
         RECIEVER_NOISE_AND_RESOLUTION = 0.1
         OTHER = 1
         MULTIPATH = 0.2
