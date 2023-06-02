@@ -62,13 +62,13 @@ class FrozenOrbits:
         self.distances = []
         self.moon_points = []
         self.satellite_indices = []
-        self.requirements = [20, 10, 10, 10, 10, 3.5]  # GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP
-        self.orbit_choices = [[8025.9e3, 0.004, 39.53, 270, 5, 4, 1, 0], [8148.8e3, 0.004, 39.51, 90, 5, 4, 1, 0],
-                              [7298.6e3, 0.001, 39.71, 270, 3, 7, 1, 1], [8669.2e3, 0.024, 39.46, 270, 4, 6, 1, 0],
-                              [8916.6e3, 0.000, 39.41, 90, 4, 6, 1, 1], [8904.4e3, 0.00, 39.41, 90, 24, 6, 1, 1], [7434.8e3, 0.00, 39.67, 270, 3, 7, 1, 1],
-                              [7298.6e3, 0.001, 39.71, 90, 3, 7, 1, 1], [8954.2e3, 0.002, 39.40, 90, 4, 6, 1, 1],
-                              [8536.0e3, 0.025, 39.47, 270, 4, 6, 1, 0], [5701.2e3, 0.002, 40.78, 90, 4, 6, 1, 1],
-                              [8855.4, 0.023, 39.43, 270, 4, 6, 1, 0], [8904.4e3, 0, 39.41, 90, 4, 6, 1, 1]]
+        self.requirements = [120.4, 10, 10, 10, 120, 3.5]  # GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP
+        self.orbit_choices = np.array([[8025.9e3, 0.004, 39.53, 270, 5, 4, 1, 0], [8148.8e3, 0.004, 39.51, 90, 5, 4, 1, 0],
+                                       [7298.6e3, 0.001, 39.71, 270, 3, 7, 1, 1], [8669.2e3, 0.024, 39.46, 270, 4, 6, 1, 0],
+                                       [8916.6e3, 0.000, 39.41, 90, 4, 6, 1, 1], [8904.4e3, 0.00, 39.41, 90, 4, 6, 1, 1], [7434.8e3, 0.00, 39.67, 270, 3, 7, 1, 1],
+                                       [7298.6e3, 0.001, 39.71, 90, 3, 7, 1, 1], [8954.2e3, 0.002, 39.40, 90, 4, 6, 1, 1],
+                                       [8536.0e3, 0.025, 39.47, 270, 4, 6, 1, 0], [5701.2e3, 0.002, 40.78, 90, 4, 6, 1, 1],
+                                       [8855.4e3, 0.023, 39.43, 270, 4, 6, 1, 0], [8904.4e3, 0, 39.41, 90, 4, 6, 1, 1]])
 
         """## a: float = r_moon,
                          e: int = 0,
@@ -78,6 +78,12 @@ class FrozenOrbits:
                          n_sat_per_plane: int = 1,
                          dist_type: int = 0,
                          elevation: int = 15) -> Any"""
+
+        self.orbit_ESA_SP = np.array([[9750.73e3, 0.6383, 54.33, 55.18, 277.53, 123.42],
+                                      [9750.73e3, 0.6383, 54.33, 55.18, 277.53, 0],
+                                      [9750.73e3, 0.6383, 61.96, 121.7, 59.27, 180],
+                                      [9750.73e3, 0.6383, 61.96, 121.7, 59.27, 0]])
+
         self.orbit8sat = np.array([[8049e3, 0.4082, 45, 90, 0, 0],
                                    [8049e3, 0.4082, 45, 270, 0, 0],
                                    [8049e3, 0.4082, 45, 90, 180, 0],
@@ -124,15 +130,17 @@ class FrozenOrbits:
 
     def model_adder(self, satellites):
         for i in range(0, len(satellites)):
-            self.model.addSatellite(satellites[i][0], satellites[i][1], satellites[i][2], satellites[i][3],
-                                    satellites[i][4], satellites[i][5], id=i)
+            self.model.addSatellite(satellites[i, 0], satellites[i, 1], satellites[i, 2], satellites[i, 3],
+                                    satellites[i, 4], satellites[i, 5]) #, id=i)
+        self.model.setCoverage()
+        #self.model.plotCoverage()
+
+    def model_symmetrical_planes(self, choice):
+        self.model.addSymmetricalPlanes(self.orbit_choices[choice, 0], self.orbit_choices[choice, 1], self.orbit_choices[choice, 2],
+                                        self.orbit_choices[choice, 3], int(self.orbit_choices[choice, 4]), int(self.orbit_choices[choice, 5]), dist_type=int(self.orbit_choices[choice, 6]), f =int(self.orbit_choices[choice, 7]))
         self.model.setCoverage()
         self.model.plotCoverage()
 
-    def model_symmetrical_planes(self, choice):
-        self.model.addSymmetricalPlanes(self.orbit_choices[choice][0], self.orbit_choices[choice][1], self.orbit_choices[choice][2]
-                                        , self.orbit_choices[choice][3], self.orbit_choices[choice][4], self.orbit_choices[choice][5], dist_type=self.orbit_choices[choice][6], f =self.orbit_choices[choice][7])
-        self.model.plotCoverage()
     def DOP_calculator(self):
         self.DOP_each_point = []
         self.DOP_each_point_with_error = []
@@ -142,27 +150,36 @@ class FrozenOrbits:
                 self.distances.append(np.array([sat.r for sat in self.model.mod_inView_obj[i]]))
                 self.moon_points.append(self.model.moon[i])
                 # self.satellite_indices.append(np.array([sat.id for sat in self.model.mod_inView_obj[i]]))
-                Errors = UserErrors(self.distances[-1], 0, 0, self.moon_points[-1], [59, 10, 100, 100, 100, 100])
+                Errors = UserErrors(self.distances[-1], 0, 0, self.moon_points[-1], [120.4, 10, 10, 10, 120, 3.5])
                 self.DOP_each_point.append(Errors.DOP_array)
                 self.DOP_each_point_with_error.append(Errors.DOP_error_array)
 
-            HHDOP_ephemeris = Errors.allowable_error(self.DOP_each_point)
             Ephemeris_error = Errors.allowable_error(self.DOP_each_point_with_error)
-            print(HHDOP_ephemeris, Ephemeris_error, np.max(self.DOP_each_point,axis=0))
+            print(Ephemeris_error, np.max(self.DOP_each_point,axis=0))
 
-    def dyn_sim(self, duration=86400, dt=100, kepler_plot=0):
+    def dyn_sim(self, P, dt=10, kepler_plot=0):
         satellites = self.model.getSatellites()
+        duration = 86400 * P/24
         propagation_time = PropagationTime(satellites, duration, dt, 250, 0, 0)
         # print(np.average(np.array(propagation_time.complete_delta_v(0, duration))))
         propagation_time.plot_kepler(kepler_plot)
         propagation_time.plot_time()
+
     def period_calc(self, satellites):
         P = np.zeros(np.shape(satellites)[0])
         for i in range(np.shape(satellites)[0]):
             P[i] = 2*np.pi * np.sqrt(satellites[i, 0]**3/miu_moon)
-        return P
+        return P/3600
+
+
 fo = FrozenOrbits()
-fo.model_symmetrical_planes(1)
+orbit_choice = 0
+fo.model = Model()
+fo.model_adder(fo.orbit_ESA_SP)
+fo.model_symmetrical_planes(orbit_choice)
 fo.DOP_calculator()
 
+P = fo.period_calc(fo.orbit_choices)[orbit_choice]
+print(fo.period_calc(fo.orbit_choices)[orbit_choice])
 
+fo.dyn_sim(P)
