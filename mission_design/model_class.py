@@ -525,6 +525,14 @@ class Model:
         else:
             raise ValueError("Resolution must be positive.")
 
+    def resetModel(self):
+        self.orbit_planes = []
+        self.modules = []
+        self.n_sat = 0
+        self.n_orbit_planes = 0
+        self.mod_inView = np.zeros(len(self.moon))
+        self.mod_inView_obj = {i: [] for i in range(len(self.moon))}
+
     def addExistingOrbitPlane(self, orbit):
         """Add an existing orbit plane to the model.
         :param orbit: orbit plane (Object)
