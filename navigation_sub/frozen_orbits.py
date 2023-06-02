@@ -165,10 +165,10 @@ class FrozenOrbits:
 
             Ephemeris_error = Errors.allowable_error(self.DOP_each_point_with_error)
             # print(Ephemeris_error, np.max(self.DOP_each_point, axis=0), np.median(self.DOP_each_point, axis=0))
-            return(self.DOP_each_point)
+            return(np.asarray(self.DOP_each_point))
         else:
             print("You suck")
-            return False
+            return np.asarray([["False","False","False","False","False","False"]])
     def boxplot(self,df):
 
         plt.figure(figsize=(12, 8))
@@ -199,15 +199,41 @@ class FrozenOrbits:
         return P/3600
 
     def DOP_time(self, satellites):
-        self.DOP_time = []
+        self.DOP_time_GDOP = np.array([])
+        self.DOP_time_PDOP = np.array([])
+        self.DOP_time_HDOP = np.array([])
+        self.DOP_time_VDOP = np.array([])
+        self.DOP_time_TDOP = np.array([])
+        self.DOP_time_HHDOP = np.array([])
         for i in range(0, satellites.shape[0], 10):
             self.model.resetModel()
             for j in range(0, satellites.shape[1]//6):
                 self.model.addSatellite(satellites[i][j*6], satellites[i][j*6+1], np.rad2deg(satellites[i][j*6+2]), np.rad2deg(satellites[i][j*6+3]),
                                         np.rad2deg(satellites[i][j*6+4]), np.rad2deg(satellites[i][j*6+5]))
             self.model.setCoverage()
-            self.DOP_time.append(self.DOP_calculator())
-        np.savetxt("model0dop.csv", np.asarray(self.DOP_time), delimiter=",")
+            DOPValues =  self.DOP_calculator()
+            if i == 0:
+                self.DOP_time_GDOP = DOPValues[:, 0]
+                self.DOP_time_PDOP = DOPValues[:, 1]
+                self.DOP_time_HDOP = DOPValues[:, 2]
+                self.DOP_time_VDOP = DOPValues[:, 3]
+                self.DOP_time_TDOP = DOPValues[:, 4]
+                self.DOP_time_HHDOP = DOPValues[:, 5]
+            else:
+                self.DOP_time_GDOP = np.vstack((self.DOP_time_GDOP, DOPValues[:, 0]))
+                self.DOP_time_PDOP = np.vstack((self.DOP_time_PDOP, DOPValues[:, 1]))
+                self.DOP_time_HDOP = np.vstack((self.DOP_time_HDOP,DOPValues[:, 2]))
+                self.DOP_time_VDOP = np.vstack((self.DOP_time_VDOP,DOPValues[:, 3]))
+                self.DOP_time_TDOP = np.vstack((self.DOP_time_TDOP,DOPValues[:, 4]))
+                self.DOP_time_HHDOP = np.vstack((self.DOP_time_HHDOP,DOPValues[:, 5]))
+
+
+        np.savetxt("model0GDOP.csv", self.DOP_time_GDOP, delimiter=",")
+        np.savetxt("model0PDOP.csv", self.DOP_time_PDOP, delimiter=",")
+        np.savetxt("model0HDOP.csv", self.DOP_time_HDOP, delimiter=",")
+        np.savetxt("model0VDOP.csv", self.DOP_time_VDOP, delimiter=",")
+        np.savetxt("model0TDOP.csv", self.DOP_time_TDOP, delimiter=",")
+        np.savetxt("model0HHDOP.csv", self.DOP_time_HHDOP, delimiter=",")
 
 
 constellations = []
