@@ -243,14 +243,62 @@ class Structure:
         self.m0 = m0
         self.shape = shape
         self.material = material
-        self.compressive_thermal_stress = self.thermal_coeff * (temperatures[1] - 20) * self.E / self.height
-        self.tensile_thermal_stress = -self.thermal_coeff * (temperatures[0] - 20) * self.E / self.height
+        self.compressive_thermal_stress = self.thermal_coeff * (temperatures[1] - 20) * self.E
+        self.tensile_thermal_stress = -self.thermal_coeff * (temperatures[0] - 20) * self.E
         self.compressive_stress = None
         self.tensile_stress = None
         self.l_eigeny = None
         self.l_eigenx = None
         self.axial_eigen = None
         self.m_struc = None
+
+    @property
+    def compressive_thermal_stress(self):
+        return self._compressive_thermal_stress
+
+    @compressive_thermal_stress.setter
+    def compressive_thermal_stress(self, compressive_thermal_stress):
+        if compressive_thermal_stress < self.yield_strength:
+            self._compressive_thermal_stress = compressive_thermal_stress
+        else:
+            raise ValueError(f"Compressive thermal stress exceeds yield strength of {self.yield_strength}Pa.")
+
+    @property
+    def tensile_thermal_stress(self):
+        return self._tensile_thermal_stress
+
+    @tensile_thermal_stress.setter
+    def tensile_thermal_stress(self, tensile_thermal_stress):
+        if tensile_thermal_stress < self.yield_strength:
+            self._tensile_thermal_stress = tensile_thermal_stress
+        else:
+            raise ValueError(f"Tensile thermal stress exceeds yield strength of {self.yield_strength}Pa.")
+
+    @property
+    def compressive_stress(self):
+        return self._compressive_stress
+
+    @compressive_stress.setter
+    def compressive_stress(self, compressive_stress):
+        if compressive_stress is None:
+            self._compressive_stress = compressive_stress
+        elif compressive_stress < self.yield_strength:
+            self._compressive_stress = compressive_stress
+        else:
+            raise ValueError(f"Compressive stress exceeds yield strength of {self.yield_strength}Pa.")
+
+    @property
+    def tensile_stress(self):
+        return self._tensile_stress
+
+    @tensile_stress.setter
+    def tensile_stress(self, tensile_stress):
+        if tensile_stress is None:
+            self._tensile_stress = tensile_stress
+        elif tensile_stress < self.yield_strength:
+            self._tensile_stress = tensile_stress
+        else:
+            raise ValueError(f"Tensile stress exceeds yield strength of {self.yield_strength}Pa.")
 
     @property
     def material(self):
@@ -313,10 +361,10 @@ class Structure:
         elif isinstance(self.shape, RectangularPrism):
             t1 = fsolve(lambda t: (1 / 6) * self.shape.width * t ** 3 + 2 * self.shape.width * t * (
                     self.shape.length / 2) ** 2 +
-                                  (1 / 6) * t * self.shape.length ** 3 - I, 0.000001)
+                                  (1 / 6) * t * self.shape.length ** 3 - I, 0.000001)[0]
             t2 = fsolve(lambda t: (1 / 6) * self.shape.length * t ** 3 + 2 * self.shape.length * t * (
                     self.shape.width / 2) ** 2 +
-                                  (1 / 6) * t * self.shape.width ** 3 - I, 0.000001)
+                                  (1 / 6) * t * self.shape.width ** 3 - I, 0.000001)[0]
             return max(t1, t2)
         else:
             raise TypeError("Shape not recognized.")
@@ -329,24 +377,24 @@ class Structure:
                 lambda t: g_axial * g * self.m0 / (2 * np.pi * self.shape.radius * t) + g_lateral * g * self.m0 *
                           self.height * self.shape.radius / (np.pi / 4 * (
                         (self.shape.radius + t) ** 4) - self.shape.radius ** 4) - self.yield_strength,
-                0.00000001)
+                0.00000001)[0]
             return t
 
         elif isinstance(self.shape, RectangularPrism):
             t1 = fsolve(lambda t: g_axial * g * self.m0 / (2 * (self.shape.width + self.shape.length) * t) +
                                   g_lateral * g * self.m0 * self.height * self.shape.length / ((1 / 6) *
                                                                                                self.shape.width * t ** 3 + 2 * self.shape.width * t * (
-                                                                                                           self.shape.length / 2) ** 2 +
+                                                                                                       self.shape.length / 2) ** 2 +
                                                                                                (
-                                                                                                           1 / 6) * t * self.shape.length ** 3) - self.yield_strength,
-                        0.000001)
+                                                                                                       1 / 6) * t * self.shape.length ** 3) - self.yield_strength,
+                        0.000001)[0]
             t2 = fsolve(lambda t: g_axial * g * self.m0 / (2 * (self.shape.width + self.shape.length) * t) +
                                   g_lateral * g * self.m0 * self.height * self.shape.width / ((1 / 6) *
                                                                                               self.shape.length * t ** 3 + 2 * self.shape.length * t * (
-                                                                                                          self.shape.width / 2) ** 2 +
+                                                                                                      self.shape.width / 2) ** 2 +
                                                                                               (
-                                                                                                          1 / 6) * t * self.shape.width ** 3) - self.yield_strength,
-                        0.000001)
+                                                                                                      1 / 6) * t * self.shape.width ** 3) - self.yield_strength,
+                        0.000001)[0]
             return max(t1, t2)
         else:
             raise TypeError("Shape not recognized.")
@@ -359,11 +407,15 @@ class Structure:
         else:
             raise TypeError("Shape not recognized.")
         t = fsolve(lambda t: 9 * (t / d) ** 1.6 + 0.16 * (t / self.height) ** 1.3 - (0.6 * 0.33 * t / d) * 1.1, 0.001)
-        return t
+        return t[0]
 
     def thickness_limiting(self):
-        return max(self.thickness_axial_freq(), *self.thickness_buckling(),
-                   *self.thickness_lateral_freq(), *self.thickness_axial_stress())
+        a = self.thickness_axial_freq()
+        b = self.thickness_buckling()
+        c = self.thickness_lateral_freq()
+        d = self.thickness_axial_stress()
+        return max(self.thickness_axial_freq(), self.thickness_buckling(),
+                   self.thickness_lateral_freq(), self.thickness_axial_stress())
 
     def compute_characteristics(self):
         """Function to compute characteristics of the structure
@@ -374,10 +426,10 @@ class Structure:
         if isinstance(self.shape, Cylinder):
             self.l_eigenx = 0.56 * np.sqrt(self.E * self.shape.area_I(self.thickness)[0] / (self.m0 * self.height ** 3))
             self.l_eigeny = self.l_eigenx
-            self.tensile_stress = self.m0 * g * (g_tensile / self.shape.cross_section_area +
+            self.tensile_stress = self.m0 * g * (g_tensile / self.shape.cross_section_area(self.thickness) +
                                                  g_lateral * self.height * self.shape.radius /
                                                  self.shape.area_I(self.thickness)[0])
-            self.compressive_stress = -self.m0 * g * (g_axial / self.shape.cross_section_area +
+            self.compressive_stress = self.m0 * g * (g_axial / self.shape.cross_section_area(self.thickness) +
                                                       g_lateral * self.height * self.shape.radius /
                                                       self.shape.area_I(self.thickness)[0])
         elif isinstance(self.shape, RectangularPrism):
@@ -445,12 +497,16 @@ if __name__ == "__main__":
     mass_init = mass_no_struc + mass_struc  # [kg] Mass of the initial sizing of the spacecraft
     vol_init = mass_init * 0.01  # [m^3] Volume of the initial sizing of the spacecraft
 
-    shape = RectangularPrism(length=2, width=1.5, height=3)
-    # shape = Cylinder(radius=1, height=3)4
-    print(Structure(shape, "Aluminium_7075-T73", mass_init))
-    # for key in material_properties.keys():
-    #     struc = Structure(shape, key, mass_init)
-    #     struc.add_panels(8, 100, deployed=True)
-    #     print(key, struc.compute_characteristics()[0])
+    cube = RectangularPrism(1, 1, 1, vol_init)
+    rect = RectangularPrism(1, 1, 2, vol_init)
+    cyl = Cylinder(1, 2, vol_init)
 
-"""Check the thermal stresses in the structure."""
+    s_cube = Structure(cube, "Aluminium_7075-T73", mass_init)
+    s_rect = Structure(rect, "Aluminium_7075-T73", mass_init)
+    s_cyl = Structure(cyl, "Aluminium_7075-T73", mass_init)
+
+    print(s_cube)
+    print("\n\n")
+    print(s_rect)
+    print("\n\n")
+    print(s_cyl)
