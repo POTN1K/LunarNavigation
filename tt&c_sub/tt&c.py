@@ -15,61 +15,19 @@ import numpy as np
 BOLTZMANN = 1.38065E-23 
 SPEED_OF_LIGHT = 299792458 #m/s
 RADIUS_MOON = 1737500 #m
-ANTENNA_1 = {'type': 'helical', 'diameter':0.098, 'length':0.212,} # efficiency must be added
-ANTENNA_2 = {'type': 'parabolic', 'diameter': 3, 'length':0.5}  #TEST VALUE
-
+# ANTENNA_1 = {'type': 'helical', 'diameter':0.098, 'length':0.212,} # efficiency must be added
+# ANTENNA_2 = {'type': 'parabolic', 'diameter': 3, 'length':0.5}  #TEST VALUE
 
 
 #Functions
-# def peakGainHelical(_diameter, _length, _wavelength):
-#     return 10 * np.log10((np.pi**2 * _diameter**2 * _length)/(_wavelength**3)) + 10.3 # dB
-
-def peakGainParabolicTransmitter(_diameter, _frequency):
-    frequency = _frequency/(1e9)
-    return 20 * np.log10(_diameter) + 20 * np.log10(frequency) + 17.8
-
-def peakGainParabolicReceiver(_diameter,_eta,_wavelength):
-    return (np.pi**2 * _diameter **2 * _eta)/(_wavelength**2)
-
-def halfPowerAngleHelical(_diameter, _length, _wavelength):
-    return (52)/(np.sqrt((np.pi**2 * _diameter**2 * _length)/(_wavelength**3)))
-
-def halfPowerAngleParabolic(_diameter, _frequency):
-    return 21/((_frequency*10**-9)*_diameter)
-
-def pointingLoss(_et, _alpha):
-    return -12*(_et/_alpha)**2
-
-def spaceLoss(_wavelength, _distance):
-    return (_wavelength/(4*np.pi*_distance))**2
-
 def decibel(_X):
-    return 10*np.log10(_X)
+    if _X != 0:
+        return 10*np.log10(_X)
+    else:
+        return 0
 
-def largestDistance(_radius_planet, _distance):       # Formula from slides, slightly modified for lagrange, as lagrange points or from center of the moon. this means Rm**2+h**2 = d**2
-    return np.sqrt((_radius_planet+_distance)**2 - _radius_planet**2)
-
-# def calculateAntennaGain(_position, _antenna, _frequency, _wavelength):
-#     if _antenna['type']=='helical':
-#             return peakGainHelical(_antenna['diameter'], _antenna['length'], _wavelength)
-#     elif _antenna['type']=='parabolic':
-#         if _position == 'transmitter':
-#             return peakGainParabolicTransmitter(_antenna['diameter'], _frequency)
-#         if _position == 'receiver':
-#             return peakGainParabolicReceiver(_antenna['diameter'], _antenna['efficiency'], _wavelength)
-#     # elif _antenna['type']=='laser':
-        # self.gain_transmitter = 'laser'
-    # else:
-    #     raise ValueError("This antenna type is invalid.")
-
-# def calculatePointingLoss(_antenna, _frequency, _wavelength):
-#     if _antenna['type']=='helical':
-#         return halfPowerAngleHelical(_antenna['diameter'], _antenna['length'], _wavelength)
-#     if _antenna['type']=='parabolic':
-#         return halfPowerAngleParabolic(_antenna['diameter'], _frequency)
-#     else:
-#         raise ValueError("This antenna type is invalid.")
-
+def inv_decibel(_X):
+    return 10 ** (_X/10) 
 
 #Classes
 
@@ -79,11 +37,12 @@ class HelicalAntenna:
         self.length = length
     
     def peak_gain(self, wavelength):
-        return 10 * np.log10((np.pi**2 * self.diameter**2 * self.length)/( wavelength ** 3 )) + 10.3
+        return inv_decibel(10 * np.log10((np.pi**2 * self.diameter**2 * self.length)/( wavelength ** 3 )) + 10.3)
     
     def half_power_angle(self, wavelength):
         return (52)/(np.sqrt((np.pi**2 * self.diameter**2 * self.length)/(wavelength**3)))
     
+
 class ParabolicAntenna:
     def __init__(self, diameter, efficiency):
         self.diameter = diameter
@@ -91,7 +50,7 @@ class ParabolicAntenna:
 
     def peak_gain_transmitter(self, frequency):
         frequency = frequency / 1e9
-        return 20 * np.log10(self.diameter) + 20 * np.log10(frequency) + 17.8
+        return inv_decibel(20 * np.log10(self.diameter) + 20 * np.log10(frequency) + 17.8)
 
     def peak_gain_receiver(self, wavelength):
         return (np.pi ** 2 * self.diameter ** 2 * self.efficiency) / (wavelength ** 2)
@@ -100,11 +59,20 @@ class ParabolicAntenna:
         return 21 / ((frequency * 10 ** -9) * self.diameter)
     
 
+class LaserAntenna:
+    def __init__(self, efficiency, gain):
+        self.efficiency = efficiency
+        self.gain = gain
+    
+
+
 class LinkBudget:
-    def __init__(self, frequency, loss_factor_receiver, loss_factor_transmitter, power_transmitter, data_rate, atmospheric_loss, system_temperature, antenna_transmitter, antenna_receiver):
+    def __init__(self, frequency, loss_factor_receiver, loss_factor_transmitter, power_transmitter, data_rate, atmospheric_loss, system_temperature, antenna_transmitter, antenna_receiver, distance, pointing_offset_angle_transmitter, pointing_offset_angle_receiver, snr_required_decibel):
         """Creates a link budget between two points."""
         self._frequency = frequency
-        self._snr_required = None
+        self._snr_required_decibel = snr_required_decibel
+        self._optical_efficiency_transmitter = None
+        self._optical_efficiency_receiver = None
         self.wavelength = SPEED_OF_LIGHT/frequency
         self._power_transmitter = power_transmitter
         self._loss_factor_receiver = loss_factor_receiver
@@ -117,6 +85,13 @@ class LinkBudget:
         self._pointing_loss_transmitter = None
         self._pointing_loss_receiver = None
         self._pointing_loss = None
+        self._space_loss = None
+        self._snr_margin = None
+        self._distance = distance
+        self._half_power_angle_transmitter = None
+        self._half_power_angle_receiver = None
+        self._pointing_offset_angle_transmitter = pointing_offset_angle_transmitter
+        self._pointing_offset_angle_receiver = pointing_offset_angle_receiver
         self.antenna_transmitter = antenna_transmitter
         self.antenna_receiver = antenna_receiver
         
@@ -128,18 +103,67 @@ class LinkBudget:
                 return antenna.peak_gain_transmitter(self.frequency)
             elif position == 'receiver':
                 return antenna.peak_gain_receiver(self.wavelength)
+        elif isinstance(antenna, LaserAntenna):
+            pass
         else:
             raise ValueError("This antenna type is invalid.")
         
-    def calculatePointingLoss(self, antenna):
+    def calculateHalfPowerAngle(self, antenna):
         if isinstance(antenna, HelicalAntenna):
             return antenna.half_power_angle(self.wavelength)
         elif isinstance(antenna, ParabolicAntenna):
-            
             return antenna.half_power_angle(self.frequency)
+        elif isinstance(antenna, LaserAntenna):
+            pass
         else:
-            raise ValueError("This antenna type is invalid.")
-        
+            raise ValueError("This antenna type for calculating half power angle does not exist.")
+    
+    def pointingLoss(self, _pointing_offset_angle, _half_power_angle):
+        return inv_decibel(-12*(_pointing_offset_angle/_half_power_angle)**2)
+    
+    def spaceLoss(self, _wavelength, _distance):
+        return (_wavelength/(4*np.pi*_distance))**2
+    
+    def largestDistance(self, _radius_planet, _distance):       # Formula from slides, slightly modified for lagrange, as lagrange points or from center of the moon. this means Rm**2+h**2 = d**2
+        return np.sqrt((_radius_planet+_distance)**2 - _radius_planet**2)
+    
+    def calculateSignalToNoiseRatio(self, **kwargs): # not finished yet.
+        negative_vars = ['boltzmann', 'data_rate', 'system_temperature']
+        total = 0
+        for var_name in kwargs:
+            if kwargs[var_name] is not None:
+                if var_name in negative_vars:
+                    total -= decibel(kwargs[var_name])
+                else:
+                    total += decibel(kwargs[var_name])
+        return total
+
+    @property
+    def optical_efficiency_transmitter(self):
+        return self._optical_efficiency_transmitter
+    
+    @optical_efficiency_transmitter.setter
+    def optical_efficiency_transmitter(self, value):
+        self._optical_efficiency_transmitter = value
+
+    @property
+    def optical_efficiency_receiver(self):
+        return self._optical_efficiency_receiver
+    
+    @optical_efficiency_receiver.setter
+    def optical_efficiency_receiver(self, value):
+        self._optical_efficiency_receiver = value
+
+    @property
+    def distance(self):
+        return self._distance
+
+    @distance.setter
+    def distance(self, value):
+        if value<0:
+            raise ValueError("The distance must be larger than 0.")
+        self._distance = value
+
     @property
     def frequency(self):
         return self._frequency
@@ -152,13 +176,13 @@ class LinkBudget:
             raise ValueError("the frequency must be larger than 0.")
 
     @property
-    def snr_required(self):
-        return self._snr_required
+    def snr_required_decibel(self):
+        return self._snr_required_decibel
     
-    @snr_required.setter
-    def snr_required(self, value):
+    @snr_required_decibel.setter
+    def snr_required_decibel(self, value):
         if value >=0:
-            self._snr_required = value
+            self._snr_required_decibel = value
         else:
             raise ValueError("the SNR required must be larger than 0.")
         
@@ -172,6 +196,28 @@ class LinkBudget:
             self._power_transmitter = value
         else:
             raise ValueError("The power of the transmitting antenna must be larger than zero")
+        
+    @property
+    def pointing_offset_angle_transmitter(self):
+        return self._pointing_offset_angle_transmitter
+    
+    @pointing_offset_angle_transmitter.setter
+    def pointing_offset_angle_transmitter(self, value):
+        if value>0:
+            self._pointing_offset_angle_transmitter = value
+        else:
+            raise ValueError("Pointing offset angle for the transmitter must be more than 0.")
+
+    @property
+    def pointing_offset_angle_receiver(self):
+        return self._pointing_offset_angle_receiver
+    
+    @pointing_offset_angle_receiver.setter
+    def pointing_offset_angle_receiver(self, value):
+        if value>0:
+            self._pointing_offset_angle_receiver = value
+        else:
+            raise ValueError("Pointing offset angle for the receiver must be more than 0.")
 
     @property
     def loss_factor_transmitter(self):
@@ -260,14 +306,7 @@ class LinkBudget:
     def pointing_loss_receiver(self, value):
         self._pointing_loss_receiver = value
 
-    @property
-    def pointing_loss(self):
-        return self._pointing_loss
     
-    @pointing_loss.setter
-    def pointing_loss(self, value):
-        self._pointing_loss = value
-
     @property
     def antenna_transmitter(self):
         return self.antenna_transmitter
@@ -277,19 +316,15 @@ class LinkBudget:
         position = 'transmitter'
         if value is None:
             raise ValueError("There is no transmitting antenna.")
-                
-        self.gain_transmitter = self.calculateAntennaGain(value, position)
-        self.pointing_loss_transmitter = self.calculatePointingLoss(value) 
+        if isinstance(value, HelicalAntenna or ParabolicAntenna):
+            self.gain_transmitter = self.calculateAntennaGain(value, position)
+            self.half_power_angle_transmitter = self.calculateHalfPowerAngle(value) 
+            self.pointing_loss_transmitter = self.pointingLoss(self.pointing_offset_angle_transmitter, self.calculateHalfPowerAngle(value))
+        elif isinstance(value, LaserAntenna):
+            self._optical_efficiency_transmitter = value.efficiency
+            self._gain_transmitter - value.gain
         self._antenna_transmitter = value      
-        # if value['type']=='helical':
-            #     self.gain_transmitter = peakGainHelical(value['diameter'], value['length'], self.wavelength)
-            #     self.pointing_loss
-            # elif value['type']=='parabolic':
-            #     self.gain_transmitter = peakGainParabolicTransmitter(value['diameter'], self.frequency)
-            # # elif value['type']=='laser':
-            #     # self.gain_transmitter = 'laser'
-            # else:
-            #     raise ValueError("This transmitting antenna type does not exist.")   
+
     
     @property
     def antenna_receiver(self):
@@ -300,17 +335,70 @@ class LinkBudget:
         position = 'receiver'
         if value is None:
             raise ValueError("There is no receiver antenna.")
-        self.gain_receiver = self.calculateAntennaGain(value, position)
-        self.pointing_loss_receiver = self.calculatePointingLoss(value)
+        if isinstance(value, HelicalAntenna or ParabolicAntenna):
+
+            self.gain_receiver = self.calculateAntennaGain(value, position)
+            self.half_power_angle_receiver = self.calculateHalfPowerAngle(value)
+            self.pointing_loss_receiver = self.pointingLoss(self.pointing_offset_angle_receiver, self.calculateHalfPowerAngle(value))
+        elif isinstance(value, LaserAntenna):
+            self._optical_efficiency_receiver = value.efficiency
+            self._gain_receiver = value.gain
         self._antenna_transmitter = value
 
+    @property
+    def pointing_loss(self):
+        return self.pointing_loss_transmitter * self.pointing_loss_receiver
+    
+    @property
+    def space_loss(self):
+        return self.spaceLoss(self.wavelength, self.distance)
+        # return self.spaceLoss(self.wavelength, self.largestDistance(RADIUS_MOON, self.distance))
+
+        
+        
+    
+
+    @property #maybe check if necessary.
+    def snr_margin(self):
+        power_transmitter = self.power_transmitter
+        loss_factor_transmitter = self.loss_factor_transmitter
+        loss_factor_receiver = self.loss_factor_receiver
+        gain_transmitter = self.gain_transmitter
+        gain_receiver = self.gain_receiver
+        atmospheric_loss = self.atmospheric_loss
+        space_loss = self.space_loss
+        pointing_loss = self.pointing_loss
+        data_rate = self.data_rate
+        boltzmann = BOLTZMANN
+        system_temperature = self.system_temperature
+        return self.calculateSignalToNoiseRatio(power_transmitter=power_transmitter, loss_factor_transmitter=loss_factor_transmitter, loss_factor_receiver=loss_factor_receiver, gain_transmitter=gain_transmitter, gain_receiver=gain_receiver, atmospheric_loss=atmospheric_loss, space_loss=space_loss, pointing_loss=pointing_loss, data_rate=data_rate, boltzmann=boltzmann, system_temperature=system_temperature) - self.snr_required_decibel
+
+
 if __name__=="__main__":
-    # inputs: Ptr, Ll, Lr, k, frequency, char_transmitting_ant, char_receiving_ant, orbit/mission param(distance), tele-com requirements(data rate), coding-modulation type, required BER
     ant_1 = HelicalAntenna(diameter=0.098, length=0.212) # efficiency must be added
-    ant_2 = ParabolicAntenna(3, 5)  #TEST VALUE
+    ant_2 = ParabolicAntenna(3, 0.55)  #TEST VALUE
+    a = LinkBudget(2500e6, 0.5, 0.5, 31.622777, 50, 0, 175.84, ant_1, ant_2,  np.array([24438000], dtype='int64'), 13, 50, 10)
+    a.gain_receiver = 1.047129 #(have to make the gain 0.2 dB for same value so this is 0.2 dB in watts)
+    a.pointing_loss_receiver = inv_decibel(-0.12) #(assumed value from slides, as 0.1 e_re is assumed)
+
+    print(f'{a.snr_margin=}')
+
+    # optical_antenna_1 = LaserAntenna(0.8, 1)
+    # optical_antenna_2 = LaserAntenna(0.8, 1)
+    # b = LinkBudget(SPEED_OF_LIGHT/1550e-9, None, None, 0.690, None, None, None, optical_antenna_1, optical_antenna_2, 1000000, None, None,-65.5)
+    # print(f'{decibel(b.space_loss)=}')
+    # print(b.power_transmitter)
+    # print(b.optical_efficiency_transmitter)
+    # print(b.optical_efficiency_receiver)
+    # print(b.gain_transmitter)
+    # print(b.gain_receiver)
+    # print(b.snr_margin)
 
 
-    a = LinkBudget(2500e6, None, None, 35, 50, None, None, ant_2, ant_1)
-    print(f'{a.gain_receiver=}')
-    print(f'{a.gain_transmitter=}')
-    print(f'{a.pointing_loss_transmitter=}')
+    
+    
+# power transmitter a little, gain transmitter, :
+
+# todo 1: get something for coding methods to introduce snr required, or other ways to get snr required.
+# todo 2: finish the snr_margin calculator.
+# inputs: Ptr, Ll, Lr, k, frequency, char_transmitting_ant, char_receiving_ant, orbit/mission param(distance), tele-com requirements(data rate), coding-modulation type, required BER
