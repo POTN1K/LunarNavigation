@@ -4,11 +4,13 @@ By I. Maes, N. Ricker"""
 
 h_falcon = 3.275  # [m] Height of the Falcon Heavy payload fairing
 r_falcon = 2.6  # [m] Radius of the Falcon Heavy payload fairing
-axial_freq_falcon = 25  # [Hz] Axial freq of the Falcon Heavy
-lateral_freq_falcon = 10  # [Hz] Lateral freq of the Falcon Heavy
+axial_freq_falcon = 25*1.5  # [Hz] Axial freq of the Falcon Heavy
+lateral_freq_falcon = 10*1.5  # [Hz] Lateral freq of the Falcon Heavy
 g_axial = 8.5
 g_lateral = 3
+g_tensile = 4
 g = 9.80665
+temperatures = [-120, 130]
 
 material_properties = {
     "Aluminium_6061-T6": {
@@ -77,6 +79,3 @@ material_properties = {
 
 
 
-# Constants from other subsystems
-m_solar_panels = 100  # [kg] Mass of the solar panels
-area_solar_panels = 8  # [m^2] Area of the solar panels

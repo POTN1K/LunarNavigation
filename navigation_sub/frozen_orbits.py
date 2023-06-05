@@ -8,7 +8,7 @@ import sys
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
-
+from pylab import cm
 sys.path.append('.')
 
 # Local Libraries
@@ -60,7 +60,7 @@ class FrozenOrbits:
     Class to check the parameters of frozen orbits,combination and position over time
     """
 
-    def __init__(self):
+    def __init__(self, File):
         self.model = Model()
         self.distances = []
         self.moon_points = []
@@ -120,6 +120,9 @@ class FrozenOrbits:
                                              [5214e3, 0.006, 30, 270, 0, 0],
                                              [10000e3, 0.006, 30, 90, 0, 0],
                                              [10000e3, 0.006, 30, 270, 0, 0]])
+
+        self.DOP = File
+        self.data = []
 
     def mean_to_true_anomaly(self, e, M):
         eccentric_anomaly = element_conversion.true_to_eccentric_anomaly(np.deg2rad(M), e)
@@ -228,35 +231,35 @@ class FrozenOrbits:
                 self.DOP_time_HHDOP = np.vstack((self.DOP_time_HHDOP,DOPValues[:, 5]))
 
 
-        np.savetxt("model0GDOP.csv", self.DOP_time_GDOP, delimiter=",")
-        np.savetxt("model0PDOP.csv", self.DOP_time_PDOP, delimiter=",")
-        np.savetxt("model0HDOP.csv", self.DOP_time_HDOP, delimiter=",")
-        np.savetxt("model0VDOP.csv", self.DOP_time_VDOP, delimiter=",")
-        np.savetxt("model0TDOP.csv", self.DOP_time_TDOP, delimiter=",")
-        np.savetxt("model0HHDOP.csv", self.DOP_time_HHDOP, delimiter=",")
+        np.savetxt("model12GDOP.csv", self.DOP_time_GDOP, delimiter=",")
+        np.savetxt("model12PDOP.csv", self.DOP_time_PDOP, delimiter=",")
+        np.savetxt("model12HDOP.csv", self.DOP_time_HDOP, delimiter=",")
+        np.savetxt("model12VDOP.csv", self.DOP_time_VDOP, delimiter=",")
+        np.savetxt("model12TDOP.csv", self.DOP_time_TDOP, delimiter=",")
+        np.savetxt("model12HHDOP.csv", self.DOP_time_HHDOP, delimiter=",")
 
 
 constellations = []
-fo = FrozenOrbits()
-orbit_choice = 0
-fo.model = Model()
-fo.model_adder(fo.orbit_ESA_SP)
-fo.model_symmetrical_planes(orbit_choice)
-# fo.DOP_calculator()
+fo = FrozenOrbits("model0GDOP.csv")
+orbit_choice = 12
+# fo.model = Model()
+# fo.model_adder(fo.orbit_ESA_SP)
+# fo.model_symmetrical_planes(orbit_choice)
+# fo.DOP_calculator(True)
 
-
+#
 # for i in range(0, 13):
 #     fo.model = Model()
 #     fo.model_symmetrical_planes(i)
 #     constellations.append(fo.DOP_calculator(True))
 
-P = fo.period_calc(fo.orbit_choices)[orbit_choice]
-print(fo.period_calc(fo.orbit_choices)[orbit_choice])
+# P = fo.period_calc(fo.orbit_choices)[orbit_choice]
+# print(fo.period_calc(fo.orbit_choices)[orbit_choice])
 
 # constellations = np.asarray(constellations)
 # print(fo.period_calc(fo.orbit_choices))
 
-
-fo.dyn_sim(P)
-fo.DOP_time(fo.propagation_time.kepler_elements)
-print(constellations)
+# #
+# fo.dyn_sim(P)
+# fo.DOP_time(fo.propagation_time.kepler_elements)
+# print(constellations)

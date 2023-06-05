@@ -28,7 +28,7 @@ miu_moon = 4.9048695e12  # m^3/s^2
 class Satellite:
     """Class to define a satellite with its position and cone of view around the Moon."""
 
-    def __init__(self, a=r_moon, e=0, i=0, w=0, Omega=0, nu=0, elevation=10, shift=0):
+    def __init__(self, a=r_moon, e=0, i=0, w=0, Omega=0, nu=0, elevation=10, shift=0, id=0):
         """Initialise the satellite with its Keplerian elements and calculate its position.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -39,6 +39,7 @@ class Satellite:
         :param elevation: (optional) elevation angle [deg]
         :param shift: (optional) shift of the cone of view [deg]
         """
+        self.id = id
         self.range = None
         self.e = e
         self.a = a
@@ -176,7 +177,7 @@ class Satellite:
         return self.a, self.e, self.i, self.w, self.Omega, self.nu
 
     def __repr__(self):
-        return f"Satellite(a={self.a}, e={self.e}, i={self.i}, w={self.w}, Omega={self.Omega}, nu={self.nu})"
+        return f"Satellite(id={self.id}, a={self.a}, e={self.e}, i={self.i}, w={self.w}, Omega={self.Omega}, nu={self.nu})"
 
 
 class Tower:
@@ -371,7 +372,7 @@ class FixPoint:
 class OrbitPlane:
     """Class to define an orbit plane, along with the satellites in it."""
 
-    def __init__(self, a=r_moon, e=0, i=0, w=0, Omega=0, n_sat=1, elevation=10, shift=0):
+    def __init__(self, a=r_moon, e=0, i=0, w=0, Omega=0, n_sat=1, elevation=10, shift=0, id_start=0):
         """Initialise the orbit plane with its Keplerian elements and calculate the positions of the satellites.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -381,6 +382,7 @@ class OrbitPlane:
         :param n_sat: number of satellites in the orbit plane
         :param elevation: (optional) elevation angle [deg]
         """
+        self.id_start = id_start
         self.satellites = []
         self.e = e
         self.a = a
@@ -488,7 +490,8 @@ class OrbitPlane:
         satellites = []
         for n in range(self.n_sat):
             satellites.append(
-                Satellite(self.a, self.e, self.i, self.w, self.Omega, 360 / self.n_sat * n, self.elevation, self.shift))
+                Satellite(self.a, self.e, self.i, self.w, self.Omega, 360 / self.n_sat * n, self.elevation, self.shift,
+                          id=self.id_start + n))
         return satellites
 
     def relDistSatellites(self):
@@ -542,7 +545,7 @@ class Model:
         self.n_sat += orbit.n_sat
         self.n_orbit_planes += 1
 
-    def addOrbitPlane(self, a=r_moon, e=0, i=0, w=0, Omega=0, n_sat=1, shift=0, elevation=10):
+    def addOrbitPlane(self, a=r_moon, e=0, i=0, w=0, Omega=0, n_sat=1, shift=0, elevation=10, id_start=0):
         """Add an orbit plane to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -552,6 +555,7 @@ class Model:
         :param n_sat: number of satellites in the orbit plane
         :param elevation: (optional) elevation angle [deg]
         """
+        self.id_start = id_start
         n_orbit = OrbitPlane(a, e, i, w, Omega, n_sat, elevation, shift)
         self.orbit_planes.append(n_orbit)
         for s in n_orbit.satellites:
@@ -566,7 +570,7 @@ class Model:
         self.modules.append(module)
         self.n_sat += 1
 
-    def addSatellite(self, a=r_moon, e=0, i=0, w=0, Omega=0, nu=0, shift=0, elevation=10):
+    def addSatellite(self, a=r_moon, e=0, i=0, w=0, Omega=0, nu=0, shift=0, elevation=10, id=0):
         """Add a satellite to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -612,10 +616,12 @@ class Model:
         """
         if dist_type == 0:
             for n in range(n_planes):
-                self.addOrbitPlane(a, e, i, w, 180 / n_planes * n, n_sat_per_plane, shift + f * 180 * n, elevation)
+                self.addOrbitPlane(a, e, i, w, 180 / n_planes * n, n_sat_per_plane, shift + f * 180 * n, elevation,
+                                   id_start=n * n_sat_per_plane)
         elif dist_type == 1:
             for n in range(n_planes):
-                self.addOrbitPlane(a, e, i, w, 360 / n_planes * n, n_sat_per_plane, shift + f * 360 * n, elevation)
+                self.addOrbitPlane(a, e, i, w, 360 / n_planes * n, n_sat_per_plane, shift + f * 360 * n, elevation,
+                                   id_start=n * n_sat_per_plane)
         else:
             raise ValueError("Invalid distribution type.")
 
