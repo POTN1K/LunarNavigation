@@ -101,8 +101,11 @@ class FrozenOrbits:
                                                [13677.7072e3, 0.0820, 40.3348, 86.5479, 0.41, 0]])
 
         self.constellation_NP = np.array([[6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 0)],
-                                     [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 120)],
-                                     [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 240)]])
+                                     [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 180)]])
+                                     # [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 240)]])
+        self.constellation_SP = np.array([[6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 0)],
+                                          [6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 180)]])
+                                          # [6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 240)]])
 
         self.constellation_MLO = np.array([[3476e3, 0.038, 15, 90, 0, self.mean_to_true_anomaly(0.038, 0)],
                                       [3476e3, 0.038, 15, 270, 0, self.mean_to_true_anomaly(0.038, 0)],
@@ -120,6 +123,9 @@ class FrozenOrbits:
                                              [5214e3, 0.006, 30, 270, 0, 0],
                                              [10000e3, 0.006, 30, 90, 0, 0],
                                              [10000e3, 0.006, 30, 270, 0, 0]])
+        self.orbit_Low_I = np.array([[10000e3, 0.038, 10, 90, 0, 30],
+                                     [10000e3, 0.038, 10, 90, 0, 150],
+                                     [10000e3, 0.038, 10, 90, 0, 270]])
 
         self.DOP = File
         self.data = []
@@ -185,7 +191,7 @@ class FrozenOrbits:
         plt.show()
 
 
-    def dyn_sim(self, P, dt=10, kepler_plot=0):
+    def dyn_sim(self, P, dt=50  , kepler_plot=0):
         satellites = self.model.getSatellites()
         duration = 86400 * P/24
         self.propagation_time = PropagationTime(satellites, duration, dt, 250, 0, 0)
@@ -231,21 +237,22 @@ class FrozenOrbits:
                 self.DOP_time_HHDOP = np.vstack((self.DOP_time_HHDOP,DOPValues[:, 5]))
 
 
-        np.savetxt("model12GDOP.csv", self.DOP_time_GDOP, delimiter=",")
-        np.savetxt("model12PDOP.csv", self.DOP_time_PDOP, delimiter=",")
-        np.savetxt("model12HDOP.csv", self.DOP_time_HDOP, delimiter=",")
-        np.savetxt("model12VDOP.csv", self.DOP_time_VDOP, delimiter=",")
-        np.savetxt("model12TDOP.csv", self.DOP_time_TDOP, delimiter=",")
-        np.savetxt("model12HHDOP.csv", self.DOP_time_HHDOP, delimiter=",")
+        np.savetxt("modelcircleGDOP.csv", self.DOP_time_GDOP, delimiter=",")
+        np.savetxt("modelcirclePDOP.csv", self.DOP_time_PDOP, delimiter=",")
+        np.savetxt("modelcircleHDOP.csv", self.DOP_time_HDOP, delimiter=",")
+        np.savetxt("modelcircleVDOP.csv", self.DOP_time_VDOP, delimiter=",")
+        np.savetxt("modelcircleTDOP.csv", self.DOP_time_TDOP, delimiter=",")
+        np.savetxt("modelcircleHHDOP.csv", self.DOP_time_HHDOP, delimiter=",")
 
 
 constellations = []
-fo = FrozenOrbits("model0GDOP.csv")
-orbit_choice = 12
-# fo.model = Model()
-# fo.model_adder(fo.orbit_ESA_SP)
-# fo.model_symmetrical_planes(orbit_choice)
-# fo.DOP_calculator(True)
+fo = FrozenOrbits("model10GDOP.csv")
+orbit_choice = 10
+fo.model = Model()
+# fo.model_adder(np.vstack((fo.constellation_SP, fo.constellation_NP, fo.orbit_Low_I)))
+fo.model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, dist_type=1)
+
+fo.DOP_calculator(True)
 
 #
 # for i in range(0, 13):
@@ -253,13 +260,13 @@ orbit_choice = 12
 #     fo.model_symmetrical_planes(i)
 #     constellations.append(fo.DOP_calculator(True))
 
-# P = fo.period_calc(fo.orbit_choices)[orbit_choice]
+P = fo.period_calc(fo.orbit_choices)[orbit_choice]
 # print(fo.period_calc(fo.orbit_choices)[orbit_choice])
 
 # constellations = np.asarray(constellations)
 # print(fo.period_calc(fo.orbit_choices))
 
 # #
-# fo.dyn_sim(P)
-# fo.DOP_time(fo.propagation_time.kepler_elements)
+fo.dyn_sim(345593//3600)
+fo.DOP_time(fo.propagation_time.kepler_elements)
 # print(constellations)
