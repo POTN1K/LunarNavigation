@@ -40,14 +40,15 @@ def Normal_Distrib(self):
 DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
 boxplotscancer = np.zeros(10000)
 for i in range(0, 6):
-    filename = "model8" + DOPS[i]+ ".csv"
+    filename = "model10NPSPEQ31" + DOPS[i]+ ".csv"
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         data = np.array([[float(element) for element in row] for row in reader])
         ninetyfifth_percent = np.percentile(data, 95, axis=0)
     boxplotscancer = np.vstack((boxplotscancer, ninetyfifth_percent))
 print("Krijg Kanker")
-boxplotscancer = boxplotscancer[1:, :].T
+boxplotscancer = array = np.delete(boxplotscancer, 0, 0).T
+
 
 def boxplot(df):
 
@@ -83,11 +84,11 @@ zM = r_moon * np.cos(theta)
 
 ax.plot_surface(xM, yM, zM, color='grey', alpha=0.2)
 
-
+boxplotpointsmap = boxplotscancer[:, 5]
 
 # Plot satellites in view
 color_map = cm.ScalarMappable(cmap='PiYG')
-color_map.set_array(boxplotscancer)
+color_map.set_array(boxplotscancer[:, 5])
 #
 ax.scatter(*zip(*Model.createMoon(100)), marker='s', s=1, c=boxplotscancer[:, 5], cmap='PiYG')
 plt.colorbar(color_map)
