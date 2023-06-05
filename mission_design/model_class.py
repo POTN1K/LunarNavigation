@@ -651,7 +651,7 @@ class Model:
     def createOrbits(self, resolution=100):
         phi = np.linspace(0, 2 * np.pi, resolution)
         theta = np.linspace(0, np.pi, resolution)
-        r = np.linspace(r_moon+resolution, r_orbit, resolution)
+        r = np.linspace(r_moon+resolution, r_orbit, 10)
 
         orbit_points = []
         for m in r:
@@ -740,11 +740,12 @@ class Model:
         # Create a meshgrid of phi and theta values
         phi, theta = np.meshgrid(phi, theta)
         # Calculate the x, y, and z coordinates for each point on the sphere
-        xO = r * np.sin(theta) * np.cos(phi)
-        yO = r * np.sin(theta) * np.sin(phi)
-        zO = r * np.cos(theta)
+        for m in r :
+            xO = m * np.sin(theta) * np.cos(phi)
+            yO = m * np.sin(theta) * np.sin(phi)
+            zO = m * np.cos(theta)
 
-        ax.plot_surface(xO, yO, zO, color='grey', alpha=0.2)
+            ax.plot_surface(xO, yO, zO, color='grey', alpha=0.2)
 
         # Plot modules
         mod_pos = [mod.r for mod in self.modules]
