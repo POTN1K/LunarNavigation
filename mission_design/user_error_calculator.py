@@ -117,6 +117,7 @@ class UserErrors:
 
 
 
+
         # Now, we can compute the DOP values
     def dop_calculator(self):
         # GDOP (Geometric DOP) - uses all elements
