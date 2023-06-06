@@ -12,6 +12,10 @@ with open('Coordinates_in_time.csv', 'r') as file:
 
     reader = csv.reader(file)
     data = np.array([[float(element) for element in row] for row in reader])
+
+
+
+
     # print(data)
     data_no_time = data[:, 1:]
     # print(data_no_time)

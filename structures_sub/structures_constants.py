@@ -2,13 +2,12 @@
 By I. Maes, N. Ricker"""
 
 
-h_falcon = 3.275  # [m] Height of the Falcon Heavy payload fairing
-r_falcon = 2.6  # [m] Radius of the Falcon Heavy payload fairing
-axial_freq_falcon = 25*1.5  # [Hz] Axial freq of the Falcon Heavy
-lateral_freq_falcon = 10*1.5  # [Hz] Lateral freq of the Falcon Heavy
-g_axial = 8.5
-g_lateral = 3
-g_tensile = 4
+
+axial_freq_falcon = 25  # [Hz] Axial freq of the Falcon Heavy
+lateral_freq_falcon = 10  # [Hz] Lateral freq of the Falcon Heavy
+g_axial = 8.5   # [g] Axial load factor
+g_lateral = 3   # [g] Lateral load factor
+g_tensile = 4   # [g] Tensile load factor (negative g)
 g = 9.80665
 temperatures = [-120, 130]
 
