@@ -55,7 +55,7 @@ eclipse_moon = eclipse_length(AU, 384400, 696340, 6371, mu_earth)
 eclipse_satellite = eclipse_length(AU+384400, r_sat, 696340, 1737.4, mu_moon)
 
 total_eclipse = eclipse_moon[1] + eclipse_satellite[1]
-print(f'Total eclipse time: {round(total_eclipse/3600,2)} [hrs]')
+# print(f'Total eclipse time: {round(total_eclipse/3600,2)} [hrs]')
 
 
 def bol_power(p_eol, degradation, lifetime):
@@ -66,18 +66,22 @@ def bol_power(p_eol, degradation, lifetime):
 # print(bol_power(1700, 0.03, 12))
 
 
-def sa_size(p_bol, solar_efficiency, sc):
+def sa_size(p_bol, cell_efficiency, sc):
     """ Function to compute the required solar array size to generate enough power for the system [m^2]
     : parameters. power generated at BOL (W), efficiency of the cells (W/m^2) and solar flux (W/m^2)
     : output. size of the solar array (m^2)"""
-    p_sa = p_bol / solar_efficiency
+    p_sa = p_bol / cell_efficiency
     area_sa = p_sa / sc
     return area_sa
+# print(sa_size(bol_power(1700, 0.03, 12), 0.32, sc_moon))
+
 
 def battery_size(T_eclipse, E_specific, E_density, P_req, N_b, n_dis, N_c, V_cdis, V_d, Vhdis, DoD):
-    """Function to compute the battery size and volume. T_eclipse = maximum eclipse time [h], E_specific = specific energy [Wh/kg]
-    E_density = Energy density [Wh/l], P_req = required power from battery during eclipse [W], N_b = number of batteries in parrallel,
-    n_dis = discharge converter efficiency, N_c = number of series cells per battery, V_d = voltage drop in bypass diode in case a cell failed
+    """Function to compute the battery size and volume. T_eclipse = maximum eclipse time [h],
+    E_specific = specific energy [Wh/kg] E_density = Energy density [Wh/l],
+    P_req = required power from battery during eclipse [W], N_b = number of batteries in parallel,
+    n_dis = discharge converter efficiency, N_c = number of series cells per battery,
+    V_d = voltage drop in bypass diode in case a cell failed
     V_cdis = voltage per cell, average during discharge, V_hdis = voltage drop in harness from battery to PRU
     Dod = maximum allowable depth of discharge in the worst case eclipse."""
 #    cap_battery = (P_req * T_eclipse) / (N_b * n_dis * ((N_c - 1) * V_cdis - V_d - V_hdis) * DoD)
@@ -85,6 +89,7 @@ def battery_size(T_eclipse, E_specific, E_density, P_req, N_b, n_dis, N_c, V_cdi
     volume_battery = (T_eclipse * P_req) / (n_dis * E_density * DoD) #[l]
     return mass_battery, volume_battery
 
-a, b = battery_size(6.79, 200, 300, 1500, 0, 0.9, 0, 0, 0, 0, 0.8)
-print(a,b)
-# print(sa_size(bol_power(1700, 0.03, 12), 0.32, sc_moon))
+
+# a, b = battery_size(6.79, 200, 300, 1500, 0, 0.9, 0, 0, 0, 0, 0.8)
+# print(a, b)
+

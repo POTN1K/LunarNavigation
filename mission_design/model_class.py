@@ -22,6 +22,7 @@ from tudatpy.kernel.astro import element_conversion
 
 # Constants
 r_moon = 1.737e6  # m
+r_orbit = r_moon + 200e3  # m
 miu_moon = 4.9048695e12  # m^3/s^2
 
 
@@ -525,6 +526,10 @@ class Model:
             self.moon = self.createMoon(value)
             self.mod_inView = np.zeros(len(self.moon))
             self.mod_inView_obj = {i: [] for i in range(len(self.moon))}
+
+            self.orbits = self.createOrbits(value)
+            self.mod_inView_orbits = np.zeros(len(self.orbits))
+            self.mod_inView_obj_orbits = {i: [] for i in range(len(self.orbits))}
         else:
             raise ValueError("Resolution must be positive.")
 
@@ -535,6 +540,9 @@ class Model:
         self.n_orbit_planes = 0
         self.mod_inView = np.zeros(len(self.moon))
         self.mod_inView_obj = {i: [] for i in range(len(self.moon))}
+
+        self.mod_inView_orbits = np.zeros(len(self.orbits))
+        self.mod_inView_obj_orbits = {i: [] for i in range(len(self.orbits))}
 
     def addExistingOrbitPlane(self, orbit):
         """Add an existing orbit plane to the model.
@@ -640,6 +648,21 @@ class Model:
                 sphere_points.append([x, y, z])
         return sphere_points
 
+    def createOrbits(self, resolution=100):
+        phi = np.linspace(0, 2 * np.pi, resolution)
+        theta = np.linspace(0, np.pi, resolution)
+        r = np.linspace(r_moon+resolution, r_orbit, 10)
+
+        orbit_points = []
+        for m in r:
+            for i in phi:
+                for j in theta:
+                    x = m * np.sin(j) * np.cos(i)
+                    y = m * np.sin(j) * np.sin(i)
+                    z = m * np.cos(j)
+                    orbit_points.append([x, y, z])
+        return orbit_points
+
     def setCoverage(self):
         """Set the coverage of the modules."""
         if self.modules == []:
@@ -649,6 +672,15 @@ class Model:
                 if mod.isInView(point):
                     self.mod_inView[i] += 1
                     self.mod_inView_obj[i].append(mod)
+
+    def setCoverageOrbits(self):
+        if self.modules == []:
+            raise ValueError("No modules in the model.")
+        for mod in self.modules:
+            for i, point in enumerate(self.orbits):
+                if mod.isInView(point):
+                    self.mod_inView_orbits[i] += 1
+                    self.mod_inView_obj_orbits[i].append(mod)
 
     def plotCoverage(self):
         """Plot the coverage of the satellites."""
@@ -679,6 +711,51 @@ class Model:
         color_map.set_array(self.mod_inView)
 
         ax.scatter(*zip(*self.moon), marker='s', s=1, c=self.mod_inView, cmap='PiYG')
+        plt.colorbar(color_map)
+
+        # ax.set_title('Satellite coverage')
+        ax.set_xlabel('x [$10^7$ m]')
+        ax.set_ylabel('y [$10^7$ m]')
+        ax.set_zlabel('z [$10^7$ m]')
+
+        ax.set_xlim(-r_moon * 3, r_moon * 3)
+        ax.set_ylim(-r_moon * 3, r_moon * 3)
+        ax.set_zlim(-r_moon * 3, r_moon * 3)
+        ax.set_aspect('equal')
+        plt.show()
+
+    def plotCoverageOrbits(self):
+        """Plot the coverage of the satellites."""
+        if self.mod_inView_orbits.all() == 0:
+            self.setCoverageOrbits()
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        # Plot Orbits
+        phi = np.linspace(0, 2 * np.pi, 100)
+        theta = np.linspace(0, np.pi, 100)
+        r = np.linspace(r_moon+100, r_orbit, 100)
+
+        # Create a meshgrid of phi and theta values
+        phi, theta = np.meshgrid(phi, theta)
+        # Calculate the x, y, and z coordinates for each point on the sphere
+        for m in r :
+            xO = m * np.sin(theta) * np.cos(phi)
+            yO = m * np.sin(theta) * np.sin(phi)
+            zO = m * np.cos(theta)
+
+            ax.plot_surface(xO, yO, zO, color='grey', alpha=0.2)
+
+        # Plot modules
+        mod_pos = [mod.r for mod in self.modules]
+        ax.scatter(*zip(*mod_pos), s=10)
+
+        # Plot satellites in view
+        color_map = cm.ScalarMappable(cmap='PiYG')
+        color_map.set_array(self.mod_inView_orbits)
+
+        ax.scatter(*zip(*self.orbits), marker='s', s=1, c=self.mod_inView_orbits, cmap='PiYG')
         plt.colorbar(color_map)
 
         # ax.set_title('Satellite coverage')
