@@ -31,7 +31,7 @@ def sensitivity_analysis(score, weight):
 if __name__ == "__main__":
 
     score_gs = np.array([[3,2,3,2,3,4], 
-                         [4,1,2,2,2,2]])
+                         [4,2,2,2,2,2]])
 
     weight_gs = [range(3,6), range(3,5), range(3,6), range(2,5), range(3,5), range(1,3)]
     win_gs = sensitivity_analysis(score_gs, weight_gs)
