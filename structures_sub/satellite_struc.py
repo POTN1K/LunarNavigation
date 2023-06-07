@@ -128,8 +128,12 @@ class SatelliteStruc:
         if self.support_r1 is None:
             b = 2*4*(np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[0])**2 * self.dim[0]*self.t + np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[1])**2 * self.dim[0]*self.t)/self.cross_section
         else:
-            b = (2*4*(np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[0])**2 * self.dim[0]*self.t + np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[1])**2 * self.dim[0]*self.t) + (self.support_E * 4 * np.pi * self.support_I / (self.dim[2]*self.support_area)/(self.cross_section + self.support_area)
-#self.support_E*(9*((self.support_r2-self.support_r1)/self.support_r2)**1.6 + 0.16*((self.support_r2-self.support_r1)/self.dim[2])**1.3)*self.support_area)
+            y = 1 - 0.901 * (1 - np.e ** - (1/16 * np.sqrt(self.support_r2/(self.support_r2-self.support_r1))))
+            print(self.dim[2]/self.support_r2)
+            b = ((2*4*(np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[0])**2 * self.dim[0]*self.t + np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[1])**2 * self.dim[0]*self.t)) +0.6 * y * self.support_E * (self.support_r2-self.support_r1)/self.support_r2*self.support_area)/(self.cross_section + self.support_area)
+#self.support_E*((9*(self.support_r2-self.support_r1)/self.support_r2)**1.6 + 0.16*((self.support_r2-self.support_r1)/self.dim[2])**1.3)*self.support_area
+#0.6 * self.support_E * (self.support_r2-self.support_r1)/self.support_r2*self.support_area
+#(self.support_E *self.support_area* 4 * np.pi**2 * self.support_I / (self.dim[2]))
         return b
 
     @property
@@ -298,7 +302,7 @@ if __name__ == "__main__":
     s.add_structure_sub(length=2.5, width=2, height=2, t=1e-3)
     s.add_propellant_tank(volume=0.07, material="Aluminium_7075-T73", prop_mass=100, pressure=2e6)
     s.add_panels(a=4.5, b=1, mass=100)
-    s.add_support(r1=19e-3 ,r2=20e-3,  material="Ti-6AL-4V")
+    s.add_support(r1=.409, r2=0.41,  material="Ti-6AL-4V")
     s.calculate_stresses()
     s.calculate_vibrations()
     print(f"Mass: {s.mass}")
