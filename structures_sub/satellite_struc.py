@@ -9,7 +9,7 @@ import numpy as np
 
 # Constants
 from structures_constants import *
-
+from tqdm import tqdm
 
 # --------------------------------------------------------------------------- #
 class PropellantTank:
@@ -81,6 +81,53 @@ class Support:
 
 class SatelliteStruc:
     """Class to create a satellite structure. It studies mass, dimensions, volume, stress, and vibrations"""
+
+    @staticmethod
+    def create_standard_satellite(l_struc, w_struc, h_struc, t_struc, r_support, t_support, material_support):
+        """Creates a standard satellite structure.
+        :param l_struc: Length of the structure. [m]
+        :param w_struc: Width of the structure. [m]
+        :param h_struc: Height of the structure. [m]
+        :param t_struc: Thickness of the structure. [m]
+        :param r_support: Radius of the support. [m]
+        :param t_support: Thickness of the support. [m]
+        :param material_support: Material of the support. [string]
+        :return: SatelliteStruc object.
+        """
+        s = SatelliteStruc()
+
+        # Structure
+        s.add_structure_sub(length=l_struc, width=w_struc, height=h_struc, t=t_struc)
+        s.add_support(r=r_support, t=t_support, material=material_support)
+
+        # Power
+        s.add_panels(a=1.6, b=0.4, mass=40)
+        s.add_point_element(mass=71, name="battery", pos=[1, 0, 0])
+        # Propulsion
+        s.add_propellant_tank(volume=0.0646 + 0.423, material="Steel_17-4PH_H1150", prop_mass=95 + 62, pressure=2e6)
+        # ADCS
+        s.add_point_element(mass=56, name="cmg")
+        s.add_point_element(mass=1.41, name="starsensor")
+        s.add_point_element(mass=0.03, name="sunsensor")
+        s.add_point_element(mass=13, name="IMU")
+        # CDH
+        s.add_point_element(mass=65.6, name="computer", pos=[-1, 0, 0])
+        # EPS
+        s.add_point_element(mass=18.2, name="pcdu", pos=[0, 1, 0])
+        # Navigation
+        s.add_point_element(mass=12, name="nsgu", pos=[1, 0, 0])
+        s.add_point_element(mass=7.6, name="freq", pos=[1, 0, 0])
+        s.add_point_element(mass=5.2, name="Clock Monitor", pos=[0, 1, 0])
+        s.add_point_element(mass=70, name="clocks", pos=[0, 1, 0])
+        # TTC
+        s.add_point_element(mass=2.776, name="antenna", pos=[1, 0, 0])
+        s.add_point_element(mass=4, name="laser", pos=[1, 0, 0])
+        s.add_point_element(mass=12.6, name="Moon reflector", pos=[1, 0, 0])
+
+        # Unknown values
+        s.add_point_element(mass=100, name="unknown", pos=[0, 0, 0])
+
+        return s
 
     def __init__(self, name="Sat_Test"):
         """Initialize the satellite structure.
@@ -312,49 +359,36 @@ class SatelliteStruc:
 
 
 if __name__ == "__main__":
-    s = SatelliteStruc()
 
-    # Structure
-    s.add_structure_sub(length=1.2, width=1.2, height=1.2, t=1e-3)
-    s.add_support(r=2.5e-1, t=1e-3, material="Ti-6AL-4V")
+    # r_support [h_struc/5, min(h_struc/2, w_struc/2)]
+    # t [0.5e-3, 3e-3]
+    # l/h [1, 2]
+    # w_struc [0.5, l_struc]
+    best = None
+    best_mass = 100000
+    for l in np.arange(1, 2, 0.1):
+        for h in tqdm(np.arange(1, 2, 0.1)):
+            for w in np.arange(0.5, l, 0.1):
+                for t_support in np.arange(0.5e-3, 3e-3, 5e-4):
+                    for t_struc in np.arange(0.5e-3, 3e-3, 5e-4):
+                        for r in np.arange(h/5, min(h/2, w/2), 1e-3):
+                            s = SatelliteStruc.create_standard_satellite(l_struc=l, w_struc=w, h_struc=h, t_struc=t_struc,
+                                                                         r_support=r, t_support=t_support, material_support="Ti-6AL-4V")
+                            s.calculate_stresses()
+                            s.calculate_vibrations()
+                            if all(s.compliance()) and s.mass < best_mass:
+                                best = s
+                                best_mass = s.mass
+                                print(f"New best: {best_mass}")
+                                print(f"l: {l}, h: {h}, w: {w}, t_support: {t_support}, t_struc: {t_struc}, r: {r}")
 
-    # Power
-    s.add_panels(a=1.6, b=0.4, mass=40)
-    s.add_point_element(mass=71, name="battery", pos=[1, 0, 0])
-    # Propulsion
-    s.add_propellant_tank(volume=0.0646+0.423, material="Steel_17-4PH_H1150", prop_mass=95+62, pressure=2e6)
-    # ADCS
-    s.add_point_element(mass=56, name="cmg")
-    s.add_point_element(mass=1.41, name="starsensor")
-    s.add_point_element(mass=0.03, name="sunsensor")
-    s.add_point_element(mass=13, name="IMU")
-    # CDH
-    s.add_point_element(mass=65.6, name="computer", pos=[-1, 0, 0])
-    # EPS
-    s.add_point_element(mass=18.2, name="pcdu", pos=[0, 1, 0])
-    # Navigation
-    s.add_point_element(mass=12, name="nsgu", pos=[1, 0, 0])
-    s.add_point_element(mass=7.6, name="freq", pos=[1, 0, 0])
-    s.add_point_element(mass=5.2, name="Clock Monitor", pos=[0, 1, 0])
-    s.add_point_element(mass=70, name="clocks", pos=[0, 1, 0])
-    # TTC
-    s.add_point_element(mass=2.776, name="antenna", pos=[1, 0, 0])
-    s.add_point_element(mass=4, name="laser", pos=[1, 0, 0])
-    s.add_point_element(mass=12.6, name="Moon reflector", pos=[1, 0, 0])
-
-    # Unknown values
-    s.add_point_element(mass=100, name="unknown", pos=[0, 0, 0])
-
-
-    s.calculate_stresses()
-    s.calculate_vibrations()
-
-    print(f"Mass: {s.mass}")
+    # l: 1.0, h: 1.0, w: 0.5, t_support: 0.0015, t_struc: 0.0005, r: 0.2
+    #print(f"Mass: {s.mass}")
     # print(f"Mass Break: {s.mass_breakdown}")
     # print(f"MMOI Break: {s.mmoi_breakdown}")
-    print(f"Compliance: {s.compliance()}")
+    #print(f"Compliance: {s.compliance()}")
     #print(f"Buckling limit: {s.buckling_limit}")
-    print(f"Tank radius: {s.propellant_tank.r}")
+    #print(f"Tank radius: {s.propellant_tank.r}")
     # print(f"Stresses: {s.stress}")
     # print(f"Vibrations: {s.vibration}")
 
