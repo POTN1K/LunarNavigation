@@ -59,6 +59,26 @@ class PropellantTank:
         return f"PropellantTank({self.volume}, {self.material})"
 
 
+class Support:
+    """Class to create a support structure."""
+    def __init__(self, r1, r2, h, material):
+        self.r1 = r1
+        self.r2 = r2
+        self.h = h
+        self.E = material_properties[material]["E"]
+        self.rho = material_properties[material]["density"]
+        self.I = np.pi * r2 ** 4 / 4 - np.pi * r1 ** 4 / 4
+        self.area = np.pi * self.r2 ** 2 - np.pi * self.r1 ** 2
+        self.mass = self.rho * self.area * self.h
+
+        self.Ixx = self.mass * (3 * r2 ** 2 + self.h ** 2) / 12 - self.mass * (
+                    3 * r1 ** 2 + self.h ** 2) / 12
+        self.Iyy = self.mass * (3 * r2 ** 2 + self.h ** 2) / 12 - self.mass * (
+                    3 * r1 ** 2 + self.h ** 2) / 12
+        self.Izz = self.mass * r2 ** 2 / 2 - self.mass * r1 ** 2 / 2
+        self.volume = self.area * self.h
+
+
 class SatelliteStruc:
     """Class to create a satellite structure. It studies mass, dimensions, volume, stress, and vibrations"""
 
@@ -70,7 +90,7 @@ class SatelliteStruc:
         self.mass = 0
         self.dim = [0, 0, 0] # [Length, Width, Height]
         self.t = None
-        self.support_r1 = None
+        self.support = None
         self.mmoi = [0, 0, 0] # [Ixx, Iyy, Izz]
 
         self.material = "Aluminium_7075-T73"
@@ -125,15 +145,17 @@ class SatelliteStruc:
 
     @property
     def buckling_limit(self):
-        if self.support_r1 is None:
+        if self.support is None:
             b = 2*4*(np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[0])**2 * self.dim[0]*self.t + np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[1])**2 * self.dim[0]*self.t)/self.cross_section
         else:
-            y = 1 - 0.901 * (1 - np.e ** - (1/16 * np.sqrt(self.support_r2/(self.support_r2-self.support_r1))))
-            print(self.dim[2]/self.support_r2)
-            b = ((2*4*(np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[0])**2 * self.dim[0]*self.t + np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[1])**2 * self.dim[0]*self.t)) +0.6 * y * self.support_E * (self.support_r2-self.support_r1)/self.support_r2*self.support_area)/(self.cross_section + self.support_area)
-#self.support_E*((9*(self.support_r2-self.support_r1)/self.support_r2)**1.6 + 0.16*((self.support_r2-self.support_r1)/self.dim[2])**1.3)*self.support_area
-#0.6 * self.support_E * (self.support_r2-self.support_r1)/self.support_r2*self.support_area
-#(self.support_E *self.support_area* 4 * np.pi**2 * self.support_I / (self.dim[2]))
+            y = 1 - 0.901 * (1 - np.e ** - (1/16 * np.sqrt(self.support.r2/(self.support.r2-self.support.r1))))
+            if self.dim[2]/self.support.r2 <= 5:
+                b = ((2*4*(np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[0])**2 * self.dim[0]*self.t + np.pi**2*self.E/(12*(1-0.33**2))*(self.t/self.dim[1])**2 * self.dim[0]*self.t)) +0.6 * y * self.support.E * (self.support.r2-self.support.r1)/self.support.r2*self.support.area)/(self.cross_section + self.support.area)
+                #self.support_E*((9*(self.support_r2-self.support_r1)/self.support_r2)**1.6 + 0.16*((self.support_r2-self.support_r1)/self.dim[2])**1.3)*self.support_area
+                #0.6 * self.support_E * (self.support_r2-self.support_r1)/self.support_r2*self.support_area
+                #(self.support_E *self.support_area* 4 * np.pi**2 * self.support_I / (self.dim[2]))
+            else:
+                raise ValueError("Support is too short")
         return b
 
     @property
@@ -200,23 +222,24 @@ class SatelliteStruc:
         :param pressure: Pressure of the propellant tank. [Pa]
         :param prop_mass: Mass of the propellant. [kg]
         """
-        p = PropellantTank(volume, prop_mass, material, pressure)
-        self.mass += p.mass
+        self.propellant_tank = PropellantTank(volume, prop_mass, material, pressure)
+        self.mass += self.propellant_tank.mass
 
-        Ixx = p.mmoi + p.mass * (pos[1] ** 2 + pos[2] ** 2)
-        Iyy = p.mmoi + p.mass * (pos[0] ** 2 + pos[2] ** 2)
-        Izz = p.mmoi + p.mass * (pos[0] ** 2 + pos[1] ** 2)
+        Ixx = self.propellant_tank.mmoi + self.propellant_tank.mass * (pos[1] ** 2 + pos[2] ** 2)
+        Iyy = self.propellant_tank.mmoi + self.propellant_tank.mass * (pos[0] ** 2 + pos[2] ** 2)
+        Izz = self.propellant_tank.mmoi + self.propellant_tank.mass * (pos[0] ** 2 + pos[1] ** 2)
         self.mmoi[0] += Ixx
         self.mmoi[1] += Iyy
         self.mmoi[2] += Izz
 
-        self.update_mass_breakdown('propellant_tank', p.mass)
-        self.update_mmoi_breakdown('propellant_tank', [Ixx, Iyy, Izz])
+        self.update_mass_breakdown('propellant_tank', self.propellant_tank.mass_struc)
+        self.update_mass_breakdown('propellant', self.propellant_tank.mass_prop)
+        self.update_mmoi_breakdown('propellant+tank', [Ixx, Iyy, Izz])
 
     def add_panels(self, a, b, mass, h=0, deployed=True):
         """Adds panels to the structure.
-        :param a: length of the panel. [m]
-        :param b: width of the panel. [m]
+        :param a: length of one panel. [m]
+        :param b: width of one panel. [m]
         :param mass: Total mass of the panels to be added. [kg]
         :param h: Height from centroid. [m]
         :param deployed: Whether the panels are deployed or not. [bool]
@@ -240,31 +263,23 @@ class SatelliteStruc:
         self.update_mass_breakdown('panels', mass)
         self.update_mmoi_breakdown('panels', [Ixx, Iyy, Izz])
 
-    def add_support(self, r1, r2, material):
+    def add_support(self, r, t, material):
         """Adds a support to the satellite.
         :param r: Radius of the support. [m]
+        :param t: Thickness of the support. [m]
         :param material: Material of the support. [string]
         """
-        self.support_r1 = r1
-        self.support_r2 = r2
-        self.support_E = material_properties[material]["E"]
-        self.support_rho = material_properties[material]["density"]
-        self.support_I = np.pi*r2**4 / 4 - np.pi*r1**4 / 4
-        self.support_area = np.pi*self.support_r2**2 - np.pi*self.support_r1**2
+        r1 = r-0.5*t
+        r2 = r+0.5*t
+        self.support = Support(r1, r2, self.dim[2], material)
+        self.mass += self.support.mass
 
-        mass = self.dim[2]*self.support_rho*np.pi*r2**2 - self.dim[2]*self.support_rho*np.pi*r1**2
-        self.mass += mass
+        self.mmoi[0] += self.support.Ixx
+        self.mmoi[1] += self.support.Iyy
+        self.mmoi[2] += self.support.Izz
 
-        Ixx = mass * (3*r2**2 + self.dim[2]**2) / 12 - mass * (3*r1**2 + self.dim[2]**2) / 12
-        Iyy = mass * (3*r2**2 + self.dim[2]**2) / 12 - mass * (3*r1**2 + self.dim[2]**2) / 12
-        Izz = mass * r2**2 / 2 - mass * r1**2 / 2
-
-        self.mmoi[0] += Ixx
-        self.mmoi[1] += Iyy
-        self.mmoi[2] += Izz
-
-        self.mass_breakdown['support'] = mass
-        self.mmoi_breakdown['support'] = [Ixx, Iyy, Izz]
+        self.mass_breakdown['support'] = self.support.mass
+        self.mmoi_breakdown['support'] = [self.support.Ixx, self.support.Iyy, self.support.Izz]
 
     def calculate_stresses(self):
         """Calculates the stresses on the satellite structure. \n
@@ -298,19 +313,49 @@ class SatelliteStruc:
 
 if __name__ == "__main__":
     s = SatelliteStruc()
-    s.add_point_element(mass=200, name="payload")
-    s.add_structure_sub(length=2.5, width=2, height=2, t=1e-3)
-    s.add_propellant_tank(volume=0.07, material="Aluminium_7075-T73", prop_mass=100, pressure=2e6)
-    s.add_panels(a=4.5, b=1, mass=100)
-    s.add_support(r1=.409, r2=0.41,  material="Ti-6AL-4V")
+
+    # Structure
+    s.add_structure_sub(length=1.2, width=1.2, height=1.2, t=1e-3)
+    s.add_support(r=2.5e-1, t=1e-3, material="Ti-6AL-4V")
+
+    # Power
+    s.add_panels(a=1.6, b=0.4, mass=40)
+    s.add_point_element(mass=71, name="battery", pos=[1, 0, 0])
+    # Propulsion
+    s.add_propellant_tank(volume=0.0646+0.423, material="Steel_17-4PH_H1150", prop_mass=95+62, pressure=2e6)
+    # ADCS
+    s.add_point_element(mass=56, name="cmg")
+    s.add_point_element(mass=1.41, name="starsensor")
+    s.add_point_element(mass=0.03, name="sunsensor")
+    s.add_point_element(mass=13, name="IMU")
+    # CDH
+    s.add_point_element(mass=65.6, name="computer", pos=[-1, 0, 0])
+    # EPS
+    s.add_point_element(mass=18.2, name="pcdu", pos=[0, 1, 0])
+    # Navigation
+    s.add_point_element(mass=12, name="nsgu", pos=[1, 0, 0])
+    s.add_point_element(mass=7.6, name="freq", pos=[1, 0, 0])
+    s.add_point_element(mass=5.2, name="Clock Monitor", pos=[0, 1, 0])
+    s.add_point_element(mass=70, name="clocks", pos=[0, 1, 0])
+    # TTC
+    s.add_point_element(mass=2.776, name="antenna", pos=[1, 0, 0])
+    s.add_point_element(mass=4, name="laser", pos=[1, 0, 0])
+    s.add_point_element(mass=12.6, name="Moon reflector", pos=[1, 0, 0])
+
+    # Unknown values
+    s.add_point_element(mass=100, name="unknown", pos=[0, 0, 0])
+
+
     s.calculate_stresses()
     s.calculate_vibrations()
+
     print(f"Mass: {s.mass}")
-    print(f"Mass Break: {s.mass_breakdown}")
-    print(f"MMOI Break: {s.mmoi_breakdown}")
+    # print(f"Mass Break: {s.mass_breakdown}")
+    # print(f"MMOI Break: {s.mmoi_breakdown}")
     print(f"Compliance: {s.compliance()}")
-    print(f"Buckling limit: {s.buckling_limit}")
-    print(f"Stresses: {s.stress}")
-    print(f"Vibrations: {s.vibration}")
+    #print(f"Buckling limit: {s.buckling_limit}")
+    print(f"Tank radius: {s.propellant_tank.r}")
+    # print(f"Stresses: {s.stress}")
+    # print(f"Vibrations: {s.vibration}")
 
 

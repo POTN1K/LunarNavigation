@@ -61,7 +61,7 @@ material_properties = {
         "E": 200e9,  # [Pa]
         "thermal_coefficient": 0,  # [m/m]
     },
-    "steel_17-4PH_H1150": {
+    "Steel_17-4PH_H1150": {
         "density": 7860,  # [kg/m^3]
         "yield_strength": 862e6,  # [Pa]
         "ultimate_strength": 1000e6,  # [Pa]
