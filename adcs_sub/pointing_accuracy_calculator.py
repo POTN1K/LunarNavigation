@@ -2,7 +2,7 @@
 By sdasd"""
 
 # Local libraries
-from mission_design import OrbitPlane
+# from mission_design import OrbitPlane
 import numpy as np
 import pandas as pd
 
@@ -49,6 +49,11 @@ def clean_csv():
     sat = np.array([clean_df[[i, i + 1, i + 2]].to_numpy() for i in range(1, 93 * 2, 6)])
     return sat
 
+def PAcc(divI, DI, MP, L ):
+    DO = MP*DI + L*np.tan(2*divI/MP)
+    acc = np.arctan2(DO/2, L) *180/np.pi
+    return DO, acc
+
 
 if __name__ == "__main__":
     # Read csv
@@ -62,6 +67,10 @@ if __name__ == "__main__":
     og2 = sat[13:19]
     og3 = sat[19:25]
     og4 = sat[25:31]
+    
+    planes = {"South Pole": south_pole, "North Pole": north_pole, 
+              "Low Inclination": low_incl, "OG Orbit 1": og1, 
+              "OG Orbit 2": og2, "OG Orbit 3": og3, "OG Orbit 4": og4}
 
 
 
@@ -82,8 +91,24 @@ if __name__ == "__main__":
     # rel5 = orb5.relDistSatellites()
     # rel6 = orb6.relDistSatellites()
     # rel7 = orb7.relDistSatellites()
-
-    print(Insight(south_pole), "Insight")
+    InMax = []
+    for key in planes:
+        InMax.append(max_inPlane(planes[key]))
+    
+    OutMax = []
+    ii = 0
+    for key1 in planes:
+        for key2 in planes:
+           OutMax.append(max_outPlane(planes[key1], planes[key2]))
+        ii = ii + 1
+        if ii > 2:
+            break
+        
+    # print(OutMax)
+    Max = np.max(InMax + OutMax)
+    
+    DO = PAcc(0.008, 4*10**(-6), 1, Max)
+    print(DO)
     # print(OutOfPlaneDistance(orb1, orb2)[1], "hello")
     # print(OutOfPlaneDistance(orb2, orb3)[1], "nice")
     # print(OutOfPlaneDistance(orb1, orb3)[1], "sicc")
