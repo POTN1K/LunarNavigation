@@ -96,7 +96,7 @@ class SatelliteStruc:
     """Class to create a satellite structure. It studies mass, dimensions, volume, stress, and vibrations"""
 
     @staticmethod
-    def create_standard_satellite(l_struc, w_struc, h_struc, t_struc, r_support, t_support, material_support):
+    def create_standard_satellite(l_struc, w_struc, h_struc, t_struc, r_support=None, t_support=None, material_support=None):
         """Creates a standard satellite structure.
         :param l_struc: Length of the structure. [m]
         :param w_struc: Width of the structure. [m]
@@ -111,7 +111,9 @@ class SatelliteStruc:
 
         # Structure
         s.add_structure_sub(length=l_struc, width=w_struc, height=h_struc, t=t_struc)
-        s.add_support(r=r_support, t=t_support, material=material_support)
+
+        if r_support is not None and t_support is not None and material_support is not None:
+            s.add_support(r=r_support, t=t_support, material=material_support)
 
         # Power
         s.add_panels(a=2.83, b=0.71, mass=40)
@@ -145,6 +147,7 @@ class SatelliteStruc:
 
         # Unknown values
         s.add_point_element(mass=100, name="unknown", pos=[0, 0, 0])
+        s.add_point_element(mass=100, name='Cables')
 
         return s
 
@@ -396,6 +399,28 @@ class SatelliteStruc:
         return s_compliance, v_axial_compliance, v_lat_compliance, b_compliance
 
 
+def optimize():
+    best = None
+    best_mass = 100000
+    for l in tqdm(np.arange(0.9, 1, 0.01)):
+        for h in np.arange(0.9, 1, 0.05):
+            for w in np.arange(0.9, l, 0.02):
+                for t_support in np.arange(0.5e-3, 2e-3, 1e-4):
+                    for t_struc in np.arange(1e-2, 2e-2, 1e-3):
+                        for r in np.arange(h / 5, min(h / 2, w / 2), 2e-3):
+                            s = SatelliteStruc.create_standard_satellite(l_struc=l, w_struc=w, h_struc=h,
+                                                                         t_struc=t_struc,
+                                                                         r_support=r, t_support=t_support,
+                                                                         material_support="Ti-6AL-4V")
+                            s.calculate_stresses()
+                            s.calculate_vibrations()
+                            if all(s.compliance()) and s.mass < best_mass:
+                                best = s
+                                best_mass = s.mass
+                                print(f"New best: {best_mass}")
+                                print(f"l: {l}, h: {h}, w: {w}, t_support: {t_support}, t_struc: {t_struc}, r: {r}")
+
+
 if __name__ == "__main__":
     s = SatelliteStruc.create_standard_satellite(l_struc=0.9, w_struc=0.9, h_struc=0.9, t_struc=1.4e-2)
 
@@ -418,3 +443,4 @@ if __name__ == "__main__":
     # print(f"Tank radius: {s.propellant_tank.r}")
     # print(f"Stresses: {s.stress}")
     # print(f"Vibrations: {s.vibration}")
+    print(s.propellant_tank.r)
