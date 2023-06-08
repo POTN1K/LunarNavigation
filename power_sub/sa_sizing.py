@@ -18,14 +18,14 @@ AU = 149600000 # km
 r_sat = 6541.4 # km
 sc_moon = 1310 # W / (m^2)
 
-
+print(np.linspace(0,10,10+1))
 def orbital_period(r_orbit, mu):
     """Function to compute the orbit period of a satellite around the Moon in [s]
     : parameters. orbit height (km) and gravitational constant
     : output. orbital period (s)"""
     return 2 * np.pi * np.sqrt(r_orbit**3/mu)
 
-
+print((365*24*12)/(orbital_period(6541.4, mu_moon)/3600))
 '''def orbital_velocity(r_orbit, mu):
     """ Function to compute the orbit velocity of a satellite around the Moon in [km/s]
     : parameters. orbit height (km) and gravitational constant
@@ -60,14 +60,21 @@ def eclipse_length(a, orbit_1, radius_1, radius_2, mu):
     alpha = eclipse_angle(orbit_1, radius_1, radius_2)
     gamma = np.arcsin(radius_2 * np.sin(90 + alpha) / a)
     eclipse = (alpha + gamma) / np.pi
-    print(alpha + gamma)
     T = orbital_period(a, mu)
     T_eclipse = T * eclipse
     return T_eclipse
-print(eclipse_length(6541.4, 149597871, 696340, 1737.4, 4902.800118)/3600)
+print('eclipse length due to Earth =', eclipse_length(384000, 149597871, 696340, 6371, mu_earth)/3600)
+print('orbital period due to Earth =', orbital_period(384400, mu_earth)/3600)
+print('orbital period due to Earth =', 365*24*12/(orbital_period(384400, mu_earth)/3600))
+print('eclipse length semi major axis 5701.2 =', eclipse_length(5701.2, 149597871, 696340, 1737.4, mu_moon)/3600)
+print('orbital period semi major axis 5701.2 =', orbital_period(5701.2, mu_moon)/3600)
+print('orbital semi major axis 5701.2 =', 365*24*12/(orbital_period(5701.2, mu_moon)/3600))
+print('eclipse length semi major axis 10000 (circular)=', eclipse_length(10000, 149597871, 696340, 1737.4, mu_moon)/3600)
+print('orbital period semi major axis 10000 (circular)=', orbital_period(10000, mu_moon)/3600)
+print('orbital period semi major axis 10000 (circular)=', 365*24*12/(orbital_period(10000, mu_moon)/3600))
 
 
-def eclipse_lenght_elip(e, a, r_m, r_s, AU, mu_m):
+def eclipse_length_elip(e, a, r_m, r_s, AU, mu_m):
     """ Function to compute the eclipse time [s] for an eliptical orbit that is caused by the Moon
      : parameters. eccentricity of satellite orbit (e), semi major axis of satellite (a [km]), radius of the Moon (r_m [km]),
      radius of the Sun (r_s [km]), distance Earth-Sun (AU [km]), gravitational parameter of the Moon (mu_m [km^3/s^2]"""
@@ -82,7 +89,9 @@ def eclipse_lenght_elip(e, a, r_m, r_s, AU, mu_m):
     T_eclipse = eclipse * T
     return T_eclipse
 
-print('eclipse', eclipse_lenght_elip(0.6, 6541.4, 1737.4, 696340, 149597871, 4902.800118)/60)
+print('eclipse length semi major axis 6541.4 (eliptical)=', eclipse_length_elip(0.6, 6541.4, 1737.4, 696340, 149597871, 4902.800118)/3600)
+print('orbital period semi major axis 6541.4 (eliptical)=', orbital_period(6541.4, mu_moon)/3600)
+print('orbital period semi major axis 6541.4 (eliptical)=', 365*24*12/(orbital_period(6541.4, mu_moon)/3600))
 
 
 eclipse_moon = eclipse_length(AU, 384400, 696340, 6371, mu_earth)
