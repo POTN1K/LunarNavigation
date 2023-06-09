@@ -735,12 +735,12 @@ class Model:
         # Plot Orbits
         phi = np.linspace(0, 2 * np.pi, 100)
         theta = np.linspace(0, np.pi, 100)
-        r = np.linspace(r_moon+100, r_orbit, 100)
+        r = np.linspace(r_moon+10, r_orbit, 10)
 
         # Create a meshgrid of phi and theta values
         phi, theta = np.meshgrid(phi, theta)
         # Calculate the x, y, and z coordinates for each point on the sphere
-        for m in r :
+        for m in r:
             xO = m * np.sin(theta) * np.cos(phi)
             yO = m * np.sin(theta) * np.sin(phi)
             zO = m * np.cos(theta)

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import quad
 from scipy.interpolate import interp1d
 from mission_design import Model, PropagationTime, UserErrors
+from tudatpy.kernel.astro import element_conversion
 
 ### Constants
 R_M = 1737.4e3  # [m]
@@ -177,7 +178,22 @@ class Orbits :
              [8536.0e3, 0.025, 39.47, 270, 4, 6, 1, 0], [5701.2e3, 0.002, 40.78, 90, 4, 6, 1, 1],
              [8855.4e3, 0.023, 39.43, 270, 4, 6, 1, 0], [8904.4e3, 0, 39.41, 90, 4, 6, 1, 1]])
 
+        self.constellation_NP = np.array([[6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 0)],
+                                     [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 180)]])
+
+        self.constellation_SP = np.array([[6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 0)],
+                                          [6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 180)]])
+
+        self.orbit_Low_I = np.array([[10000e3, 0.038, 10, 90, 0, 30],
+                                     [10000e3, 0.038, 10, 90, 0, 150],
+                                     [10000e3, 0.038, 10, 90, 0, 270]])
+
         self.model = Model()
+
+    def mean_to_true_anomaly(self, e, M):
+        eccentric_anomaly = element_conversion.true_to_eccentric_anomaly(np.deg2rad(M), e)
+        mean_anomaly = element_conversion.eccentric_to_mean_anomaly(eccentric_anomaly, e)
+        return np.rad2deg(mean_anomaly)
 
     def model_adder(self, satellites):
         for i in range(0, len(satellites)):
@@ -190,4 +206,7 @@ class Orbits :
         self.model.addSymmetricalPlanes(self.orbit_choices[choice][0], self.orbit_choices[choice][1], self.orbit_choices[choice][2]
                                         , self.orbit_choices[choice][3], int(self.orbit_choices[choice][4]), int(self.orbit_choices[choice][5]), dist_type=int(self.orbit_choices[choice][6]), f =int(self.orbit_choices[choice][7]))
         self.model.setCoverage()
-        # self.model.plotCoverage()
+        self.model.plotCoverage()
+
+
+

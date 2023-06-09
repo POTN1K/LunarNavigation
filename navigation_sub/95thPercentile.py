@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pylab import cm
 from mission_design import Model
+
 def Normal_Distrib(self):
     DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
     for i in range(0,6):
@@ -40,7 +41,7 @@ def Normal_Distrib(self):
 DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
 boxplotscancer = np.zeros(10000)
 for i in range(0, 6):
-    filename = "model10NPSPEQ31" + DOPS[i]+ ".csv"
+    filename = "model10Orbit" + DOPS[i]+ ".csv"
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         data = np.array([[float(element) for element in row] for row in reader])
@@ -51,7 +52,6 @@ boxplotscancer = array = np.delete(boxplotscancer, 0, 0).T
 
 
 def boxplot(df):
-
     plt.figure(figsize=(12, 8))
     column_names = ['GDOP', 'PDOP', 'HDOP', 'VDOP', 'TDOP', 'HHDOP']
     allowable = [120.4, 10, 10, 10, 120, 3.5]

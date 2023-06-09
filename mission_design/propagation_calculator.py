@@ -30,7 +30,7 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
 class PropagationTime:
     """Class to input satellite(s) and see their change of position over time"""
-    def __init__(self, orbit_parameters=None, final_time=86400, resolution=900, mass_sat=250, area_sat=0, c_radiation=1):
+    def __init__(self, orbit_parameters=None, final_time=86400, resolution=900, mass_sat=250, area_sat=1, c_radiation=1.07*0.768):
         """Initialize the initial state of the satellite(s) with Keplerian elements,final time and resolution to see the final position
         :param orbit_parameters: array of Keplarian elements [[sat1],[sat2],[[sat3]] #Radians
         :param final_time: Time for the end of the simulation [s]
@@ -55,10 +55,11 @@ class PropagationTime:
         spice.load_standard_kernels()
 
         self.bodies, self.bodies_to_propagate, self.central_bodies = self.create_bodies()
+        self.add_vehicle_radiation_pressure()
         self.dependent_variables_to_save = self.saving()
         self.states_array = None
         self.dep_vars_array = None
-        self.add_vehicle_radiation_pressure()
+
         self.acceleration_models = self.create_acceleration_models()
         self.initial_state = self.create_initial_state()
         self.propagator_settings = self.create_propagator_settings()
@@ -196,8 +197,10 @@ class PropagationTime:
                 propagation_setup.acceleration.spherical_harmonic_gravity(5, 5)
             ],
             Moon=[
-                propagation_setup.acceleration.spherical_harmonic_gravity(10, 10)
+                propagation_setup.acceleration.spherical_harmonic_gravity(10, 10),
+                propagation_setup.acceleration.relativistic_correction(use_schwarzschild=True)
             ]
+
         )
         acceleration_settings = {}
         for satellite_name in self.bodies_to_propagate:
@@ -244,7 +247,7 @@ class PropagationTime:
         for i, satellite_name in enumerate(self.bodies_to_propagate):
             dependent_variables_to_save.append([
                 # propagation_setup.dependent_variable.total_acceleration(satellite_name),
-                propagation_setup.dependent_variable.keplerian_state(satellite_name, "Moon") #,
+                propagation_setup.dependent_variable.keplerian_state(satellite_name, "Moon"),
                 # propagation_setup.dependent_variable.latitude(satellite_name, "Moon"),
                 # propagation_setup.dependent_variable.longitude(satellite_name, "Moon"),
                 # propagation_setup.dependent_variable.single_acceleration_norm(
@@ -257,7 +260,7 @@ class PropagationTime:
                 #     propagation_setup.acceleration.spherical_harmonic_gravity_type, satellite_name, "Earth"
                 # ),
                 # propagation_setup.dependent_variable.single_acceleration_norm(
-                #     propagation_setup.acceleration.cannonball_radiation_pressure_type, satellite_name, "Sun"
+                #     propagation_setup.acceleration.relativistic_correction_acceleration_type, satellite_name, "Moon"  #propagation_setup.acceleration.cannonball_radiation_pressure_type, satellite_name, "Sun"
                 # )
             ])
 
@@ -312,7 +315,8 @@ class PropagationTime:
         self.states_array = result2array(states)
         dep_vars = dynamics_simulator.dependent_variable_history
         self.dep_vars_array = result2array(dep_vars)
-        self.kepler_elements = self.dep_vars_array[:, 1:]
+        self.accelsun = self.dep_vars_array[:, -1]
+        self.kepler_elements = self.dep_vars_array[:, 1:-1]
 
 
         indices_velocity = np.arange(4, self.states_array.shape[1], 6).reshape(-1, 1) + np.arange(3)
@@ -481,7 +485,7 @@ class PropagationTime:
         time_hours = self.states_array[:, 0] / 3600
 
         # Plot Kepler elements as a function of time
-        kepler_elements = self.dep_vars_array[:,1+  6 * satellite_number:7 + 6 * satellite_number]
+        kepler_elements = self.dep_vars_array[:, 1+6 * satellite_number:7+6 * satellite_number]
         # kepler_elements = dep_vars_array[:, 4 + 6 * self.satellite_number:10 + 6 * self.satellite_number]
         fig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(3, 2, figsize=(9, 12))
         # Semi-major Axis
@@ -523,6 +527,6 @@ class PropagationTime:
         plt.show()
 # satellites = [[5740e3, 0.58, np.deg2rad(54.856), 0,  np.deg2rad(86.322), 0],[5740e3,0.58,54.856,0,86.322,0]]
 # propagation_time = PropagationTime(resolution=10,final_time= 86400,orbit_parameters=satellites)
-# # # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
+# # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
 # propagation_time.plot_kepler(0)
 # propagation_time.plot_time()
