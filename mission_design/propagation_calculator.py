@@ -244,9 +244,9 @@ class PropagationTime:
         for i, satellite_name in enumerate(self.bodies_to_propagate):
             dependent_variables_to_save.append([
                 # propagation_setup.dependent_variable.total_acceleration(satellite_name),
-                propagation_setup.dependent_variable.keplerian_state(satellite_name, "Moon") #,
+                propagation_setup.dependent_variable.keplerian_state(satellite_name, "Moon")#,
                 # propagation_setup.dependent_variable.latitude(satellite_name, "Moon"),
-                # propagation_setup.dependent_variable.longitude(satellite_name, "Moon"),
+                # propagation_setup.dependent_variable.longitude(satellite_name, "Moon")
                 # propagation_setup.dependent_variable.single_acceleration_norm(
                 #     propagation_setup.acceleration.point_mass_gravity_type, satellite_name, "Sun"
                 # ),
@@ -481,7 +481,7 @@ class PropagationTime:
         time_hours = self.states_array[:, 0] / 3600
 
         # Plot Kepler elements as a function of time
-        kepler_elements = self.dep_vars_array[:,1+  6 * satellite_number:7 + 6 * satellite_number]
+        kepler_elements = self.dep_vars_array[:, 1 + 6 * satellite_number:7 + 6 * satellite_number]
         # kepler_elements = dep_vars_array[:, 4 + 6 * self.satellite_number:10 + 6 * self.satellite_number]
         fig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(3, 2, figsize=(9, 12))
         # Semi-major Axis
