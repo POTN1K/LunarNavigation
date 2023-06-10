@@ -5,6 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import quad
 from scipy.interpolate import interp1d
+from mission_design import Model, PropagationTime, UserErrors
+from tudatpy.kernel.astro import element_conversion
 
 ### Constants
 R_M = 1737.4e3  # [m]
@@ -162,3 +164,49 @@ ax.fill_between(y_left, z_line_left, z_Orbit_left, where=conditionL, color='gree
 ax.fill_between(y_left1, z_line_left1, z_Orbit_left1, where=conditionL1, color='blue', alpha=0.5)
 plt.legend()
 plt.show()
+
+
+class Orbits :
+
+    def __init__(self):
+        self.orbit_choices = np.array(
+            [[8025.9e3, 0.004, 39.53, 270, 5, 4, 1, 0], [8148.8e3, 0.004, 39.51, 90, 5, 4, 1, 0],
+             [7298.6e3, 0.001, 39.71, 270, 3, 7, 1, 1], [8669.2e3, 0.024, 39.46, 270, 4, 6, 1, 0],
+             [8916.6e3, 0.000, 39.41, 90, 4, 6, 1, 1], [8904.4e3, 0.00, 39.41, 90, 4, 6, 1, 1],
+             [7434.8e3, 0.00, 39.67, 270, 3, 7, 1, 1],
+             [7298.6e3, 0.001, 39.71, 90, 3, 7, 1, 1], [8954.2e3, 0.002, 39.40, 90, 4, 6, 1, 1],
+             [8536.0e3, 0.025, 39.47, 270, 4, 6, 1, 0], [5701.2e3, 0.002, 40.78, 90, 4, 6, 1, 1],
+             [8855.4e3, 0.023, 39.43, 270, 4, 6, 1, 0], [8904.4e3, 0, 39.41, 90, 4, 6, 1, 1]])
+
+        self.constellation_NP = np.array([[6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 0)],
+                                     [6541.4e3, 0.6, 56.2, 270, 0, self.mean_to_true_anomaly(0.6, 180)]])
+
+        self.constellation_SP = np.array([[6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 0)],
+                                          [6541.4e3, 0.6, 56.2, 90, 0, self.mean_to_true_anomaly(0.6, 180)]])
+
+        self.orbit_Low_I = np.array([[10000e3, 0.038, 10, 90, 0, 30],
+                                     [10000e3, 0.038, 10, 90, 0, 150],
+                                     [10000e3, 0.038, 10, 90, 0, 270]])
+
+        self.model = Model()
+
+    def mean_to_true_anomaly(self, e, M):
+        eccentric_anomaly = element_conversion.true_to_eccentric_anomaly(np.deg2rad(M), e)
+        mean_anomaly = element_conversion.eccentric_to_mean_anomaly(eccentric_anomaly, e)
+        return np.rad2deg(mean_anomaly)
+
+    def model_adder(self, satellites):
+        for i in range(0, len(satellites)):
+            self.model.addSatellite(satellites[i, 0], satellites[i, 1], satellites[i, 2], satellites[i, 3],
+                                    satellites[i, 4], satellites[i, 5]) #, id=i)
+        self.model.setCoverageOrbits()
+        self.model.plotCoverageOrbits()
+
+    def model_symmetrical_planes(self, choice):
+        self.model.addSymmetricalPlanes(self.orbit_choices[choice][0], self.orbit_choices[choice][1], self.orbit_choices[choice][2]
+                                        , self.orbit_choices[choice][3], int(self.orbit_choices[choice][4]), int(self.orbit_choices[choice][5]), dist_type=int(self.orbit_choices[choice][6]), f =int(self.orbit_choices[choice][7]))
+        self.model.setCoverage()
+        self.model.plotCoverage()
+
+
+

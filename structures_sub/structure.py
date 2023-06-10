@@ -243,6 +243,7 @@ class Structure:
         self.m0 = m0
         self.shape = shape
         self.material = material
+
         self.compressive_thermal_stress = self.thermal_coeff * (temperatures[1] - 20) * self.E
         self.tensile_thermal_stress = -self.thermal_coeff * (temperatures[0] - 20) * self.E
         self.compressive_stress = None
@@ -497,16 +498,11 @@ if __name__ == "__main__":
     mass_init = mass_no_struc + mass_struc  # [kg] Mass of the initial sizing of the spacecraft
     vol_init = mass_init * 0.01  # [m^3] Volume of the initial sizing of the spacecraft
 
-    cube = RectangularPrism(1, 1, 1, vol_init)
-    rect = RectangularPrism(1, 1, 2, vol_init)
-    cyl = Cylinder(1, 2, vol_init)
-
-    s_cube = Structure(cube, "Aluminium_7075-T73", mass_init)
-    s_rect = Structure(rect, "Aluminium_7075-T73", mass_init)
-    s_cyl = Structure(cyl, "Aluminium_7075-T73", mass_init)
-
-    print(s_cube)
-    print("\n\n")
-    print(s_rect)
-    print("\n\n")
-    print(s_cyl)
+    i = 1
+    j = 1.3
+    rect = RectangularPrism(i, i, j, vol_init)
+    s = Structure(rect, "Aluminium_7075-T73", mass_init)
+    s.add_panels(8, 100)
+    s.compute_characteristics()
+    _ = f"{rect.width}x{rect.length}x{rect.height}, {s.m_struc}, {s.tensile_stress}, {s.compressive_stress}, {s.thickness}, {s.Ixx}, {s.Iyy}, {s.Izz}, {s.axial_eigen}, {s.l_eigenx}, {s.l_eigeny}"
+    print(_)

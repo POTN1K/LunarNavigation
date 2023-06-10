@@ -6,6 +6,7 @@ import seaborn as sns
 from pylab import cm
 from mission_design import Model, UserErrors
 
+
 def Normal_Distrib(self):
     DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
     for i in range(0,6):
@@ -42,7 +43,7 @@ DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
 VOP = ["VTOT", "VH", "VV"]
 boxplotscancer = np.zeros(10000)
 for i in range(0, 6):
-    filename = "model10NPSPEQ31" + DOPS[i]+ ".csv"
+    filename = "model10Orbit" + DOPS[i]+ ".csv"
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         data = np.array([[float(element) for element in row] for row in reader])
@@ -61,7 +62,6 @@ def allowable_error(DOP_array, allowable):
     return ephemeris_budget
 print(allowable_error(boxplotscancer,[120.4, 10, 10, 10, 120, 100]))
 def boxplot(df):
-
     plt.figure(figsize=(12, 8))
     column_names = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
     allowable = [120, 10, 10, 10, 10, 10]
