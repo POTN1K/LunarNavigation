@@ -76,5 +76,127 @@ material_properties = {
         "thermal_coefficient": 11.3  # [m/m]
     }}
 
+components = {
+    "cmg1": {
+        "subsystem": "ADCS",
+        "mass": 10,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "cmg2": {
+        "subsystem": "ADCS",
+        "mass": 10,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "star_sensors": {
+        "subsystem": "ADCS",
+        "mass": 9*0.47,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "computer": {
+        "subsystem": "CDH",
+        "mass": 10.5,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Galileo_PCDU": {
+        "subsystem": "EPS",
+        "mass": 18.2,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "NSGU": {
+        "subsystem": "Navigation",
+        "mass": 12,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "FGUU": {
+        "subsystem": "Navigation",
+        "mass": 7.6,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Clock_Monitor": {
+        "subsystem": "Navigation",
+        "mass": 5.2,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Clock1": {
+        "subsystem": "Navigation",
+        "mass": 15.9,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Clock2": {
+        "subsystem": "Navigation",
+        "mass": 15.9,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Clock3": {
+        "subsystem": "Navigation",
+        "mass": 15.9,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Battery1": {
+        "subsystem": "EPS",
+        "mass": 53.4,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Battery2": {
+        "subsystem": "EPS",
+        "mass": 31.8,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Cables": {
+        "subsystem": "EPS",
+        "mass": 100,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "GR1_Thrusters": {
+        "subsystem": "Propulsion",
+        "mass": 12*0.29,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "GR22_Thruster": {
+        "subsystem": "Propulsion",
+        "mass": 0.59,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Filters_Valves": {
+        "subsystem": "Propulsion",
+        "mass": 4.4,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "TTC_User": {
+        "subsystem": "TTC",
+        "mass": 6*0.106777,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "TTC_Relay": {
+        "subsystem": "TTC",
+        "mass": 0*0.2,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "TTC_ISL": {
+        "subsystem": "TTC",
+        "mass": 4,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "TTC_Reflector": {
+        "subsystem": "TTC",
+        "mass": 12.6,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Antenna_Support": {
+        "subsystem": "Structures",
+        "mass": ...,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Solar_Array_Support": {
+        "subsystem": "Structures",
+        "mass": ...,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    },
+    "Mechanisms": {
+        "subsystem": "Structures",
+        "mass": ...,  # [kg]
+        "cg": [0, 0, 0]  # [m]
+    }
+}
 
 
