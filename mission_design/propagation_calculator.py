@@ -26,11 +26,11 @@ from tudatpy.kernel import constants
 from tudatpy.util import result2array
 from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
-
+c = 299792458
 
 class PropagationTime:
     """Class to input satellite(s) and see their change of position over time"""
-    def __init__(self, orbit_parameters=None, final_time=86400, resolution=900, mass_sat=250, area_sat=1, c_radiation=1.07*0.768):
+    def __init__(self, orbit_parameters=None, final_time=86400, resolution=900, mass_sat=250, area_sat=1, c_radiation=1.07*0.768, antenna_power=100):
         """Initialize the initial state of the satellite(s) with Keplerian elements,final time and resolution to see the final position
         :param orbit_parameters: array of Keplarian elements [[sat1],[sat2],[[sat3]] #Radians
         :param final_time: Time for the end of the simulation [s]
@@ -49,6 +49,7 @@ class PropagationTime:
         self.orbit_parameters = np.array(orbit_parameters)
         self.mass_sat = mass_sat
         self.area_sat = area_sat
+        self.antenna_power = antenna_power
         self.c_radiation = c_radiation
         self.fixed_step_size = resolution
 
@@ -179,6 +180,11 @@ class PropagationTime:
             environment_setup.add_radiation_pressure_interface(
                 self.bodies, satellite_name, radiation_pressure_settings
             )
+
+    def add_antenna_thrust(self):
+        a = self.antenna_power/(c*self.mass_sat)
+
+
 
     def create_acceleration_models(self):
         """
@@ -525,8 +531,8 @@ class PropagationTime:
 
         plt.tight_layout()
         plt.show()
-# satellites = [[5740e3, 0.58, np.deg2rad(54.856), 0,  np.deg2rad(86.322), 0],[5740e3,0.58,54.856,0,86.322,0]]
-# propagation_time = PropagationTime(resolution=10,final_time= 86400,orbit_parameters=satellites)
-# # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
-# propagation_time.plot_kepler(0)
-# propagation_time.plot_time()
+satellites = [[5740e3, 0.58, np.deg2rad(54.856), 0,  np.deg2rad(86.322), 0],[5740e3,0.58,54.856,0,86.322,0]]
+propagation_time = PropagationTime(resolution=10,final_time= 86400,orbit_parameters=satellites)
+# # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
+propagation_time.plot_kepler(0)
+propagation_time.plot_time()

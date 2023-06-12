@@ -17,7 +17,7 @@ from mission_design import Model, PropagationTime, UserErrors
 
 # cst
 miu_moon = 4.9048695e12  # m^3/s^2
-
+c = 299792458  # m/s
 
 # DOP Calculation
 # DOP_with_error = []
@@ -203,7 +203,7 @@ class FrozenOrbits:
         plt.show()
 
 
-    def dyn_sim(self, P, dt=1, kepler_plot=0):
+    def dyn_sim(self, P, dt=10, kepler_plot=0):
         satellites = self.model.getSatellites()
         duration = P
         self.propagation_time = PropagationTime(satellites, duration, dt, 250)
@@ -328,54 +328,46 @@ fo.model_symmetrical_planes(orbit_choice)
 
 # fo.DOP_calculator(True)
 
-
-# for i in range(0, 13):
-#     fo.model = Model()
-#     fo.model_symmetrical_planes(i)
-#     constellations.append(fo.DOP_calculator(True))
-
 # P = fo.period_calc(fo.orbit_choices)[orbit_choice]
 # print(fo.period_calc(fo.orbit_choices)[orbit_choice])
 
 # constellations = np.asarray(constellations)
 
-# P_max = 2*np.pi * np.sqrt(10000000**3/miu_moon)
-# fo.dyn_sim(P_max)
+P_max = 2*np.pi * np.sqrt(10000000**3/miu_moon)
+fo.dyn_sim(P_max)
 # np.savetxt("statesarray_radiation.csv", fo.propagation_time.states_array, delimiter=",")
 
 
-with open("statesarray.csv", 'r') as file:
-    reader = csv.reader(file)
-    data = np.array([[float(element) for element in row] for row in reader])
-
-real_cart = data[:38621, 43:46]
-
-with open("statesarray_relativity_radiation.csv", 'r') as file:
-    reader = csv.reader(file)
-    data = np.array([[float(element) for element in row] for row in reader])
-
-assumption_cart = data[:38621, 43:46]
-
-dist1_cart = np.zeros(np.shape(assumption_cart)[0])
-for i in range(np.shape(assumption_cart)[0]):
-    dist1_cart[i] = np.sqrt((assumption_cart[i, 0] - real_cart[i, 0]) ** 2 + (assumption_cart[i, 1] - real_cart[i, 1]) ** 2 + (assumption_cart[i, 2] - real_cart[i, 2]) ** 2)
-
-print(np.where(dist1_cart >= 1)[0][0])
-print(dist1_cart[np.where(dist1_cart >= 1)[0][0]])
-print(np.max(dist1_cart), np.argmax(dist1_cart))
-
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-ax.scatter3D(assumption_cart[::500, 0], assumption_cart[::500, 1], assumption_cart[::500, 2], c='g', marker='x')
-ax.scatter3D(real_cart[::500, 0], real_cart[::500, 1], real_cart[::500, 2], c='r', marker='o')
-plt.show()
-
-print("12603 1.0000498551936128 19.506837292649397 38620")
+# with open("statesarray.csv", 'r') as file:
+#     reader = csv.reader(file)
+#     data = np.array([[float(element) for element in row] for row in reader])
+#
+# real_cart = data[:38621, 43:46]
+#
+# with open("statesarray_relativity_radiation.csv", 'r') as file:
+#     reader = csv.reader(file)
+#     data = np.array([[float(element) for element in row] for row in reader])
+#
+# assumption_cart = data[:38621, 43:46]
+#
+# dist1_cart = np.zeros(np.shape(assumption_cart)[0])
+# for i in range(np.shape(assumption_cart)[0]):
+#     dist1_cart[i] = np.sqrt((assumption_cart[i, 0] - real_cart[i, 0]) ** 2 + (assumption_cart[i, 1] - real_cart[i, 1]) ** 2 + (assumption_cart[i, 2] - real_cart[i, 2]) ** 2)
+#
+# print(np.where(dist1_cart >= 1)[0][0])
+# print(dist1_cart[np.where(dist1_cart >= 1)[0][0]])
+# print(np.max(dist1_cart), np.argmax(dist1_cart))
+#
+# fig = plt.figure()
+# ax = plt.axes(projection='3d')
+# ax.scatter3D(assumption_cart[::500, 0], assumption_cart[::500, 1], assumption_cart[::500, 2], c='g', marker='x')
+# ax.scatter3D(real_cart[::500, 0], real_cart[::500, 1], real_cart[::500, 2], c='r', marker='o')
+# plt.show()
 
 # time = np.arange(0, P_max+1, 1)
 # print(np.max(fo.propagation_time.accelsun))
 # plt.semilogy(time, fo.propagation_time.accelsun)
 # plt.show()
 
-# fo.DOP_time(fo.propagation_time.kepler_elements)
+fo.DOP_time(fo.propagation_time.kepler_elements)
 # # print(constellations)
