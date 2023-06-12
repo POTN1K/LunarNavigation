@@ -4,7 +4,8 @@ import csv
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pylab import cm
-from mission_design import Model
+from mission_design import Model, UserErrors
+
 
 def Normal_Distrib(self):
     DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
@@ -39,6 +40,7 @@ def Normal_Distrib(self):
 # fo = FrozenOrbits("model0")
 # Normal_Distrib(fo)
 DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
+VOP = ["VTOT", "VH", "VV"]
 boxplotscancer = np.zeros(10000)
 for i in range(0, 6):
     filename = "model10Orbit" + DOPS[i]+ ".csv"
@@ -47,14 +49,22 @@ for i in range(0, 6):
         data = np.array([[float(element) for element in row] for row in reader])
         ninetyfifth_percent = np.percentile(data, 95, axis=0)
     boxplotscancer = np.vstack((boxplotscancer, ninetyfifth_percent))
-print("Krijg Kanker")
+
 boxplotscancer = array = np.delete(boxplotscancer, 0, 0).T
 
 
+def allowable_error(DOP_array, allowable):
+    constraints = np.max(DOP_array, axis=0)
+    ephemeris_budget = []
+    for i in range(len(constraints)):
+        ephemeris_budget.append(np.sqrt((allowable[i] ** 2 / constraints[i] ** 2/4 ) - UserErrors.satellite_error(0, ORBIT=0) ** 2))
+    ephemeris_budget = np.array(ephemeris_budget)
+    return ephemeris_budget
+print(allowable_error(boxplotscancer,[120.4, 10, 10, 10, 120, 100]))
 def boxplot(df):
     plt.figure(figsize=(12, 8))
-    column_names = ['GDOP', 'PDOP', 'HDOP', 'VDOP', 'TDOP', 'HHDOP']
-    allowable = [120.4, 10, 10, 10, 120, 3.5]
+    column_names = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
+    allowable = [120, 10, 10, 10, 10, 10]
     sns.boxplot(data=df)
     plt.xticks(range(df.shape[1]), column_names)
     for i in range(df.shape[1]):
@@ -84,13 +94,13 @@ zM = r_moon * np.cos(theta)
 
 ax.plot_surface(xM, yM, zM, color='grey', alpha=0.2)
 
-boxplotpointsmap = boxplotscancer[:, 5]
+boxplotpointsmap = boxplotscancer[:, 1]
 
 # Plot satellites in view
 color_map = cm.ScalarMappable(cmap='PiYG')
-color_map.set_array(boxplotscancer[:, 5])
+color_map.set_array(boxplotscancer[:, 0])
 #
-ax.scatter(*zip(*Model.createMoon(100)), marker='s', s=1, c=boxplotscancer[:, 5], cmap='PiYG')
+ax.scatter(*zip(*Model.createMoon(100)), marker='s', s=1, c=boxplotscancer[:, 0], cmap='PiYG')
 plt.colorbar(color_map)
 
 # ax.set_title('Satellite coverage')

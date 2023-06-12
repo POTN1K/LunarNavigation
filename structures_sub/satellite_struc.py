@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 
 # --------------------------------------------------------------------------- #
-class PropellantTank:
+class PropTankSphere:
     """Class to create a spherical tank for the propellant."""
 
     def __init__(self, prop_mass, material, pressure=10e6, volume=None):
@@ -68,8 +68,56 @@ class PropellantTank:
         return 4 * np.pi * self.r ** 2
 
     def __repr__(self):
-        return f"PropellantTank({self.volume}, {self.material})"
+        return f"PropTankSphere({self.volume}, {self.material})"
 
+
+class PropTankCylinder:
+    """Class to create a cylindrical tank for the propellant."""
+
+    def __init__(self, prop_mass, material, pressure=10e6, volume=None, r=0.26):
+        self.name = "Propellant Tank"
+        self.mass_prop = prop_mass
+        self.material = material
+        self.pressure = pressure
+        self.volume = volume
+
+        self.r = r
+
+        self.l = (self.volume - 4*np.pi*self.r**3/3) / (np.pi*self.r**2)
+        self.thickness = self.pressure * self.r / (self.sigma_y / 1.1)
+        self.mass_struc = self.surface_area() * self.thickness * self.rho
+
+        self.mass = self.mass_struc + self.mass_prop
+        self.mmoi = 2 / 3 * self.mass_struc * self.r ** 2 + 2 / 5 * self.mass_prop * self.r ** 2
+
+    @property
+    def volume(self):
+        return self._volume
+
+    @volume.setter
+    def volume(self, v):
+        if v is None:
+            self._volume = self.mass_prop / (1.47 * 1000)*1.05 # 5% Margin
+        else:
+            self._volume = v
+
+    @property
+    def material(self):
+        return self._material
+
+    @material.setter
+    def material(self, material):
+        self.E = material_properties[material]['E']
+        self.rho = material_properties[material]['density']
+        self.sigma_y = material_properties[material]['yield_strength']
+        self.sigma_u = material_properties[material]['ultimate_strength']
+        self.thermal_coeff = material_properties[material]['thermal_coefficient']
+        self._material = material
+
+    def surface_area(self):
+        """Computes the surface area of the tank.
+        :return: Surface area of the tank. [m^2]"""
+        return 2 * np.pi * self.r * self.l + 4 * np.pi * self.r ** 2
 
 class Support:
     """Class to create a support structure."""
@@ -95,66 +143,11 @@ class Support:
 class SatelliteStruc:
     """Class to create a satellite structure. It studies mass, dimensions, volume, stress, and vibrations"""
 
-    @staticmethod
-    def create_standard_satellite(l_struc, w_struc, h_struc, t_struc, r_support=None, t_support=None, material_support=None):
-        """Creates a standard satellite structure.
-        :param l_struc: Length of the structure. [m]
-        :param w_struc: Width of the structure. [m]
-        :param h_struc: Height of the structure. [m]
-        :param t_struc: Thickness of the structure. [m]
-        :param r_support: Radius of the support. [m]
-        :param t_support: Thickness of the support. [m]
-        :param material_support: Material of the support. [string]
-        :return: SatelliteStruc object.
-        """
-        s = SatelliteStruc()
-
-        # Structure
-        s.add_structure_sub(length=l_struc, width=w_struc, height=h_struc, t=t_struc)
-
-        if r_support is not None and t_support is not None and material_support is not None:
-            s.add_support(r=r_support, t=t_support, material=material_support)
-
-        # Power
-        s.add_panels(a=2.83, b=0.71, mass=40)
-        s.add_point_element(mass=30, name="battery", pos=[0.3, -0.3, 0.3])
-        # Propulsion
-        s.add_propellant_tank(material="Steel_17-4PH_H1150", prop_mass=212.9, pressure=2e6, pos=[0, -0.3, 0])
-        s.add_point_element(mass=0.59, name="Big thruster", pos=[0, -0.5, 0])
-        s.add_point_element(mass=1.74, name="Small thrusters")
-        s.add_point_element(mass=4.4, name="Valves")
-        # ADCS
-        s.add_point_element(mass=10, name="cmg", pos=[0, 0, 0.2])
-        s.add_point_element(mass=10, name="cmg", pos=[0, 0, -0.2])
-        s.add_point_element(mass=1.41, name="starsensor")
-        s.add_point_element(mass=0.03, name="sunseùnsor")
-        s.add_point_element(mass=13, name="IMU")
-        # CDH
-        s.add_point_element(mass=10.5, name="computer", pos=[-0.4, 0.4, 0.4])
-        # EPS
-        s.add_point_element(mass=18.2, name="pcdu", pos=[-0.45, -0.4, 0.4])
-        # Navigation
-        s.add_point_element(mass=12, name="nsgu", pos=[0, 0.4, 0])
-        s.add_point_element(mass=7.6, name="freq", pos=[0.3, 0.4, 0])
-        s.add_point_element(mass=5.2, name="Clock Monitor", pos=[-0.4, 0.4, 0])
-        s.add_point_element(mass=15.9, name="clock", pos=[0.3, 0.3, -0.3])
-        s.add_point_element(mass=15.9, name="clock", pos=[0, 0.3, -0.3])
-        s.add_point_element(mass=15.9, name="clock", pos=[-0.3, 0.3, -0.3])
-        # TTC
-        s.add_point_element(mass=5.8, name="antenna", pos=[0, 0.45, 0])
-        s.add_point_element(mass=4, name="laser", pos=[0, 0, 0])
-        s.add_point_element(mass=12.6, name="Moon reflector", pos=[0, 0.45, -0.45])
-
-        # Unknown values
-        s.add_point_element(mass=100, name="unknown", pos=[0, 0, 0])
-        s.add_point_element(mass=100, name='Cables')
-
-        return s
-
     def __init__(self, name="Sat_Test"):
         """Initialize the satellite structure.
         :param name: Name of the satellite. [string]
         """
+        self.propellant_tank = None
         self.name = name
         self.mass = 0
         self.dim = [0, 0, 0]  # [Length, Width, Height]
@@ -178,10 +171,10 @@ class SatelliteStruc:
 
     def update_mmoi_breakdown(self, key, value):
         if key in self.mmoi_breakdown:
-            value = np.array(value)
+            value = np.array(value, dtype=float)
             self.mmoi_breakdown[key] += value
         else:
-            self.mmoi_breakdown[key] = np.array(value)
+            self.mmoi_breakdown[key] = np.array(value, dtype=float)
 
     @property
     def mass(self):
@@ -294,18 +287,23 @@ class SatelliteStruc:
         self.mmoi[1] += Iyy
         self.mmoi[2] += Izz
 
-        self.update_mass_breakdown('structure', mass_struc)
-        self.update_mmoi_breakdown('structure', [Ixx, Iyy, Izz])
+        self.update_mass_breakdown('skeleton', mass_struc)
+        self.update_mmoi_breakdown('skeleton', [Ixx, Iyy, Izz])
 
-    def add_propellant_tank(self, material, pos=[0, 0, 0], pressure=10e6, prop_mass=20, volume=None):
+    def add_propellant_tank(self, type, material, pos=[0, 0, 0], pressure=10e6, prop_mass=20., volume=None):
         """Adds a propellant tank to the satellite.
-        :param volume: Volume of the propellant tank. [m^3]
+        :param type: Type of the propellant tank. (0-Sphere, 1-Cylinder) [int]
         :param material: Material of the propellant tank. [string]
         :param pos: Position of the propellant tank (x,y,z). [m]
         :param pressure: Pressure of the propellant tank. [Pa]
         :param prop_mass: Mass of the propellant. [kg]
         """
-        self.propellant_tank = PropellantTank(prop_mass, material, pressure, volume)
+
+        if type == 0:
+            self.propellant_tank = PropTankSphere(prop_mass, material, pressure, volume)
+        elif type == 1:
+            self.propellant_tank = PropTankCylinder(prop_mass, material, pressure, volume)
+
         self.mass += self.propellant_tank.mass
 
         Ixx = self.propellant_tank.mmoi + self.propellant_tank.mass * (pos[1] ** 2 + pos[2] ** 2)
@@ -315,9 +313,9 @@ class SatelliteStruc:
         self.mmoi[1] += Iyy
         self.mmoi[2] += Izz
 
-        self.update_mass_breakdown('propellant_tank', self.propellant_tank.mass_struc)
-        self.update_mass_breakdown('propellant', self.propellant_tank.mass_prop)
-        self.update_mmoi_breakdown('propellant+tank', [Ixx, Iyy, Izz])
+        self.update_mass_breakdown('Propellant_tank', self.propellant_tank.mass_struc)
+        self.update_mass_breakdown('Propellant', self.propellant_tank.mass_prop)
+        self.update_mmoi_breakdown('Propellant+Tank', [Ixx, Iyy, Izz])
 
     def add_panels(self, a, b, mass, h=0, deployed=True):
         """Adds panels to the structure.
@@ -364,6 +362,13 @@ class SatelliteStruc:
 
         self.mass_breakdown['support'] = self.support.mass
         self.mmoi_breakdown['support'] = [self.support.Ixx, self.support.Iyy, self.support.Izz]
+
+    def add_dictionary(self, dictionary):
+        """Adds a point mass elements to the satellite from a dictionary.
+        :param dictionary: Dictionary containing the point mass elements. [dict]
+        """
+        for key in dictionary:
+            self.add_point_element(dictionary[key]['mass'], dictionary[key]['subsystem'], dictionary[key]['cg'])
 
     def calculate_stresses(self):
         """Calculates the stresses on the satellite structure. \n
@@ -422,25 +427,33 @@ def optimize():
 
 
 if __name__ == "__main__":
-    s = SatelliteStruc.create_standard_satellite(l_struc=0.9, w_struc=0.9, h_struc=0.9, t_struc=1.4e-2)
+
+    # Create Satellite
+    s = SatelliteStruc()
+
+    # Structure
+    s.add_structure_sub(length=1, width=0.9, height=0.9, t=1.4e-2)
+
+    # Power
+    s.add_panels(a=2.83, b=0.71, mass=40)
+
+    # Propulsion
+    s.add_propellant_tank(type=1, material="Ti-6AL-4V", prop_mass=212.9, pressure=4e6, pos=[0, -0.3, 0])
+
+    # Add Elements
+    s.add_dictionary(components)
 
 
-
-    # l: 1.0, h: 1.0, w: 0.5, t_support: 0.0015, t_struc: 0.0005, r: 0.2
-
-    # s = SatelliteStruc.create_standard_satellite(l_struc=0.92, w_struc=0.92, h_struc=0.92,
-    #                                      t_struc=0.001,
-    #                                      r_support=0.19, t_support=0.001,
-    #                                      material_support="Ti-6AL-4V")
-
+    # Calculate
     s.calculate_stresses()
     s.calculate_vibrations()
-    print(f"Mass: {s.mass}")
-    print(f"Mass Break: {s.mass_breakdown}")
-    # print(f"MMOI Break: {s.mmoi_breakdown}")
-    print(f"Compliance: {s.compliance()}")
-    # print(f"Buckling limit: {s.buckling_limit}")
-    # print(f"Tank radius: {s.propellant_tank.r}")
-    # print(f"Stresses: {s.stress}")
-    # print(f"Vibrations: {s.vibration}")
-    print(s.propellant_tank.r)
+
+    # Results
+    print(f"Total Mass: {s.mass}")
+    print(f"Dry Mass: {s.mass - s.propellant_tank.mass_prop}")
+    print(f"Mass Breakdown: {s.mass_breakdown}")
+
+    print(f"Meets requirements? {all(s.compliance())}")
+
+    print(f"Propellant Tank Info: Radius-{s.propellant_tank.r:.3f}, Length-{s.propellant_tank.l:.3f}, "
+          f"Volume-{s.propellant_tank.volume:.3f}, Thickness-{s.propellant_tank.thickness:.3f}")
