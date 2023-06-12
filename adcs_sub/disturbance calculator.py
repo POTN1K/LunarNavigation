@@ -4,6 +4,7 @@ Created on Fri Jun  2 14:42:11 2023
 
 @author: MD
 """
+#%%
 import numpy as np
 
 def As_and_Csp_Rect(l, w, h):
@@ -25,8 +26,12 @@ def As_and_Csp_Cyl(R, h):
     x_sp = 0.5*h/(1+2*h/(np.pi*R))
     y_sp = 0
     return np.array([A_s]), np.array([x_sp]), np.array([y_sp])
+
 #Cg is origin in this system
-def SRP(x_sp, y_sp, q, A_s):
+def SRP(q, U):
+    A_s = U[0]
+    x_sp = U[1]
+    y_sp = U[2]
     dist_SM = 0.98263  #[AU]
     F_s = 1367/ dist_SM**2
     c = 3*10**8
@@ -40,20 +45,25 @@ def SRP(x_sp, y_sp, q, A_s):
     Tmax = T[int(inc/179), inc%179]
     return inc,  Tmax
 
-# A_s = As_and_Csp_Rect(2, 1.5, 3)[0]
+body = {"Rect":[As_and_Csp_Rect(0.9, 0.9, 0.9)[0], As_and_Csp_Rect(0.9, 0.9, 0.9)[1], 
+                  As_and_Csp_Rect(0.9, 0.9, 0.9)[2]], 
+          "Cyl": [As_and_Csp_Cyl(1.5, 3)[0], As_and_Csp_Cyl(1.5, 3)[1], 
+                  As_and_Csp_Cyl(1.5, 3)[2]]}
 
-# x_sp = As_and_Csp_Rect(2, 1.5, 3)[1]
-# y_sp = As_and_Csp_Rect(2, 1.5, 3)[2]
+# print("This is the max", SRP(1, body["Cyl"]))
+TD = SRP(1, body["Rect"])[1]
+print(TD)
 
-A_s = As_and_Csp_Cyl(1.5, 3)[0]
-print(A_s)
+#%%
 
-x_sp = As_and_Csp_Cyl(1.5, 3)[1]
-y_sp = As_and_Csp_Cyl(1.5, 3)[2]
+a = 10000 #[km]
+mu = 4902.801
 
-print("This is the max", SRP(x_sp, y_sp, 1, A_s))
+P = 2*np.pi*np.sqrt(a**3 / mu)
 
-def maxDesaturationRect(h, t, w, l, n):
+Orbs = 12*365*24*60*60/P
+print(Orbs)
+def maxDesaturationRect(h, t, w, l, n, I_sp):
     ''' h is the momentum of the wheel
         t is time for momentum dunmping
         w is width of spacecraft
@@ -66,13 +76,31 @@ def maxDesaturationRect(h, t, w, l, n):
         L=w
     else:
         L=w
-        
-    return h/(n*t*L)
+    return h/(n*t*L), h/(n*L*I_sp*9.81)
 
 def maxDesaturationCyl(h, t, R, n):
     return h/(n*t*R)
 
 #Assume 1 second for PVT services, could be slower if needed
-FT = maxDesaturationRect(75*1.04, 1, 1.5, 2, 4)
-print(FT)
+
+
+def HowMuchIsYourMom(P, TD, theta_a):
+    #Momentum storage needed to overcome periodic disturbance torque
+    hP = np.sqrt(2)/2*TD*P/4
     
+    # momentum h required for a maximum allowed spacecraft rotation (per orbit) 
+    ha = TD/(theta_a*np.pi/180)*P/4
+    
+    return hP, ha
+
+def prop(FT, t, I_sp):
+    return FT*t/(I_sp*9.81)
+
+def devPs(TD, I_min):
+    return 0.5*TD/I_min
+
+Dumps = HowMuchIsYourMom(P, TD, 0.45839557342765236)[1]
+FT, Mp = maxDesaturationRect(Dumps, 1, 0.9, 0.9, 1, 266)
+print(Dumps, "here")
+print(Mp*Orbs)
+print(Mp)
