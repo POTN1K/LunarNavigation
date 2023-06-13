@@ -43,7 +43,7 @@ DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
 VOP = ["VTOT", "VH", "VV"]
 boxplotscancer = np.zeros(10000)
 for i in range(0, 6):
-    filename = "model10Orbit" + DOPS[i]+ ".csv"
+    filename = "modelredun" + DOPS[i]+ ".csv"
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         data = np.array([[float(element) for element in row] for row in reader])
@@ -61,10 +61,11 @@ def allowable_error(DOP_array, allowable):
     ephemeris_budget = np.array(ephemeris_budget)
     return ephemeris_budget
 print(allowable_error(boxplotscancer,[120.4, 10, 10, 10, 120, 100]))
+
 def boxplot(df):
     plt.figure(figsize=(12, 8))
     column_names = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
-    allowable = [120, 10, 10, 10, 10, 10]
+    allowable = [120, 10, 10, 10, 120, 3.5]
     sns.boxplot(data=df)
     plt.xticks(range(df.shape[1]), column_names)
     for i in range(df.shape[1]):
@@ -94,13 +95,13 @@ zM = r_moon * np.cos(theta)
 
 ax.plot_surface(xM, yM, zM, color='grey', alpha=0.2)
 
-boxplotpointsmap = boxplotscancer[:, 1]
+boxplotpointsmap = boxplotscancer[:, 5]
 
 # Plot satellites in view
 color_map = cm.ScalarMappable(cmap='PiYG')
-color_map.set_array(boxplotscancer[:, 0])
+color_map.set_array(boxplotscancer[:, 5])
 #
-ax.scatter(*zip(*Model.createMoon(100)), marker='s', s=1, c=boxplotscancer[:, 0], cmap='PiYG')
+ax.scatter(*zip(*Model.createMoon(100)), marker='s', s=1, c=boxplotscancer[:, 5], cmap='PiYG')
 plt.colorbar(color_map)
 
 # ax.set_title('Satellite coverage')
