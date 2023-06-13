@@ -254,16 +254,16 @@ class FrozenOrbits:
         return P
 
     def DOP_time(self, satellites):
-        self.DOP_time_GDOP = np.array([])
-        self.DOP_time_PDOP = np.array([])
-        self.DOP_time_HDOP = np.array([])
-        self.DOP_time_VDOP = np.array([])
-        self.DOP_time_TDOP = np.array([])
-        self.DOP_time_HHDOP = np.array([])
-        self.velocity_time_total = np.array([])
-        self.velocity_time_horizontal = np.array([])
-        self.velocity_time_vertical = np.array([])
-        sats = np.arange(0, 36)
+        self.DOP_time_GDOP = []
+        self.DOP_time_PDOP = []
+        self.DOP_time_HDOP = []
+        self.DOP_time_VDOP = []
+        self.DOP_time_TDOP = []
+        self.DOP_time_HHDOP = []
+        self.velocity_time_total = []
+        self.velocity_time_horizontal = []
+        self.velocity_time_vertical = []
+        sats = np.arange(0, 2)
         self.combinations = list(itertools.combinations(sats, 2))
         for k in range(len(self.combinations)):
             for i in range(0, satellites.shape[0], 1000):
@@ -276,39 +276,24 @@ class FrozenOrbits:
                 self.model.setCoverage()
                 DOPValues = self.DOP_calculator(sat_velocities)
                 if i == 0:
-                    self.DOP_time_GDOP = DOPValues[:, 0]
-                    self.DOP_time_PDOP = DOPValues[:, 1]
-                    self.DOP_time_HDOP = DOPValues[:, 2]
-                    self.DOP_time_VDOP = DOPValues[:, 3]
-                    self.DOP_time_TDOP = DOPValues[:, 4]
-                    self.DOP_time_HHDOP = DOPValues[:, 5]
-                    self.velocity_time_total = DOPValues[:, 6]
-                    self.velocity_time_horizontal = DOPValues[:, 7]
-                    self.velocity_time_vertical = DOPValues[:, 8]
-
-
-
-
-                else:
-                    self.DOP_time_GDOP = np.vstack((self.DOP_time_GDOP, DOPValues[:, 0]))
-                    self.DOP_time_PDOP = np.vstack((self.DOP_time_PDOP, DOPValues[:, 1]))
-                    self.DOP_time_HDOP = np.vstack((self.DOP_time_HDOP, DOPValues[:, 2]))
-                    self.DOP_time_VDOP = np.vstack((self.DOP_time_VDOP, DOPValues[:, 3]))
-                    self.DOP_time_TDOP = np.vstack((self.DOP_time_TDOP, DOPValues[:, 4]))
-                    self.DOP_time_HHDOP = np.vstack((self.DOP_time_HHDOP, DOPValues[:, 5]))
-                    self.velocity_time_total = np.vstack((self.velocity_time_total, DOPValues[:, 6]))
-                    self.velocity_time_horizontal = np.vstack((self.velocity_time_horizontal, DOPValues[:, 7]))
-                    self.velocity_time_vertical = np.vstack((self.velocity_time_vertical, DOPValues[:, 8]))
-        np.savetxt("modelredunVTOT.csv", self.velocity_time_total, delimiter=",")
-        np.savetxt("modelredunVH.csv", self.velocity_time_horizontal, delimiter=",")
-        np.savetxt("modelredunVV.csv", self.velocity_time_vertical, delimiter=",")
-
-        np.savetxt("modelredunGDOP.csv", self.DOP_time_GDOP, delimiter=",")
-        np.savetxt("modelredunPDOP.csv", self.DOP_time_PDOP, delimiter=",")
-        np.savetxt("modelredunHDOP.csv", self.DOP_time_HDOP, delimiter=",")
-        np.savetxt("modelredunVDOP.csv", self.DOP_time_VDOP, delimiter=",")
-        np.savetxt("modelredunTDOP.csv", self.DOP_time_TDOP, delimiter=",")
-        np.savetxt("modelredunHHDOP.csv", self.DOP_time_HHDOP, delimiter=",")
+                    self.DOP_time_GDOP.append((self.DOP_time_GDOP, DOPValues[:, 0]))
+                    self.DOP_time_PDOP.append((self.DOP_time_PDOP, DOPValues[:, 1]))
+                    self.DOP_time_HDOP.append((self.DOP_time_HDOP, DOPValues[:, 2]))
+                    self.DOP_time_VDOP.append((self.DOP_time_VDOP, DOPValues[:, 3]))
+                    self.DOP_time_TDOP.append((self.DOP_time_TDOP, DOPValues[:, 4]))
+                    self.DOP_time_HHDOP.append((self.DOP_time_HHDOP, DOPValues[:, 5]))
+                    self.velocity_time_total.append((self.velocity_time_total, DOPValues[:, 6]))
+                    self.velocity_time_horizontal.append((self.velocity_time_horizontal, DOPValues[:, 7]))
+                    self.velocity_time_vertical.append((self.velocity_time_vertical, DOPValues[:, 8]))
+        np.savetxt("modelredunVTOT.csv", np.asarray(self.velocity_time_total), delimiter=",")
+        np.savetxt("modelredunVH.csv",  np.asarray(self.velocity_time_horizontal), delimiter=",")
+        np.savetxt("modelredunVV.csv",  np.asarray(self.velocity_time_vertical), delimiter=",")
+        np.savetxt("modelredunGDOP.csv",  np.asarray(self.DOP_time_GDOP), delimiter=",")
+        np.savetxt("modelredunPDOP.csv",  np.asarray(self.DOP_time_PDOP), delimiter=",")
+        np.savetxt("modelredunHDOP.csv",  np.asarray(self.DOP_time_HDOP), delimiter=",")
+        np.savetxt("modelredunVDOP.csv",  np.asarray(self.DOP_time_VDOP), delimiter=",")
+        np.savetxt("modelredunTDOP.csv",  np.asarray(self.DOP_time_TDOP), delimiter=",")
+        np.savetxt("modelredunHHDOP.csv",  np.asarray(self.DOP_time_HHDOP), delimiter=",")
 
 
 constellations = []
