@@ -322,8 +322,10 @@ class PropagationTime:
         dep_vars = dynamics_simulator.dependent_variable_history
         self.dep_vars_array = result2array(dep_vars)
         self.accelsun = self.dep_vars_array[:, -1]
-        self.kepler_elements = self.dep_vars_array[:, 1:-1]
-
+        # self.kepler_elements = self.dep_vars_array[:, 1:-1]
+        self.kepler_elements = np.delete(self.dep_vars_array, 0, axis=1)
+        # Delete the initial position as this is not yet updated according to the simulation
+        self.kepler_elements = np.delete(self.kepler_elements, 0, axis=0)
 
         indices_velocity = np.arange(4, self.states_array.shape[1], 6).reshape(-1, 1) + np.arange(3)
         # use advanced indexing
@@ -531,8 +533,9 @@ class PropagationTime:
 
         plt.tight_layout()
         plt.show()
-satellites = [[5740e3, 0.58, np.deg2rad(54.856), 0,  np.deg2rad(86.322), 0],[5740e3,0.58,54.856,0,86.322,0]]
-propagation_time = PropagationTime(resolution=10,final_time= 86400,orbit_parameters=satellites)
-# # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
-propagation_time.plot_kepler(0)
-propagation_time.plot_time()
+
+# satellites = [[5740e3, 0.58, np.deg2rad(54.856), 0,  np.deg2rad(86.322), 0],[5740e3,0.58,54.856,0,86.322,0]]
+# propagation_time = PropagationTime(resolution=10,final_time= 86400,orbit_parameters=satellites)
+# # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))
+# propagation_time.plot_kepler(0)
+# propagation_time.plot_time()
