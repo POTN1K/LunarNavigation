@@ -73,10 +73,10 @@ class UserErrors:
 
     def satellite_error(self, ORBIT):
         CLOCK_ERROR = 0.03
-        RECIEVER_NOISE_AND_RESOLUTION = 0.1
+        RECEIVER_NOISE_AND_RESOLUTION = 0.1
         MULTIPATH = 0.2
         DIFF_GROUP_DELAY = 0.15
-        return np.sqrt(CLOCK_ERROR**2 + ORBIT**2 + RECIEVER_NOISE_AND_RESOLUTION**2 + MULTIPATH**2 + DIFF_GROUP_DELAY**2)
+        return np.sqrt(CLOCK_ERROR**2 + ORBIT**2 + RECEIVER_NOISE_AND_RESOLUTION**2 + MULTIPATH**2 + DIFF_GROUP_DELAY**2)
 
 
 
