@@ -216,5 +216,10 @@ components = {
         "subsystem": "Structures",
         "mass": 10,  # [kg]
         "cg": [0, 0, 0]  # [m]
+    },
+    "Tank_Support": {
+        "subsystem": "Structures",
+        "mass": 10,  # [kg]
+        "cg": [0, 0, 0]  # [m]
     }
 }

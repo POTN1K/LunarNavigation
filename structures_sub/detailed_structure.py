@@ -445,7 +445,7 @@ if __name__ == "__main__":
     s.add_panels(a=3.699, b=0.925, mass=27.36)
 
     # Propulsion
-    s.add_propellant_tank(type=1, material="Ti-6AL-4V", prop_mass=243.5, pressure=4e6, pos=[0, 0, 0], r=0.27)
+    s.add_propellant_tank(type=1, material="Ti-6AL-4V", prop_mass=247, pressure=4e6, pos=[0, 0, 0], r=0.27)
 
     # Add Elements
     s.add_dictionary(components)
