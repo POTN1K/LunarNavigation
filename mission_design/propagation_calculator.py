@@ -199,15 +199,15 @@ class PropagationTime:
         """
         accelerations_settings_lunar_sats = dict(
             Sun=[
-                propagation_setup.acceleration.cannonball_radiation_pressure(),
+                # propagation_setup.acceleration.cannonball_radiation_pressure(),
                 propagation_setup.acceleration.point_mass_gravity()
             ],
             Earth=[
-                propagation_setup.acceleration.spherical_harmonic_gravity(5, 5)
+                propagation_setup.acceleration.spherical_harmonic_gravity(0, 0)
             ],
             Moon=[
-                propagation_setup.acceleration.spherical_harmonic_gravity(10, 10),
-                propagation_setup.acceleration.relativistic_correction(use_schwarzschild=True)
+                propagation_setup.acceleration.spherical_harmonic_gravity(3, 3),
+                # propagation_setup.acceleration.relativistic_correction(use_schwarzschild=True)
             ]
 
         )

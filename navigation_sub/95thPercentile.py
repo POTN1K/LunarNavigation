@@ -43,7 +43,7 @@ DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
 VOP = ["VTOT", "VH", "VV"]
 boxplotscancer = np.zeros(10000)
 for i in range(0, 6):
-    filename = "model35" + DOPS[i] + ".csv"
+    filename = "modelreduntot" + DOPS[i] + ".csv"
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         data = np.array([[float(element) for element in row] for row in reader])
@@ -53,19 +53,41 @@ for i in range(0, 6):
 
 boxplotscancer = array = np.delete(boxplotscancer, 0, 0).T
 
+boxplotscancer_V = np.zeros(10000)
+for j in range(0, 3):
+    filename = "modelreduntot" + VOP[j] + ".csv"
+    with open(filename, 'r') as file:
+        reader = csv.reader(file)
+        data = np.array([[float(element) for element in row] for row in reader])
+        ninetyfifth_percent = np.percentile(data, 95, axis=0)
+    boxplotscancer_V = np.vstack((boxplotscancer_V, ninetyfifth_percent))
 
-def allowable_error(DOP_array, allowable):
+boxplotscancer_V = array = np.delete(boxplotscancer_V, 0, 0).T
+
+CNR = 8  # [dB]
+sigma_V = 0.01*10**(-(CNR-45)/20)  # [m/s]
+
+def allowable_error(DOP_array, DOP_array_2, allowable, allowable_V):
     constraints = np.max(DOP_array, axis=0)
     ephemeris_budget = []
     for i in range(len(constraints)):
-        ephemeris_budget.append(np.sqrt((allowable[i] ** 2 / constraints[i] ** 2/4 ) - UserErrors.satellite_error(0, ORBIT=0) ** 2))
+        ephemeris_budget.append(np.sqrt((allowable[i] ** 2 / constraints[i] ** 2/4) - UserErrors.satellite_error(0, ORBIT=0) ** 2))
     ephemeris_budget = np.array(ephemeris_budget)
-    return ephemeris_budget
-print(allowable_error(boxplotscancer,[120.4, 10, 10, 10, 120, 100]))
 
-def boxplot(df):
+    constraints_V = np.max(DOP_array_2, axis=0)
+    ephemeris_budget_V = []
+    for i in range(len(constraints_V)):
+        ephemeris_budget_V.append(
+            np.sqrt((allowable_V[i] ** 2 / constraints_V[i] ** 2 / 4) - sigma_V ** 2))
+    ephemeris_budget_V = np.array(ephemeris_budget_V)
+
+    return ephemeris_budget, ephemeris_budget_V
+print(allowable_error(boxplotscancer, boxplotscancer_V, [120.4, 10, 10, 10, 120, 100], [1, 1, 1]))
+
+
+def boxplot(df, df_V):
     plt.figure(figsize=(12, 8))
-    column_names = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
+    column_names = DOPS
     allowable = [120, 10, 10, 10, 120, 3.5]
     sns.boxplot(data=df)
     plt.xticks(range(df.shape[1]), column_names)
@@ -74,7 +96,18 @@ def boxplot(df):
     plt.title("95th percentile points over time")
     plt.show()
 
-boxplot(boxplotscancer)
+    plt.figure(figsize=(12, 8))
+    column_names_V = VOP
+    allowable_V = [1, 1, 1]
+    sns.boxplot(data=df_V)
+    plt.xticks(range(df_V.shape[1]), column_names_V)
+    for i in range(df_V.shape[1]):
+        plt.plot([i - 0.5, i + 0.5], [allowable_V[i]] * 2, color='red')
+    plt.title("95th percentile points over time")
+    plt.show()
+
+boxplot(boxplotscancer, boxplotscancer_V)
+
 
 r_moon = 1.737e6  # m
 miu_moon = 4.9048695e12  # m^3/s^2
