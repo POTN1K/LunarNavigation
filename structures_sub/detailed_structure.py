@@ -381,9 +381,9 @@ class SatelliteStruc:
         """Calculates the stresses on the satellite structure. \n
          Stresses - tensile_launch, tensile_thermal, compressive_launch, compressive_thermal
         """
-        s1 = self.mass * g * (g_tensile / self.cross_section + g_lateral * self.dim[0] * (self.dim[1] / 2) /
+        s1 = self.mass * g * (g_lateral / self.cross_section + g_axial * self.dim[0] * (self.dim[1] / 2) /
                               self.area_moment_of_inertia[0])
-        s2 = self.mass * g * (g_tensile / self.cross_section + g_lateral * self.dim[0] * (self.dim[2] / 2) /
+        s2 = self.mass * g * (g_lateral  / self.cross_section + g_axial * self.dim[0] * (self.dim[2] / 2) /
                               self.area_moment_of_inertia[1])
         self.stress[0] = max(s1, s2)
         self.stress[1] = -self.thermal_coeff * (temperatures[0] - 20) * self.E
@@ -393,6 +393,8 @@ class SatelliteStruc:
                               self.area_moment_of_inertia[1])
         self.stress[2] = max(s1, s2)
         self.stress[3] = self.thermal_coeff * (temperatures[1] - 20) * self.E
+        self.stress[4] = (self.mass*g*g_axial)*(self.t*self.dim[1]*self.dim[0]/2 + 2*self.t*self.dim[0]/2*self.dim[0]/4)/(self.area_moment_of_inertia[0]*self.t)
+
 
     def calculate_vibrations(self):
         """Calculates the vibrations on the satellite structure."""
@@ -454,6 +456,8 @@ if __name__ == "__main__":
     # Calculate
     s.calculate_stresses()
     s.calculate_vibrations()
+
+    print(s.stress)
 
     # Results
     print(f"Total Mass: {s.mass:.3f}")

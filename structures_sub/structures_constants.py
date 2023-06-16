@@ -9,7 +9,7 @@ g_axial = 8.5   # [g] Axial load factor
 g_lateral = 3   # [g] Lateral load factor
 g_tensile = 4   # [g] Tensile load factor (negative g)
 g = 9.80665
-temperatures = [-120, 130]
+temperatures = [0, 40]
 
 material_properties = {
     "Aluminium_6061-T6": {
