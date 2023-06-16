@@ -263,16 +263,16 @@ class FrozenOrbits:
         self.velocity_time_total = []
         self.velocity_time_horizontal = []
         self.velocity_time_vertical = []
-        sats = np.arange(0, 2)
+        sats = np.arange(0, 35)
         self.combinations = list(itertools.combinations(sats, 2))
-        for k in range(len(self.combinations)):
+        for k in range(0, 40, 5):
             for i in range(0, satellites.shape[0], 1000):
                 self.model.resetModel()
                 sat_velocities = self.propagation_time.velocity[i]
                 for j in range(0, satellites.shape[1]//6):
-                    if j != self.combinations[k][0] and j != self.combinations[k][1]:
-                        self.model.addSatellite(satellites[i][j*6], satellites[i][j*6+1], np.rad2deg(satellites[i][j*6+2]), np.rad2deg(satellites[i][j*6+3]),
-                                    np.rad2deg(satellites[i][j*6+4]), np.rad2deg(satellites[i][j*6+5]), id=j)
+                    # if j != self.combinations[k][0] and j != self.combinations[k][1]:
+                    self.model.addSatellite(satellites[i][j*6], satellites[i][j*6+1], np.rad2deg(satellites[i][j*6+2]), np.rad2deg(satellites[i][j*6+3]),
+                                np.rad2deg(satellites[i][j*6+4]), np.rad2deg(satellites[i][j*6+5]), id=j, elevation=k)
                 self.model.setCoverage()
                 DOPValues = self.DOP_calculator(sat_velocities)
                 self.DOP_time_GDOP.append(DOPValues[:, 0])
@@ -284,15 +284,15 @@ class FrozenOrbits:
                 self.velocity_time_total.append(DOPValues[:, 6])
                 self.velocity_time_horizontal.append(DOPValues[:, 7])
                 self.velocity_time_vertical.append(DOPValues[:, 8])
-        np.savetxt("modelredunVTOT.csv", np.asarray(self.velocity_time_total), delimiter=",")
-        np.savetxt("modelredunVH.csv",  np.asarray(self.velocity_time_horizontal), delimiter=",")
-        np.savetxt("modelredunVV.csv",  np.asarray(self.velocity_time_vertical), delimiter=",")
-        np.savetxt("modelredunGDOP.csv",  np.asarray(self.DOP_time_GDOP), delimiter=",")
-        np.savetxt("modelredunPDOP.csv",  np.asarray(self.DOP_time_PDOP), delimiter=",")
-        np.savetxt("modelredunHDOP.csv",  np.asarray(self.DOP_time_HDOP), delimiter=",")
-        np.savetxt("modelredunVDOP.csv",  np.asarray(self.DOP_time_VDOP), delimiter=",")
-        np.savetxt("modelredunTDOP.csv",  np.asarray(self.DOP_time_TDOP), delimiter=",")
-        np.savetxt("modelredunHHDOP.csv",  np.asarray(self.DOP_time_HHDOP), delimiter=",")
+            np.savetxt("model"+str(k)+"VTOT.csv", np.asarray(self.velocity_time_total), delimiter=",")
+            np.savetxt("model"+str(k)+"VH.csv",  np.asarray(self.velocity_time_horizontal), delimiter=",")
+            np.savetxt("model"+str(k)+"VV.csv",  np.asarray(self.velocity_time_vertical), delimiter=",")
+            np.savetxt("model"+str(k)+"GDOP.csv",  np.asarray(self.DOP_time_GDOP), delimiter=",")
+            np.savetxt("model"+str(k)+"PDOP.csv",  np.asarray(self.DOP_time_PDOP), delimiter=",")
+            np.savetxt("model"+str(k)+"HDOP.csv",  np.asarray(self.DOP_time_HDOP), delimiter=",")
+            np.savetxt("model"+str(k)+"VDOP.csv",  np.asarray(self.DOP_time_VDOP), delimiter=",")
+            np.savetxt("model"+str(k)+"TDOP.csv",  np.asarray(self.DOP_time_TDOP), delimiter=",")
+            np.savetxt("model"+str(k)+"HHDOP.csv",  np.asarray(self.DOP_time_HHDOP), delimiter=",")
 
 
 constellations = []
@@ -352,6 +352,7 @@ fo.model_symmetrical_planes(orbit_choice)
 
 P_max = 2*np.pi * np.sqrt(10000000**3/miu_moon)
 fo.dyn_sim(P_max)
+fo.propagation_time.plot_time()
 
 # np.savetxt("statesarray_radiation.csv", fo.propagation_time.states_array, delimiter=",")
 

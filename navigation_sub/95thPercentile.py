@@ -43,11 +43,12 @@ DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
 VOP = ["VTOT", "VH", "VV"]
 boxplotscancer = np.zeros(10000)
 for i in range(0, 6):
-    filename = "modelredun" + DOPS[i]+ ".csv"
+    filename = "model35" + DOPS[i] + ".csv"
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         data = np.array([[float(element) for element in row] for row in reader])
-        ninetyfifth_percent = np.percentile(data, 95, axis=0)
+        print(data.shape)
+        ninetyfifth_percent = np.percentile(data, 100, axis=0)
     boxplotscancer = np.vstack((boxplotscancer, ninetyfifth_percent))
 
 boxplotscancer = array = np.delete(boxplotscancer, 0, 0).T

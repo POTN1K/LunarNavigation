@@ -15,6 +15,9 @@ By Kyle Scherpenzeel
 import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from PIL import Image
+import imageio
+
 
 
 # Load tudatpy modules
@@ -451,7 +454,7 @@ class PropagationTime:
         z = np.cos(v) * 1737.4 * 1000
 
         # plot the sphere
-
+        frames = []
 
         for i, body in enumerate(self.bodies_to_propagate):
             # Plot the 3D trajectory of each body
@@ -480,6 +483,17 @@ class PropagationTime:
         ax1.set_ylabel('y [$10^7$ m]')
         ax1.set_zlabel('z [$10^7$ m]')
         plt.tight_layout()
+
+        for angle in range(0, 360, 5):
+            ax1.view_init(elev=30, azim=angle)  # Set the camera angle
+            fig1.canvas.draw()  # Redraw the figure
+            frame = np.frombuffer(fig1.canvas.tostring_rgb(), dtype='uint8')  # Convert the figure to an RGB array
+            frame = frame.reshape(fig1.canvas.get_width_height()[::-1] + (3,))  # Reshape the array
+            frames.append(frame)  # Append the frame to the list
+
+            # Create a GIF using imageio
+        output_gif = "OrbitAnimation.gif"
+        imageio.mimsave(output_gif, frames, duration=0.1)
         plt.show()
 
     def plot_kepler(self, satellite_number):
