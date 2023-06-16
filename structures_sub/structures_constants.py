@@ -23,6 +23,7 @@ material_properties = {
         "density": 2800,  # [kg/m^3]
         "yield_strength": 435e6,  # [Pa]
         "ultimate_strength": 505e6,  # [Pa]
+        "shear_strength": 300e6,
         "E": 72e9,  # [Pa]
         "thermal_coefficient": 23.6e-6,  # [m/m]
     },

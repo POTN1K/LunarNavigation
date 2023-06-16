@@ -159,7 +159,7 @@ class SatelliteStruc:
 
         self.material = "Aluminium_7075-T73"
 
-        self.stress = [0, 0, 0, 0]  # [tensile_launch, tensile_thermal, compressive_launch, compressive_thermal]
+        self.stress = [0, 0, 0, 0, 0]  # [tensile_launch, tensile_thermal, compressive_launch, compressive_thermal, shear]
         self.vibration = [0, 0, 0]  # [axial, lateral_x, lateral_y]
 
         self.mass_breakdown = dict()
@@ -240,6 +240,7 @@ class SatelliteStruc:
         self.rho = material_properties[material]['density']
         self.sigma_y = material_properties[material]['yield_strength']
         self.sigma_u = material_properties[material]['ultimate_strength']
+        self.tau = material_properties[material]['shear_strength']
         self.thermal_coeff = material_properties[material]['thermal_coefficient']
         self._material = material
 
@@ -406,11 +407,12 @@ class SatelliteStruc:
         """Checks if the satellite structure is compliant with the requirements.
         :return: s_compliance, v_axial_compliance, v_lat_compliance, b_compliance
         """
-        s_compliance = max(self.stress) < self.sigma_y / 1.1
+        s_compliance = max(self.stress[:4]) < self.sigma_y / 1.1
         v_axial_compliance = self.vibration[0] > axial_freq_falcon * 1.5
         v_lat_compliance = min(self.vibration[1:]) > lateral_freq_falcon * 1.5
         b_compliance = self.stress[2] < self.buckling_limit / 1.1
-        return s_compliance, v_axial_compliance, v_lat_compliance, b_compliance
+        sh_compliance = self.stress[4] < self.tau / 1.1
+        return s_compliance, v_axial_compliance, v_lat_compliance, b_compliance, sh_compliance
 
 
 def optimize():
