@@ -156,79 +156,6 @@ class Cylinder:
         return f"Cylinder({self.radius}, {self.height})"
 
 
-class PropellantTank:
-    """Class to create a tank for the propellant."""
-
-    def __init__(self, volume, material, l_d=5, pressure=10e6):
-        """Initializes the tank.
-        :param volume: Volume of the tank. [m^3]
-        :param pressure: Pressure of the tank. [Pa]
-        :param material: Material of the tank. [string]
-        """
-        self._thickness = None
-        self.name = "Propellant Tank"
-        self.volume = volume
-        self.pressure = pressure
-        self.material = material
-        self.d = (2 * volume / (np.pi * (l_d - 1) / 2 + 1 / 3)) ** (1 / 3)
-        self.l = l_d * self.d
-        self.mass = self.surface_area() * self.thickness * self.rho
-
-    @property
-    def material(self):
-        return self._material
-
-    @material.setter
-    def material(self, material):
-        self.E = material_properties[material]['E']
-        self.rho = material_properties[material]['density']
-        self.yield_strength = material_properties[material]['yield_strength'] * 1.1
-        self.ultimate_strength = material_properties[material]['ultimate_strength'] * 1.25
-        self.thermal_coeff = material_properties[material]['thermal_coefficient']
-        self._material = material
-
-    @property
-    def thickness(self):
-        if self._thickness is None:
-            self._thickness = self.thickness_limiting()
-            return self._thickness
-        else:
-            return self._thickness
-
-    @thickness.setter
-    def thickness(self, thickness):
-        if thickness >= self.thickness_limiting():
-            self._thickness = thickness
-        else:
-            raise ValueError(
-                f"Thickness does not meet requirements, must be at least {round(self.thickness_limiting() * 1000, 3)}mm.")
-
-    def surface_area(self):
-        """Computes the surface area of the tank.
-        :return: Surface area of the tank. [m^2]"""
-        return np.pi * self.d * self.l + np.pi * self.d ** 2 / 4
-
-    def thickness_stress(self):
-        """Computes the thickness of the tank based on stress.
-        :return: Thickness of the tank. [m]"""
-        return self.pressure * self.d / (2 * self.yield_strength)
-
-    def thickness_buckling(self):
-        t = fsolve(lambda t: 9 * (t / (self.d / 2)) ** 1.6 + 0.16 * (t / self.l) ** 1.3 - (
-                0.6 * 0.33 * t / (self.d / 2)) * 1.1, 0.001)
-        return t
-
-    def thickness_limiting(self):
-        return max(self.thickness_stress(), self.thickness_buckling())
-
-    def __str__(self):
-        return f"Propellant Tank: Mass - {self.mass}[kg]\n" \
-               f"Dimensions: Diameter - {self.d}[m]\t Length including caps - {self.l}[m]\t Thickness - {self.thickness * 1000}[mm]"
-
-    def __repr__(self):
-        return f"PropellantTank({self.volume}, {self.material})"
-
-
 class Structure:
     """Structure subsystem of the satellite."""
 
@@ -243,6 +170,7 @@ class Structure:
         self.m0 = m0
         self.shape = shape
         self.material = material
+
         self.compressive_thermal_stress = self.thermal_coeff * (temperatures[1] - 20) * self.E
         self.tensile_thermal_stress = -self.thermal_coeff * (temperatures[0] - 20) * self.E
         self.compressive_stress = None
@@ -414,8 +342,8 @@ class Structure:
         b = self.thickness_buckling()
         c = self.thickness_lateral_freq()
         d = self.thickness_axial_stress()
-        return max(self.thickness_axial_freq(), self.thickness_buckling(),
-                   self.thickness_lateral_freq(), self.thickness_axial_stress())
+        print(a,b,c,d)
+        return max(a,b,c,d)
 
     def compute_characteristics(self):
         """Function to compute characteristics of the structure
@@ -497,16 +425,11 @@ if __name__ == "__main__":
     mass_init = mass_no_struc + mass_struc  # [kg] Mass of the initial sizing of the spacecraft
     vol_init = mass_init * 0.01  # [m^3] Volume of the initial sizing of the spacecraft
 
-    cube = RectangularPrism(1, 1, 1, vol_init)
-    rect = RectangularPrism(1, 1, 2, vol_init)
-    cyl = Cylinder(1, 2, vol_init)
-
-    s_cube = Structure(cube, "Aluminium_7075-T73", mass_init)
-    s_rect = Structure(rect, "Aluminium_7075-T73", mass_init)
-    s_cyl = Structure(cyl, "Aluminium_7075-T73", mass_init)
-
-    print(s_cube)
-    print("\n\n")
-    print(s_rect)
-    print("\n\n")
-    print(s_cyl)
+    i = 1
+    j = 1.3
+    rect = RectangularPrism(i, i, j, vol_init)
+    s = Structure(rect, "Aluminium_7075-T73", mass_init)
+    s.add_panels(8, 100)
+    s.compute_characteristics()
+    _ = f"{rect.width}x{rect.length}x{rect.height}, {s.m_struc}, {s.tensile_stress}, {s.compressive_stress}, {s.thickness}, {s.Ixx}, {s.Iyy}, {s.Izz}, {s.axial_eigen}, {s.l_eigenx}, {s.l_eigeny}"
+    print(_)

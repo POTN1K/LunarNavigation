@@ -72,11 +72,11 @@ class UserErrors:
             raise ValueError("Ephemeris error must be equal or greater than 0")
 
     def satellite_error(self, ORBIT):
-        CLOCK_ERROR = 0.01
-        RECIEVER_NOISE_AND_RESOLUTION = 0.1
-        OTHER = 1
+        CLOCK_ERROR = 0.03
+        RECEIVER_NOISE_AND_RESOLUTION = 0.1
         MULTIPATH = 0.2
-        return np.sqrt(CLOCK_ERROR**2 + ORBIT**2 + RECIEVER_NOISE_AND_RESOLUTION**2 + MULTIPATH**2 + OTHER**2)
+        DIFF_GROUP_DELAY = 0.15
+        return np.sqrt(CLOCK_ERROR**2 + ORBIT**2 + RECEIVER_NOISE_AND_RESOLUTION**2 + MULTIPATH**2 + DIFF_GROUP_DELAY**2)
 
 
 
@@ -100,22 +100,32 @@ class UserErrors:
         # Compute covariance matrix
         self.Q = np.dot(H_inv, H_inv.T)
         self.HQ = np.dot(HH_inv, HH_inv.T)
-    def velocity_parameter_cov(self, time_index):
+    def velocity_parameter_cov(self, velocity_indeces):
         HV = np.ones((len(self.sats), 4))
         # Compute vectors from receiver to satellites
         vecs = self.sats - self.position_user
         # Compute distances
         self.dists = np.linalg.norm(vecs, axis=1)
+        rel_velocities = []
+        for i in range(0, len(velocity_indeces)):
+            rel_velocities.append([self.sats_velocity[velocity_indeces[i]:velocity_indeces[i]+3]])
+        rel_velocities = np.squeeze(np.asarray(rel_velocities))
         # Compute unit vectors
         uvecs = vecs / self.dists[:, np.newaxis]
-        HV[:, :3] = np.dot(uvecs, self.sats_velocity[time_index].reshape((3, (len(self.sats)))))
+        HV[:, :3] = uvecs * rel_velocities
         HV_inv = np.linalg.pinv(HV)
         self.VQ = np.dot(HV_inv, HV_inv.T)
-        print(np.sqrt(np.trace(self.VQ)))
+        # print(np.sqrt(np.trace(self.VQ)))
+        return self.velocity_error_calculator()
 
 
 
 
+    def velocity_error_calculator(self):
+        self.velocity3d = np.sqrt(np.trace(self.VQ[:3, :3]))
+        self.velocityH =  np.sqrt(np.trace(self.VQ[:2, :2]))
+        self.velocityV =  np.sqrt(self.VQ[2, 2])
+        return np.asarray([self.velocity3d, self.velocityH, self.velocityV])
 
 
         # Now, we can compute the DOP values
@@ -159,4 +169,4 @@ class UserErrors:
         for i in range(len(constraints)):
             ephemeris_budget.append(np.sqrt((self.allowable[i] ** 2 / constraints[i] ** 2) - self.satellite_error(0) ** 2))
         self.ephemeris_budget = np.array(ephemeris_budget)
-        return ephemeris_budget
+        return self.ephemeris_budget

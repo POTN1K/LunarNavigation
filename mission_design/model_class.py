@@ -563,8 +563,8 @@ class Model:
         :param n_sat: number of satellites in the orbit plane
         :param elevation: (optional) elevation angle [deg]
         """
-        self.id_start = id_start
-        n_orbit = OrbitPlane(a, e, i, w, Omega, n_sat, elevation, shift)
+
+        n_orbit = OrbitPlane(a, e, i, w, Omega, n_sat, elevation, shift, id_start=id_start)
         self.orbit_planes.append(n_orbit)
         for s in n_orbit.satellites:
             self.modules.append(s)
@@ -589,7 +589,7 @@ class Model:
         :param elevation: (optional) elevation angle [deg]
         :param shift: (optional) shift of the satellite in the orbit plane [deg]
         """
-        n_sat = Satellite(a, e, i, w, Omega, nu, elevation, shift)
+        n_sat = Satellite(a, e, i, w, Omega, nu, elevation, shift, id=id)
         self.modules.append(n_sat)
         self.n_sat += 1
 
@@ -609,7 +609,7 @@ class Model:
         self.n_sat += 1
 
     def addSymmetricalPlanes(self, a=r_moon, e=0, i=0, w=0, n_planes=1, n_sat_per_plane=1, dist_type=0, f=0, shift=0,
-                             elevation=10):
+                             elevation=10, id_start=0):
         """Add  symmetrical orbit planes to the model.
         :param a: semi-major axis [m]
         :param e: eccentricity [-]
@@ -625,11 +625,11 @@ class Model:
         if dist_type == 0:
             for n in range(n_planes):
                 self.addOrbitPlane(a, e, i, w, 180 / n_planes * n, n_sat_per_plane, shift + f * 180 * n, elevation,
-                                   id_start=n * n_sat_per_plane)
+                                   id_start=id_start + n * n_sat_per_plane)
         elif dist_type == 1:
             for n in range(n_planes):
                 self.addOrbitPlane(a, e, i, w, 360 / n_planes * n, n_sat_per_plane, shift + f * 360 * n, elevation,
-                                   id_start=n * n_sat_per_plane)
+                                   id_start=id_start + n * n_sat_per_plane)
         else:
             raise ValueError("Invalid distribution type.")
 
@@ -735,12 +735,12 @@ class Model:
         # Plot Orbits
         phi = np.linspace(0, 2 * np.pi, 100)
         theta = np.linspace(0, np.pi, 100)
-        r = np.linspace(r_moon+100, r_orbit, 100)
+        r = np.linspace(r_moon+10, r_orbit, 10)
 
         # Create a meshgrid of phi and theta values
         phi, theta = np.meshgrid(phi, theta)
         # Calculate the x, y, and z coordinates for each point on the sphere
-        for m in r :
+        for m in r:
             xO = m * np.sin(theta) * np.cos(phi)
             yO = m * np.sin(theta) * np.sin(phi)
             zO = m * np.cos(theta)
