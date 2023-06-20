@@ -193,10 +193,15 @@ components = {
         "mass": 12.43,  # [kg]
         "cg": [-0.6, 0, 0.23]  # [m]
     },
-    "Radiator": {
+    "Radiator1": {
         "subsystem": "TCS",
-        "mass": 11.85,  # [kg]
-        "cg": [0, 0, 0]  # [m]
+        "mass": 11.85/2,  # [kg]
+        "cg": [0.45, 0, -0.2]  # [m]
+    },
+    "Radiator2": {
+        "subsystem": "TCS",
+        "mass": 11.85/2,  # [kg]
+        "cg": [-0.45, 0, 0.2]  # [m]
     },
     "Heaters": {
         "subsystem": "TCS",
