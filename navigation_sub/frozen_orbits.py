@@ -191,6 +191,7 @@ class FrozenOrbits:
     def dyn_sim(self, P, dt=1, kepler_plot=0):
         satellites = self.model.getSatellites()
         duration = P
+        print("hi")
         self.propagation_time = PropagationTime(satellites, duration, dt)
         # print(np.average(np.array(propagation_time.complete_delta_v(0, duration))))
         # self.propagation_time.plot_kepler(kepler_plot)
