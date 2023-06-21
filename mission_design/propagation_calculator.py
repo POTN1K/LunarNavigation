@@ -30,7 +30,7 @@ c = 299792458
 
 class PropagationTime:
     """Class to input satellite(s) and see their change of position over time"""
-    def __init__(self, orbit_parameters=None, final_time=86400, resolution=900, mass_sat=250, area_sat=1, c_radiation=1.07*0.768, antenna_power=100):
+    def __init__(self, orbit_parameters=None, final_time=86400, resolution=900, mass_sat=966, area_sat=1, c_radiation=1.935740338429357, antenna_power=100):
         """Initialize the initial state of the satellite(s) with Keplerian elements,final time and resolution to see the final position
         :param orbit_parameters: array of Keplarian elements [[sat1],[sat2],[[sat3]] #Radians
         :param final_time: Time for the end of the simulation [s]
@@ -38,10 +38,8 @@ class PropagationTime:
         :param mass_sat: Mass of each satellite [kg]
         :param area_sat: Radiation area sat [m^2]
         :param c_radiation: Coefficient radiation pressure [-]
-
-
-
         """
+
         if orbit_parameters is None:
             orbit_parameters = np.array([[20e6, 0, 0, 0, 0, 0], [20e6, 0, 0, 0, 0, 0]])
         self.resolution = resolution
@@ -196,15 +194,15 @@ class PropagationTime:
         """
         accelerations_settings_lunar_sats = dict(
             Sun=[
-                # propagation_setup.acceleration.cannonball_radiation_pressure(),
+                propagation_setup.acceleration.cannonball_radiation_pressure(),
                 propagation_setup.acceleration.point_mass_gravity()
             ],
             Earth=[
-                propagation_setup.acceleration.spherical_harmonic_gravity(0, 0)
+                propagation_setup.acceleration.spherical_harmonic_gravity(5, 5)
             ],
             Moon=[
-                propagation_setup.acceleration.spherical_harmonic_gravity(3, 3),
-                # propagation_setup.acceleration.relativistic_correction(use_schwarzschild=True)
+                propagation_setup.acceleration.spherical_harmonic_gravity(10, 10),
+                propagation_setup.acceleration.relativistic_correction(use_schwarzschild=True)
             ]
 
         )
@@ -469,13 +467,13 @@ class PropagationTime:
         ax1.plot_surface(x, y, z, color='grey', alpha=0.3)
 
         # Set the limits of the plot
-        max_range = np.max(np.abs(self.states_array[:, 0:3]))
+        max_range = 2*np.max(np.abs(self.states_array[:, 0:3]))
         ax1.set_xlim(-max_range, max_range)
         ax1.set_ylim(-max_range, max_range)
         ax1.set_zlim(-max_range, max_range)
 
         # Add a legend, labels, and use a tight layout to save space
-        ax1.legend()
+        # ax1.legend()
         ax1.set_xlabel('x [$10^7$ m]')
         ax1.set_ylabel('y [$10^7$ m]')
         ax1.set_zlabel('z [$10^7$ m]')

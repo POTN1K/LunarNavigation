@@ -90,16 +90,19 @@ class UserErrors:
         self.dists = np.linalg.norm(vecs, axis=1)
 
         # Compute unit vectors
-        uvecs = vecs / self.dists[:, np.newaxis]
+        self.uvecs = vecs / self.dists[:, np.newaxis]
 
         # Insert unit vectors into geometry matrix
-        H[:, :3] = uvecs
+        H[:, :3] = self.uvecs
         HH = np.vstack((H, [[0, 0, 1, 0]]))
         HH_inv = np.linalg.pinv(HH)
         H_inv = np.linalg.pinv(H)
         # Compute covariance matrix
         self.Q = np.dot(H_inv, H_inv.T)
         self.HQ = np.dot(HH_inv, HH_inv.T)
+
+        return self.uvecs
+
     def velocity_parameter_cov(self, velocity_indeces):
         HV = np.ones((len(self.sats), 4))
         # Compute vectors from receiver to satellites
@@ -115,10 +118,7 @@ class UserErrors:
         HV[:, :3] = uvecs * rel_velocities
         HV_inv = np.linalg.pinv(HV)
         self.VQ = np.dot(HV_inv, HV_inv.T)
-        # print(np.sqrt(np.trace(self.VQ)))
         return self.velocity_error_calculator()
-
-
 
 
     def velocity_error_calculator(self):
@@ -147,6 +147,7 @@ class UserErrors:
 
         self.HHDOP = np.sqrt(np.trace(self.HQ[:2, :2]))
 
+        self.uvecs_tot = []
 
 
         # self.DOP = {

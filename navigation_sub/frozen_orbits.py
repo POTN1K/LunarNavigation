@@ -1,5 +1,5 @@
 """Main File, used to run all simulations.
-Maintained by Nikolaus Ricker"""
+Maintained by Kyle and Serban"""
 
 # External Libraries
 import numpy as np
@@ -178,11 +178,9 @@ class FrozenOrbits:
         self.maxdist = []
         if np.min(self.model.mod_inView) >= 4:
             for i in range(0, len(self.model.moon)):
-
                 self.distances.append(np.array([sat.r for sat in self.model.mod_inView_obj[i]]))
                 self.satellite_indices.append(np.array([sat.id for sat in self.model.mod_inView_obj[i]]))
                 self.moon_points.append(self.model.moon[i])
-                # self.satellite_indices.append(np.array([sat.id for sat in self.model.mod_inView_obj[i]]))
                 Errors = UserErrors(self.distances[-1], sat_velocities, 0, self.moon_points[-1], [120.4, 10, 10, 10, 120, 3.5])
                 self.DOP_each_point.append(np.hstack((Errors.DOP_array, Errors.velocity_parameter_cov(self.satellite_indices[-1]))))
                 self.DOP_each_point_with_error.append(Errors.DOP_error_array)
@@ -218,8 +216,8 @@ class FrozenOrbits:
         duration = P
         self.propagation_time = PropagationTime(satellites, duration, dt, 250)
         # print(np.average(np.array(propagation_time.complete_delta_v(0, duration))))
-        # self.propagation_time.plot_kepler(kepler_plot)
-        # self.propagation_time.plot_time()
+        self.propagation_time.plot_kepler(kepler_plot)
+        self.propagation_time.plot_time()
 
     def ideal_sim(self, P, satellites):
         self.cartesian_states = np.array([(element_conversion.keplerian_to_cartesian_elementwise(
@@ -264,34 +262,34 @@ class FrozenOrbits:
         self.velocity_time_vertical = []
         sats = np.arange(0, 35)
         self.combinations = list(itertools.combinations(sats, 2))
-        for k in range(len(self.combinations)):
-            for i in range(0, satellites.shape[0], 1000):
-                self.model.resetModel()
-                sat_velocities = self.propagation_time.velocity[i]
-                for j in range(0, satellites.shape[1]//6):
-                    if j != self.combinations[k][0] and j != self.combinations[k][1]:
-                        self.model.addSatellite(satellites[i][j*6], satellites[i][j*6+1], np.rad2deg(satellites[i][j*6+2]), np.rad2deg(satellites[i][j*6+3]),
-                                    np.rad2deg(satellites[i][j*6+4]), np.rad2deg(satellites[i][j*6+5]), id=j)
-                self.model.setCoverage()
-                DOPValues = self.DOP_calculator(sat_velocities)
-                self.DOP_time_GDOP.append(DOPValues[:, 0])
-                self.DOP_time_PDOP.append(DOPValues[:, 1])
-                self.DOP_time_HDOP.append(DOPValues[:, 2])
-                self.DOP_time_VDOP.append(DOPValues[:, 3])
-                self.DOP_time_TDOP.append(DOPValues[:, 4])
-                self.DOP_time_HHDOP.append(DOPValues[:, 5])
-                self.velocity_time_total.append(DOPValues[:, 6])
-                self.velocity_time_horizontal.append(DOPValues[:, 7])
-                self.velocity_time_vertical.append(DOPValues[:, 8])
-        np.savetxt("modelreduntotVTOT.csv", np.array(self.velocity_time_total), delimiter=",")
-        np.savetxt("modelreduntotVH.csv",  np.array(self.velocity_time_horizontal), delimiter=",")
-        np.savetxt("modelreduntotVV.csv",  np.array(self.velocity_time_vertical), delimiter=",")
-        np.savetxt("modelreduntotGDOP.csv",  np.array(self.DOP_time_GDOP), delimiter=",")
-        np.savetxt("modelreduntotPDOP.csv",  np.array(self.DOP_time_PDOP), delimiter=",")
-        np.savetxt("modelreduntotHDOP.csv",  np.array(self.DOP_time_HDOP), delimiter=",")
-        np.savetxt("modelreduntotVDOP.csv",  np.array(self.DOP_time_VDOP), delimiter=",")
-        np.savetxt("modelreduntotTDOP.csv",  np.array(self.DOP_time_TDOP), delimiter=",")
-        np.savetxt("modelreduntotHHDOP.csv",  np.array(self.DOP_time_HHDOP), delimiter=",")
+        # for k in range(len(self.combinations)):
+        for i in range(0, satellites.shape[0], 100):
+            self.model.resetModel()
+            sat_velocities = self.propagation_time.velocity[i]
+            for j in range(0, satellites.shape[1]//6):
+                # if j != self.combinations[k][0] and j != self.combinations[k][1]:
+                    self.model.addSatellite(satellites[i][j*6], satellites[i][j*6+1], np.rad2deg(satellites[i][j*6+2]), np.rad2deg(satellites[i][j*6+3]),
+                                np.rad2deg(satellites[i][j*6+4]), np.rad2deg(satellites[i][j*6+5]), id=j)
+            self.model.setCoverage()
+            DOPValues = self.DOP_calculator(sat_velocities)
+            self.DOP_time_GDOP.append(DOPValues[:, 0])
+            self.DOP_time_PDOP.append(DOPValues[:, 1])
+            self.DOP_time_HDOP.append(DOPValues[:, 2])
+            self.DOP_time_VDOP.append(DOPValues[:, 3])
+            self.DOP_time_TDOP.append(DOPValues[:, 4])
+            self.DOP_time_HHDOP.append(DOPValues[:, 5])
+            self.velocity_time_total.append(DOPValues[:, 6])
+            self.velocity_time_horizontal.append(DOPValues[:, 7])
+            self.velocity_time_vertical.append(DOPValues[:, 8])
+        np.savetxt("model24VTOT.csv", np.array(self.velocity_time_total), delimiter=",")
+        np.savetxt("model24VH.csv",  np.array(self.velocity_time_horizontal), delimiter=",")
+        np.savetxt("model24VV.csv",  np.array(self.velocity_time_vertical), delimiter=",")
+        np.savetxt("model24GDOP.csv",  np.array(self.DOP_time_GDOP), delimiter=",")
+        np.savetxt("model24PDOP.csv",  np.array(self.DOP_time_PDOP), delimiter=",")
+        np.savetxt("model24HDOP.csv",  np.array(self.DOP_time_HDOP), delimiter=",")
+        np.savetxt("model24VDOP.csv",  np.array(self.DOP_time_VDOP), delimiter=",")
+        np.savetxt("model24TDOP.csv",  np.array(self.DOP_time_TDOP), delimiter=",")
+        np.savetxt("model24HHDOP.csv",  np.array(self.DOP_time_HHDOP), delimiter=",")
 
 
 constellations = []
@@ -299,54 +297,68 @@ fo = FrozenOrbits("model10GDOP.csv")
 orbit_choice = 10
 fo.model = Model()
 
+# fo.model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, dist_type=1)
 # fo.model_adder(np.vstack((fo.constellation_SP, fo.constellation_NP, fo.orbit_Low_I)))
 # fo.model_symmetrical_planes(orbit_choice)
 
 P_max = 2*np.pi * np.sqrt(10000000**3/miu_moon)
 P_OG = 2*np.pi * np.sqrt(5701200**3/miu_moon)
-P_NP_SP = 2*np.pi * np.sqrt(6141400**3/miu_moon)
+P_NP_SP = 2*np.pi * np.sqrt(6541400**3/miu_moon)
+P_24 = 2*np.pi * np.sqrt(24572000**3/miu_moon)
+print(((P_max/3600-24)*60-55)*60)
 
-# fo.dyn_sim(P_max)
+# fo.dyn_sim(P_24)
 
 # fo.DOP_time(fo.propagation_time.kepler_elements)
 
 # np.savetxt("statesarray_assumptions.csv", fo.propagation_time.states_array, delimiter=",")
 
 
-with open("statesarray_precise.csv", 'r') as file:
-    reader = csv.reader(file)
-    data = np.array([[float(element) for element in row] for row in reader])
-
-
-
-real_cart = data[:int(np.ceil(P_max)), 37:40]
-real_cart_V = data[:int(np.ceil(P_max)), 40:43]
-print(real_cart[0, :])
-print(real_cart_V[0, :])
-
-with open("statesarray_assumptions.csv", 'r') as file:
-    reader = csv.reader(file)
-    data = np.array([[float(element) for element in row] for row in reader])
-
-assumption_cart = data[:int(np.ceil(P_max)), 37:40]
-assumption_cart_V = data[:int(np.ceil(P_max)), 40:43]
-print(assumption_cart[0, :])
-print(assumption_cart_V[0, :])
-
-dist_cart = np.zeros(np.shape(assumption_cart)[0])
-for i in range(np.shape(assumption_cart)[0]):
-    dist_cart[i] = np.sqrt((assumption_cart[i, 0] - real_cart[i, 0]) ** 2 + (assumption_cart[i, 1] - real_cart[i, 1]) ** 2 + (assumption_cart[i, 2] - real_cart[i, 2]) ** 2)
-
-print(np.where(dist_cart >= 0.94944433)[0][0])
-print(dist_cart[np.where(dist_cart >= 0.94944433)[0][0]-1])
-print(np.max(dist_cart), np.argmax(dist_cart))
-
-dv_cart = np.zeros(np.shape(assumption_cart_V)[0])
-for i in range(np.shape(assumption_cart_V)[0]):
-    dv_cart[i] = np.sqrt((assumption_cart_V[i, 0] - real_cart_V[i, 0]) ** 2 + (assumption_cart_V[i, 1] - real_cart_V[i, 1]) ** 2 + (assumption_cart_V[i, 2] - real_cart_V[i, 2]) ** 2)
-
-print(np.max(dv_cart), np.argmax(dv_cart))
-
+# with open("statesarray_precise.csv", 'r') as file:
+#     reader = csv.reader(file)
+#     data = np.array([[float(element) for element in row] for row in reader])
+#
+#
+# real_cart = data[:int(np.ceil(P_NP_SP)), 61:64]
+# real_cart_V = data[:int(np.ceil(P_NP_SP)), 64:67]
+# print(real_cart[0, :])
+# print(real_cart_V[0, :])
+#
+# with open("statesarray_assumptions.csv", 'r') as file:
+#     reader = csv.reader(file)
+#     data = np.array([[float(element) for element in row] for row in reader])
+#
+# assumption_cart = data[:int(np.ceil(P_NP_SP)), 61:64]
+# assumption_cart_V = data[:int(np.ceil(P_NP_SP)), 64:67]
+# print(assumption_cart[0, :])
+# print(assumption_cart_V[0, :])
+#
+# dist_cart = np.zeros(np.shape(assumption_cart)[0])
+# for i in range(np.shape(assumption_cart)[0]):
+#     dist_cart[i] = np.sqrt((assumption_cart[i, 0] - real_cart[i, 0]) ** 2 + (assumption_cart[i, 1] - real_cart[i, 1]) ** 2 + (assumption_cart[i, 2] - real_cart[i, 2]) ** 2)
+# # Time constraint allowable ephemeris error = 17.60414169
+# print(np.where(dist_cart >= 0.94944433)[0][0])
+# print(dist_cart[np.where(dist_cart >= 0.94944433)[0][0]-1])
+# print(np.max(dist_cart), np.argmax(dist_cart))
+#
+# dv_cart = np.zeros(np.shape(assumption_cart_V)[0])
+# for i in range(np.shape(assumption_cart_V)[0]):
+#     dv_cart[i] = np.sqrt((assumption_cart_V[i, 0] - real_cart_V[i, 0]) ** 2 + (assumption_cart_V[i, 1] - real_cart_V[i, 1]) ** 2 + (assumption_cart_V[i, 2] - real_cart_V[i, 2]) ** 2)
+#
+# print(dv_cart[np.where(dist_cart >= 0.94944433)[0][0]-1])
+# print(np.max(dv_cart), np.argmax(dv_cart))
+#
+# t = np.arange(0, np.ceil(P_NP_SP))
+# y = 0.94944433*np.ones(np.shape(t))
+# plt.plot(t, dist_cart)
+# plt.plot(t, y)
+# plt.show()
+#
+# y_V = 0.07841202*np.ones(np.shape(t))
+# plt.plot(t, dv_cart)
+# plt.plot(t, y_V)
+# plt.show()
+#
 # fig = plt.figure()
 # ax = plt.axes(projection='3d')
 # ax.scatter3D(assumption_cart[::500, 0], assumption_cart[::500, 1], assumption_cart[::500, 2], c='g', marker='x')

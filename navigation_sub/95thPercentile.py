@@ -43,7 +43,7 @@ DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
 VOP = ["VTOT", "VH", "VV"]
 boxplotscancer = np.zeros(10000)
 for i in range(0, 6):
-    filename = "modelreduntot" + DOPS[i] + ".csv"
+    filename = "model24" + DOPS[i] + ".csv"
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         data = np.array([[float(element) for element in row] for row in reader])
@@ -53,8 +53,8 @@ for i in range(0, 6):
 boxplotscancer = array = np.delete(boxplotscancer, 0, 0).T
 
 boxplotscancer_V = np.zeros(10000)
-for j in range(0, 3):
-    filename = "modelreduntot" + VOP[j] + ".csv"
+for j in range(0, 6):
+    filename = "model24" + DOPS[j] + ".csv"
     with open(filename, 'r') as file:
         reader = csv.reader(file)
         data = np.array([[float(element) for element in row] for row in reader])
@@ -63,17 +63,21 @@ for j in range(0, 3):
 
 boxplotscancer_V = array = np.delete(boxplotscancer_V, 0, 0).T
 
-CNR = 8  # [dB]
-sigma_V = 0.01*10**(-(CNR-45)/20)  # [m/s]
+SNR = 8  # [dB]
+BW = 70  # [dB]
+CNR = SNR + BW  # [dB]
+sigma_V_1 = 0.01*10**(-(CNR-45)/20)  # [m/s]
+sigma_V = 0.06  # [m/s]
 
-def allowable_error(DOP_array, DOP_array_2, allowable, allowable_V):
+def allowable_error(DOP_array, DOP_array_V, allowable, allowable_V):
     constraints = np.max(DOP_array, axis=0)
     ephemeris_budget = []
     for i in range(len(constraints)):
         ephemeris_budget.append(np.sqrt((allowable[i] ** 2 / constraints[i] ** 2/4) - UserErrors.satellite_error(0, ORBIT=0) ** 2))
     ephemeris_budget = np.array(ephemeris_budget)
 
-    constraints_V = np.max(DOP_array_2, axis=0)
+    constraints_V = np.max(DOP_array_V, axis=0)
+    print(constraints_V)
     ephemeris_budget_V = []
     for i in range(len(constraints_V)):
         ephemeris_budget_V.append(
@@ -81,13 +85,36 @@ def allowable_error(DOP_array, DOP_array_2, allowable, allowable_V):
     ephemeris_budget_V = np.array(ephemeris_budget_V)
 
     return ephemeris_budget, ephemeris_budget_V
-print(allowable_error(boxplotscancer, boxplotscancer_V, [120.4, 10, 10, 10, 120, 100], [1, 1, 1]))
+print(allowable_error(boxplotscancer, boxplotscancer_V, [120.4, 120, 120, 100, 300, 3.5], [1, 1, 1, 2, 1, 1]))
+
+### Max 95th percentile DOP values
+# [6.0822285  5.0641006  4.4073417  3.43252637 3.40788531 3.0694594 ]
+
+### Allowable error for position and velocity for sigma_V from ERDA reader
+#(array([ 9.89397936,  0.94944433,  1.10164593,  1.43123656, 17.60414169,
+#       16.28726027]), array([0.08220641, 0.09873396, 0.11344685, 0.14566513, 0.14671838,
+#       0.16289498]))
+
+### Allowable error for position and velocity for sigma_V from Kyle's source
+# (array([ 9.89397936,  0.94944433,  1.10164593,  1.43123656, 17.60414169,
+#        16.28726027]), array([0.05619558, 0.07841202, 0.09628207, 0.13273425, 0.13388926,
+#        0.15144248]))
+
+### Allowable error for PDOP, + HDOP&VDOP for orbiting and landing and velocity PDOP + Orbiting and landing HDOP & VDOP for sigma_V from Kyle's source
+# (array([ 9.89397936,  9.8697038 ,  5.6658798 , 14.56401079, 17.60414169,
+#        16.28726027]), array([0.05619558, 0.07841202, 0.09628207, 0.28508512, 0.13388926,
+#        0.15144248]))
+
+### Allowable error for PDOP, + HDOP&VDOP for orbiting and landing and velocity PDOP + Orbiting and landing HDOP & VDOP for sigma_V from ERDA reader
+# (array([ 9.89397936,  9.8697038 ,  5.6658798 , 14.56401079, 17.60414169,
+#        16.28726027]), array([0.08220641, 0.09873396, 0.11344685, 0.29133052, 0.14671838,
+#        0.16289498]))
 
 
 def boxplot(df, df_V):
     plt.figure(figsize=(12, 8))
     column_names = DOPS
-    allowable = [120, 10, 10, 10, 120, 3.5]
+    allowable = [120, 100, 100, 100, 120, 3.5]
     sns.boxplot(data=df)
     plt.xticks(range(df.shape[1]), column_names)
     for i in range(df.shape[1]):
@@ -96,8 +123,8 @@ def boxplot(df, df_V):
     plt.show()
 
     plt.figure(figsize=(12, 8))
-    column_names_V = VOP
-    allowable_V = [1, 1, 1]
+    column_names_V = DOPS
+    allowable_V = [1, 1, 1, 1, 1, 1]
     sns.boxplot(data=df_V)
     plt.xticks(range(df_V.shape[1]), column_names_V)
     for i in range(df_V.shape[1]):
