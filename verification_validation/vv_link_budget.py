@@ -6,7 +6,7 @@ import numpy as np
 import sys
 sys.path.append('.')
 
-# Local objects
+# Local obzjects
 from scripts import Gpeak_helical, alpha1_over_2_helical, Lpr, dB, snr, snr_margin, S_lagrange, \
     L_s
 

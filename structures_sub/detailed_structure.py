@@ -45,7 +45,7 @@ class PropTankSphere:
     @volume.setter
     def volume(self, v):
         if v is None:
-            self._volume = self.mass_prop / (1.47 * 1000)*1.05 # 5% Margin
+            self._volume = self.mass_prop / (1.47 * 1000)*1.1 # 10% Margin
         else:
             self._volume = v
 
@@ -153,7 +153,7 @@ class SatelliteStruc:
         self.name = name
         self.mass = 0
         self.dim = [0, 0, 0]  # [Height, Length, Width]
-        self.t = None
+        self.t = 0
         self.support = None
         self.mmoi = [0, 0, 0]  # [Ixx, Iyy, Izz]
 

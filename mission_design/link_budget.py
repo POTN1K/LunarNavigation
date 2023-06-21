@@ -1,11 +1,11 @@
 """This code calculates the SNR margin of a link budget between the satellite and the user. It is very basic and basically a big calculator.
-By J. Geijsbers"""
+By J. Geijsberts"""
 
 import numpy as np
 
 
 
-# my values
+# My values
 # Ptr_dB = 15 #dBW  15dBW from Characterization of On-Orbit GPS and 26.8 dBW !!! this inclused the Gt. (GPSReceiverArchitecturesandMeasurements)
 # Ll = 0.5 #assumed
 # Lr = 0.5 #assumed

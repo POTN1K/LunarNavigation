@@ -11,7 +11,7 @@ import sys
 sys.path.append('.')
 
 # Local objects
-from scripts import Satellite, Tower, Lagrange, FixPoint, OrbitPlane, Model
+from mission_design import Satellite, Tower, Lagrange, FixPoint, OrbitPlane, Model
 
 # Constants
 r_moon = 1.737e6  # m

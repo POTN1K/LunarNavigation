@@ -277,7 +277,7 @@ class Structure:
             ar = 2 * self.shape.width + 2 * self.shape.length
         else:
             raise TypeError("Shape not recognized.")
-        return mass_init * self.height / (self.E * ar) * (axial_freq_falcon / 0.25) ** 2
+        return self.m0 * self.height / (self.E * ar) * (axial_freq_falcon / 0.25) ** 2
 
     def thickness_lateral_freq(self):
         """Computes the thickness of the structure based on the frequency of the structure.

@@ -1,3 +1,6 @@
+"""Script to determine the required thickness of the support structure of the solar panels.
+By I. Maes"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.optimize as sp
