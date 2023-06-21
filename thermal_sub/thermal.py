@@ -137,7 +137,7 @@ print('T_min', equilibrium_temperature(4.86, 0.81, 0, infrared_intensity_min, 0.
 if __name__ == "__main__":
     """Printing some graphs for sensitivity analysis and report based on the formulas found above"""
     a_e = np.array(np.linspace(0.1,2,1000))
-    e = np.array(np.linspace(0.0,0.20,5))
+    e = np.array(np.linspace(0.5,0.25,5))
     T_sc = np.array([])
     for i in range(len(a_e)):
         T = ((1420 + intensities(1182, 1737, 2616) + albedo_radiation(albedo_moon, 1420)) / (5.67*10**(-8) * 6) * 1.5 * a_e[i] + 1664 * 0.05 / (5.67*10**(-8) * 6 * e[::1]))**0.25-273.15
