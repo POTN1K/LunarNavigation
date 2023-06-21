@@ -42,6 +42,7 @@ def Normal_Distrib(self):
 DOPS = ["GDOP", "PDOP", "HDOP", "VDOP", "TDOP", "HHDOP"]
 VOP = ["VTOT", "VH", "VV"]
 boxplotscancer = np.zeros(10000)
+maxdops =[]
 for i in range(0, 6):
     filename = "model24" + DOPS[i] + ".csv"
     with open(filename, 'r') as file:

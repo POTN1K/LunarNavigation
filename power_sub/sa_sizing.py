@@ -17,8 +17,11 @@ mu_earth = 398600.435507 # km^3 /(s^2)
 AU = 149600000 # km
 r_sat = 6541.4 # km
 sc_moon = 1310 # W / (m^2)
-specific_energy = 130 # Wh/kg
+margin = 1.2
+specific_energy = 168.5 # Wh/kg
 energy_density = 300 # Wh/l
+eclipse_power = 912.54 * margin # W
+heater_power = 255 # W
 
 
 def orbital_period(r_orbit, mu):
@@ -107,7 +110,7 @@ def eclipse_length_elip(e, a, r_m, r_s, AU, mu_m):
 # print(f'Total eclipse time: {round(total_eclipse/3600,2)} [hrs]')
 
 
-def bol_power(p_eol, degradation, lifetime):
+def bol_power(p_eol, degradation=0.03, lifetime=12):
     """ Function to compute the required begin of life power for the satellite [W]
     : parameters.
     p_eol - power required at end of life [W],
@@ -117,7 +120,7 @@ def bol_power(p_eol, degradation, lifetime):
     return p_eol / ((1-degradation)**lifetime)
 
 
-def sa_size(p_bol, cell_efficiency, sc):
+def sa_size(p_bol, sc, cell_efficiency=0.285):
     """ Function to compute the required solar array size to generate enough power for the system [m^2]
     : parameters.
     p_bol - power generated at BOL [W],
@@ -131,7 +134,7 @@ def sa_size(p_bol, cell_efficiency, sc):
 # print(sa_size(bol_power(1700, 0.03, 12), 0.32, sc_moon))
 
 
-def battery_size(eclipse_time, power_required, voltage_d, voltage_hdis, dod, n_c, n_b=1, n_dis=1, voltage_cdis=3):
+def battery_size(eclipse_time, power_required, voltage_d, voltage_hdis, dod, n_c, n_b=1, n_dis=1, voltage_cdis=3.5):
     """Function to compute the battery capacity [Ah], mass [kg] and volume [l].
     : parameters.
     eclipse_time - time duration of the eclipse [hr],
@@ -151,20 +154,59 @@ def battery_size(eclipse_time, power_required, voltage_d, voltage_hdis, dod, n_c
     return capacity_battery, mass_battery, volume_battery, capacity_cell
 
 
-earth_moon = eclipse_length1(AU, 384400, 696340, 6371, mu_earth) # option Lennart
+def charging_power(capacity, charging_time, efficiency=0.9):
+    """ A script to compute the power required for charging the batteries during day time [W]
+    : parameters.
+    capacity - the capacity of the batteries which must be charged [Wh]
+    charging_time - the time allowed for charging (period - eclipse time) [h]
+    : outputs.
+    charging_power - power required for charging of the battery [W]"""
+    return capacity / (charging_time * efficiency)
+
+
+# Code segment
+
+
+earth_moon = eclipse_length1(AU, 384400, 696340, 6371, mu_earth)[0]/3600 # option Lennart
 moon_earth_eclipse = eclipse_length(384400, AU, 696340, 6371, mu_earth)/3600 # Option Mathijs
 # capacity, mass, volume, cell_capacity = battery_size(moon_earth_eclipse, 1500, 0.1, 0.1, 0.8)
 # print(earth_moon[1]/3600)
 # print(capacity, mass, volume, cell_capacity)
+eclipse_time = eclipse_length(5701, AU+384400, 696340, 1737.4, mu_moon)/3600
+eclipse_time2 = eclipse_length(10000, AU+384400, 696340, 1737.4, mu_moon)/3600
 
-power = 1500
 lowest_volume = 99999
 for i in range(9, 60):
-    new_volume = battery_size(earth_moon[1]/3600, power, 0.1, 0.1, 0.5, i)[2]
-    if new_volume < lowest_volume:
-        lowest_volume = new_volume
-        index = i
-print(lowest_volume, index)
+    if battery_size(eclipse_time, eclipse_power, 0.1, 0.1, 0.4, i)[-1] < 51:
+        new_volume = battery_size(eclipse_time, eclipse_power, 0.1, 0.1, 0.4, i)[2]
+        if new_volume < lowest_volume:
+            lowest_volume = new_volume
+            index = i
+    else:
+        continue
 
-# capacity, mass, volume, cell_capacity = battery_size(moon_earth_eclipse+ eclipse_length_elip(0.6, 6541.4, 1737.4, 696340, 149597871, 4902.800118)/3600, 1500, 0.1, 0.1, 0.5)
-# print(capacity, mass, volume, cell_capacity)
+
+lowest_volume2 = 99999
+for i in range(9, 60):
+    if battery_size(earth_moon, eclipse_power, 0.1, 0.1, 0.8, i)[-1] < 51:
+        # print(battery_size(eclipse_time, eclipse_power, 0.1, 0.1, 0.8, i)[-1])
+        new_volume = battery_size(earth_moon, eclipse_power, 0.1, 0.1, 0.8, i)[2]
+        if new_volume < lowest_volume2:
+            lowest_volume2 = new_volume
+            index2 = i
+    else:
+        continue
+
+
+battery_1 = battery_size(eclipse_time, eclipse_power, 0.1, 0.1, 0.4, index)
+battery_2 = battery_size(moon_earth_eclipse, eclipse_power, 0.1, 0.1, 0.8, index2)
+print(f' --- Battery 1: --- \nNumber of cells: {index}, \nBattery capacity: {battery_1[0]} [Wh],\nBattery mass: \
+{14.52+index*1.08} [kg], \nBattery volume: {0.553797+index*0.508429} [l]')
+print(f' --- Battery 2: --- \nNumber of cells: {index2}, \nBattery capacity: {battery_2[0]} [Wh],\nBattery mass: \
+{14.52+index2*1.08} [kg], \nBattery volume: {0.553797+index2*0.508429} [l]')
+charging_battery_1 = charging_power(battery_1[0], (orbital_period(5701, mu_moon)/3600 - eclipse_time))
+charging_battery_2 = charging_power(battery_2[0], (orbital_period(384400, mu_earth)/3600 - moon_earth_eclipse))
+total_charging_power = charging_battery_1 + charging_battery_2
+sa_area = sa_size(bol_power(eclipse_power + total_charging_power + heater_power), sc_moon)
+
+

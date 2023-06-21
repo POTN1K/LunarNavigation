@@ -21,43 +21,6 @@ from mission_design import Model, PropagationTime, UserErrors
 miu_moon = 4.9048695e12  # m^3/s^2
 c = 299792458  # m/s
 
-# DOP Calculation
-# DOP_with_error = []
-# error_budget = []
-# DOP = []
-#
-# for i in range(0, 10000):
-#     point = i
-#     Errors = UserErrors(np.array([sat.r for sat in model.mod_inView_obj[point]]),0, 0,
-#                         model.moon[point], [20, 10, 10, 10, 10, 3.5])
-#     DOP_with_error.append(Errors.Error)
-#     DOP_with_error.append(Errors.DOP_array)
-# #     # error_budget.append(Errors.ErrorBudget)
-# max_HHDOP = np.max(DOP_with_error, axis=0)[5]
-# print(f" The max HHDOP is :{np.round(max_HHDOP,3)}")
-# #
-# print(f"GDOP, PDOP, HDOP, VDOP, TDOP, HHDOP")
-# print(f"DOP WITH ERROR, PERFECT ORBIT, mean:{np.mean(DOP_with_error, axis=0)}, max: {np.max(DOP_with_error, axis=0)}, "
-#       f"min: {np.min(DOP_with_error, axis=0)}, ptp: {np.ptp(DOP_with_error, axis=0)},SD: {np.std(DOP_with_error, axis=0)}")
-
-# print(f"ORBIT BUDGET FOR REQUIREMENT, mean:{np.mean(error_budget, axis=0)}, max: {np.max(error_budget, axis=0)}, "
-#       f"min: {np.min(error_budget, axis=0)}, ptp: {np.ptp(error_budget, axis=0)},SD: {np.std(error_budget, axis=0)}")
-
-
-
-# # # Dynamic Simulation
-# satellites = model.getSatellites()
-# duration = 86400 * 1
-#
-# # # PropagationTime(satellites, total_time, time_step, delta_v, n_planes, shift, elevation)
-# propagation_time = PropagationTime(satellites, duration, 100, 250, 0, 0)
-#
-# # print(np.average(np.array(propagation_time.complete_delta_v(0, duration))))
-#
-# propagation_time.plot_kepler(0)
-# propagation_time.plot_time()
-
-
 class FrozenOrbits:
     """
     Class to check the parameters of frozen orbits,combination and position over time
@@ -143,11 +106,20 @@ class FrozenOrbits:
         self.data = []
 
     def true_to_mean_anomaly(self, e, M):
+        if e < 0:
+            raise ValueError("Eccentricity (e) cannot be negative.")
+        if M > 360 or M < 0:
+            raise ValueError("Mean Anomaly must be between 0-360 [deg] ")
+
         eccentric_anomaly = element_conversion.true_to_eccentric_anomaly(np.deg2rad(M), e)
         mean_anomaly = element_conversion.eccentric_to_mean_anomaly(eccentric_anomaly, e)
         return np.rad2deg(mean_anomaly)
 
     def mean_to_true_anomaly(self, e, M):
+        if e < 0:
+            raise ValueError("Eccentricity (e) cannot be negative.")
+        if M > 360 or M < 0:
+            raise ValueError("Mean Anomaly must be between 0-360 [deg] ")
         true_anomaly = element_conversion.mean_to_true_anomaly(e, np.deg2rad(M))
         return np.rad2deg(true_anomaly)
 
@@ -182,17 +154,18 @@ class FrozenOrbits:
                 self.satellite_indices.append(np.array([sat.id for sat in self.model.mod_inView_obj[i]]))
                 self.moon_points.append(self.model.moon[i])
                 Errors = UserErrors(self.distances[-1], sat_velocities, 0, self.moon_points[-1], [120.4, 10, 10, 10, 120, 3.5])
-                self.DOP_each_point.append(np.hstack((Errors.DOP_array, Errors.velocity_parameter_cov(self.satellite_indices[-1]))))
-                self.DOP_each_point_with_error.append(Errors.DOP_error_array)
+                self.DOP_each_point.append(Errors.DOP_array)
+                # self.DOP_each_point.append(np.hstack((Errors.DOP_array, Errors.velocity_parameter_cov(self.satellite_indices[-1]))))
+                # self.DOP_each_point_with_error.append(Errors.DOP_error_array)
             self.DOP_each_point = np.asarray(self.DOP_each_point)
-            self.DOP_each_point_with_error = np.asarray(self.DOP_each_point_with_error)
+            # self.DOP_each_point_with_error = np.asarray(self.DOP_each_point_with_error)
             # self.maxdist.append(np.max(np.concatenate(self.distances)))
             # HHDOP_ephemeris = Errors.allowable_error(self.DOP_each_point)
             if plotting == True:
                 self.boxplot(self.DOP_each_point)
-            print(np.max(self.DOP_each_point, axis=0))
+            # print(np.max(self.DOP_each_point, axis=0))
 
-            Ephemeris_error = Errors.allowable_error(self.DOP_each_point_with_error)
+            # Ephemeris_error = Errors.allowable_error(self.DOP_each_point_with_error)
             # print(Ephemeris_error, np.max(self.DOP_each_point, axis=0), np.median(self.DOP_each_point, axis=0))
             return(np.asarray(self.DOP_each_point))
         else:
@@ -200,6 +173,8 @@ class FrozenOrbits:
             return np.asarray([["False","False","False","False","False","False"]])
 
     def boxplot(self, df):
+        if type(df) != np.ndarray:
+            raise TypeError("An array has to be put in")
         plt.figure(figsize=(12, 8))
         column_names = ['GDOP', 'PDOP', 'HDOP', 'VDOP', 'TDOP', 'HHDOP']
         sns.boxplot(data=df)
@@ -216,8 +191,8 @@ class FrozenOrbits:
         duration = P
         self.propagation_time = PropagationTime(satellites, duration, dt, 250)
         # print(np.average(np.array(propagation_time.complete_delta_v(0, duration))))
-        self.propagation_time.plot_kepler(kepler_plot)
-        self.propagation_time.plot_time()
+        # self.propagation_time.plot_kepler(kepler_plot)
+        # self.propagation_time.plot_time()
 
     def ideal_sim(self, P, satellites):
         self.cartesian_states = np.array([(element_conversion.keplerian_to_cartesian_elementwise(
@@ -250,7 +225,7 @@ class FrozenOrbits:
             P[i] = 2*np.pi * np.sqrt(satellites[i, 0]**3/miu_moon)
         return P
 
-    def DOP_time(self, satellites):
+    def DOP_time(self, satellites, interval=100):
         self.DOP_time_GDOP = []
         self.DOP_time_PDOP = []
         self.DOP_time_HDOP = []
@@ -292,9 +267,10 @@ class FrozenOrbits:
         np.savetxt("model24HHDOP.csv",  np.array(self.DOP_time_HHDOP), delimiter=",")
 
 
-constellations = []
+#
+# constellations = []
 fo = FrozenOrbits("model10GDOP.csv")
-orbit_choice = 10
+# orbit_choice = 10
 fo.model = Model()
 
 # fo.model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, dist_type=1)
