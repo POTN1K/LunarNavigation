@@ -4,7 +4,6 @@ By N. Ricker"""
 
 # External modules
 import numpy as np
-import matplotlib.pyplot as plt
 import unittest
 
 # Internal modules
