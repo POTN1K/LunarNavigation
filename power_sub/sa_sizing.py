@@ -5,6 +5,7 @@ By Lennart and Mathijs"""
 # External Libraries
 import numpy as np
 from scipy.optimize import fsolve
+import matplotlib.pyplot as plt
 
 # Constants
 G = 6.6743015*10**(-11) # N m^2 / (kg^2)
@@ -20,8 +21,8 @@ sc_moon = 1310 # W / (m^2)
 margin = 1.2
 specific_energy = 168.5 # Wh/kg
 energy_density = 300 # Wh/l
-eclipse_power = 912.54 * margin # W
-heater_power = 255 # W
+eclipse_power = 761 * margin # W
+heater_power = 300 # W
 
 
 def orbital_period(r_orbit, mu):
@@ -198,8 +199,8 @@ for i in range(9, 60):
         continue
 
 
-battery_1 = battery_size(eclipse_time, eclipse_power, 0.1, 0.1, 0.4, index)
-battery_2 = battery_size(moon_earth_eclipse, eclipse_power, 0.1, 0.1, 0.8, index2)
+battery_1 = battery_size(eclipse_time, eclipse_power, 0.2, 0.1, 0.4, index)
+battery_2 = battery_size(moon_earth_eclipse, eclipse_power, 0.2, 0.1, 0.8, index2)
 print(f' --- Battery 1: --- \nNumber of cells: {index}, \nBattery capacity: {battery_1[0]} [Wh],\nBattery mass: \
 {14.52+index*1.08} [kg], \nBattery volume: {0.553797+index*0.508429} [l]')
 print(f' --- Battery 2: --- \nNumber of cells: {index2}, \nBattery capacity: {battery_2[0]} [Wh],\nBattery mass: \
@@ -207,6 +208,29 @@ print(f' --- Battery 2: --- \nNumber of cells: {index2}, \nBattery capacity: {ba
 charging_battery_1 = charging_power(battery_1[0], (orbital_period(5701, mu_moon)/3600 - eclipse_time))
 charging_battery_2 = charging_power(battery_2[0], (orbital_period(384400, mu_earth)/3600 - moon_earth_eclipse))
 total_charging_power = charging_battery_1 + charging_battery_2
-sa_area = sa_size(bol_power(eclipse_power + total_charging_power + heater_power), sc_moon)
+sa_area = sa_size(bol_power(eclipse_power + total_charging_power*margin + heater_power*margin), sc_moon)
+print(sa_area/0.9)
+print(bol_power(eclipse_power + total_charging_power*margin + heater_power*margin))
+# print(eclipse_power + total_charging_power + heater_power)
+# for i in range(6,1000):
+#     if battery_size(moon_earth_eclipse+eclipse_time, 2266.8, 0.2, 0.1, 0.4, i)[-1] < 51:
+#         print(i, battery_size(moon_earth_eclipse+eclipse_time , 2266.8, 0.2, 0.1, 0.4,i))
+#         break
 
 
+for i in range(6,1000):
+    if battery_size(eclipse_time+moon_earth_eclipse, eclipse_power, 0.2, 0.1, 0.4, i)[-1] < 51:
+        index3 = i
+        break
+
+single_battery = battery_size(eclipse_time+moon_earth_eclipse, eclipse_power, 0.2, 0.1, 0.4, index3)
+print(f' --- Singular Battery: --- \nNumber of cells: {index3}, \nBattery capacity: {single_battery[0]} [Wh],\nBattery \
+mass: {14.52+index3*1.08} [kg], \nBattery volume: {0.553797+index3*0.508429} [l]')
+# battery_size(eclipse_time+moon_earth_eclipse, eclipse_power, 0.2, 0.1, 0.4, index)
+# print(sa_size(2266.8, sc_moon)/0.85*4)
+print(bol_power(1605))
+
+power = np.arange(10,2001, 1)
+sa = sa_size(bol_power(power), sc_moon)
+plt.plot(power, sa)
+plt.show()
