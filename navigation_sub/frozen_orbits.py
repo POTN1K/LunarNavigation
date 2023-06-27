@@ -270,12 +270,12 @@ class FrozenOrbits:
 #
 # constellations = []
 fo = FrozenOrbits("model10GDOP.csv")
-# orbit_choice = 10
+orbit_choice = 10
 fo.model = Model()
 
 # fo.model.addSymmetricalPlanes(a=24572000, i=58.69, e=0, w=22.9, n_planes=6, n_sat_per_plane=4, dist_type=1)
-# fo.model_adder(np.vstack((fo.constellation_SP, fo.constellation_NP, fo.orbit_Low_I)))
-# fo.model_symmetrical_planes(orbit_choice)
+fo.model_adder(np.vstack((fo.constellation_SP, fo.constellation_NP, fo.orbit_Low_I)))
+fo.model_symmetrical_planes(orbit_choice)
 
 P_max = 2*np.pi * np.sqrt(10000000**3/miu_moon)
 P_OG = 2*np.pi * np.sqrt(5701200**3/miu_moon)

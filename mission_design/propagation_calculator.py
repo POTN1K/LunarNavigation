@@ -14,9 +14,9 @@ By Kyle Scherpenzeel
 # Load standard modules
 import numpy as np
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from PIL import Image
-import imageio
+# from mpl_toolkits.mplot3d import Axes3D
+# from PIL import Image
+# import imageio
 
 
 
@@ -552,28 +552,29 @@ class PropagationTime:
         plt.show()
 miu_moon = 4.9048695e12
 satellites = [[5701.2e3, 0.002, np.deg2rad(40.78), np.deg2rad(90),  0, 0], [5701.2e3, 0.002, np.deg2rad(40.78), np.deg2rad(90),  0, 0]]
-propagation_time = PropagationTime(resolution=10, final_time= 2*np.pi * np.sqrt(10000000**3/miu_moon), orbit_parameters=satellites,degree_moon=5)
-# # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))a
-accell = propagation_time.dep_vars_array[:,1:6]
-time = propagation_time.dep_vars_array[:, 0]
-propagation_time = PropagationTime(resolution=10, final_time= 2*np.pi * np.sqrt(10000000**3/miu_moon), orbit_parameters=satellites,degree_earth =0,degree_moon=0)
-accell2 = propagation_time.dep_vars_array[:,1:6]
-propagation_time = PropagationTime(resolution=10, final_time= 2*np.pi * np.sqrt(10000000**3/miu_moon), orbit_parameters=satellites,degree_earth =10,degree_moon=10)
-accell3 = propagation_time.dep_vars_array[:,1:6]
-
-
-
+# satellites = [[6541.4e3, 0.6, np.deg2rad(56.2), np.deg2rad(270), 0, 0], [6541.4e3, 0.6, np.deg2rad(56.2), np.deg2rad(270), 0, 0]]
+# propagation_time = PropagationTime(resolution=10, final_time= 2*np.pi * np.sqrt(10000000**3/miu_moon), orbit_parameters=satellites,degree_moon=5)
+# # # # print(np.average(np.array(propagation_time.complete_delta_v(0, 86400*14))))a
+# accell = propagation_time.dep_vars_array[:,1:6]
+# time = propagation_time.dep_vars_array[:, 0]
+# propagation_time = PropagationTime(resolution=10, final_time= 2*np.pi * np.sqrt(10000000**3/miu_moon), orbit_parameters=satellites,degree_earth =0,degree_moon=0)
+# accell2 = propagation_time.dep_vars_array[:,1:6]
+# propagation_time = PropagationTime(resolution=10, final_time= 2*np.pi * np.sqrt(10000000**3/miu_moon), orbit_parameters=satellites,degree_earth =10,degree_moon=10)
+# accell3 = propagation_time.dep_vars_array[:,1:6]
 
 # plt.plot(time, accell[:, 0], label ='Sun Point Mass')
 # plt.plot(time, accell[:, 1], label ='Moon 10th degree')
-plt.plot(time, accell[:, 1], label ='Moon 5th Degree')
-plt.plot(time, accell2[:, 1], label ='Moon Point Mass')
-plt.plot(time, accell3[:, 1], label ='Moon 10th Degree')
-
-# plt.plot(time, accell[:, 3], label ='Relativistic Correction')
-# plt.plot(time, accell[:, 4], label ='Solar Radiation Pressure')
-plt.legend(loc='lower right')
-plt.show()
+# plt.plot(time, accell2[:, 1], label='Moon Point Mass')
+# plt.plot(time, accell[:, 1], label='Moon 5th Degree')
+# plt.plot(time, accell3[:, 1], label='Moon 10th Degree')
+#
+# # plt.plot(time, accell[:, 3], label ='Relativistic Correction')
+# # plt.plot(time, accell[:, 4], label ='Solar Radiation Pressure')
+# plt.xlabel('Time [s]', fontsize=25)
+# plt.ylabel(r'Acceleration [$ms^{-2}$]', fontsize=25)
+# plt.tick_params(axis='both', labelsize=20)
+# plt.legend(loc='lower right', fontsize=25)
+# plt.show()
 
 # propagation_time.plot_kepler(0)
-propagation_time.plot_time()
+# propagation_time.plot_time()

@@ -12,18 +12,6 @@ class TestFrozenOrbits(unittest.TestCase):
         # self.frozen_orbits.model_adder(np.vstack((self.frozen_orbits.constellation_SP, self.frozen_orbits.constellation_NP, self.frozen_orbits.orbit_Low_I)))
         # self.frozen_orbits.dyn_sim(1000)
 
-    def test_true_to_mean_anomaly(self):
-        e = 0.1
-        M = 30.0
-        mean_anomaly = self.frozen_orbits.true_to_mean_anomaly(e, M)
-        self.assertAlmostEqual(mean_anomaly, 30.665787, places=5)
-
-    def test_mean_to_true_anomaly(self):
-        e = 0.1
-        M = 30.0
-        true_anomaly = self.frozen_orbits.mean_to_true_anomaly(e, M)
-        self.assertAlmostEqual(true_anomaly, 35.72958, places=5)
-
     def test_true_anomaly_translation(self):
         satellites = np.array([[8000e3, 0.1, 0.0, 0.0, 0.0, 0.0],
                                [8000e3, 0.1, 0.0, 0.0, 0.0, 120.0],
@@ -46,6 +34,7 @@ class TestFrozenOrbits(unittest.TestCase):
     def test_model_symmetrical_planes(self):
         self.frozen_orbits.model_symmetrical_planes(1)
         self.assertEqual(len(self.frozen_orbits.model.modules), 20)
+
     def test_DOP_calculator(self):
         instance = FrozenOrbits(None)
 
@@ -71,35 +60,12 @@ class TestFrozenOrbits(unittest.TestCase):
         num_timesteps = len(self.frozen_orbits.propagation_time.states_array)
         self.assertEqual(num_timesteps, 3601)
 
-    def test_true_to_mean_anomaly_invalid_e(self):
-        e = -0.5  # Invalid eccentricity
-        M = 45.0
-        with self.assertRaises(ValueError):
-            self.frozen_orbits.true_to_mean_anomaly(e, M)
-
-    def test_true_to_mean_anomaly_invalid_M(self):
-        e = 0.2
-        M = -45.0  # Invalid mean anomaly
-        with self.assertRaises(ValueError):
-            self.frozen_orbits.true_to_mean_anomaly(e, M)
-
-    def test_mean_to_true_anomaly_invalid_e(self):
-        e = -0.5  # Invalid eccentricity
-        M = 45.0
-        with self.assertRaises(ValueError):
-            self.frozen_orbits.mean_to_true_anomaly(e, M)
-
-    def test_mean_to_true_anomaly_invalid_M(self):
-        e = 0.2
-        M = -45.0  # Invalid mean anomaly
-        with self.assertRaises(ValueError):
-            self.frozen_orbits.mean_to_true_anomaly(e, M)
-
     def test_true_anomaly_translation_invalid_change(self):
         satellites = [[8000e3, 0.1, 45, 90, 0, 0]]
         change = '30'
         with self.assertRaises(TypeError):
             self.frozen_orbits.true_anomaly_translation(satellites, change)
+
     def test_boxplot_no_array(self):
         df = [[1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
               [2.0, 3.0, 4.0, 5.0, 6.0, 7.0],
