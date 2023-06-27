@@ -49,6 +49,21 @@ def clean_csv():
     sat = np.array([clean_df[[i, i + 1, i + 2]].to_numpy() for i in range(1, 93 * 2, 6)])
     return sat
 
+def relay_csv():
+    df = pd.read_csv('statesarray_Jasper.csv', header= None)
+    #Drop time
+    df.drop(columns=0, inplace=True)
+    #Velocity and replica columns, drop
+    erase_indices = np.arange(4, df.shape[1]+1)
+    df.drop(columns=erase_indices, inplace=True)
+    #Time steps to keep
+    keepTime = np.arange(3, df.shape[0], 10)
+    relayP = df.loc[keepTime]
+    relay = np.array(relayP)
+    return relay
+
+    
+    
 def PAcc(divI, DI, MP, L ):
     DO = MP*DI + L*np.tan(2*divI/MP)
     acc = np.arctan2(DO/2, L) *180/np.pi
@@ -58,6 +73,7 @@ def PAcc(divI, DI, MP, L ):
 if __name__ == "__main__":
     # Read csv
     sat = clean_csv()
+    relay = relay_csv()
 
     # Planes
     south_pole = sat[0:2]
@@ -103,11 +119,17 @@ if __name__ == "__main__":
         ii = ii + 1
         if ii > 2:
             break
-        
+    
+    # relayMax = []
+    # for keyR in planes:
+    #     relayMax.append(max_outPlane(relay, planes[keyR]))
+    # print(np.min(relayMax))
+                        
     # print(OutMax)
     Max = np.max(InMax + OutMax)
+    print(Max)
     
-    DO = PAcc(0.008, 4*10**(-6), 1, Max)
+    DO = PAcc(8*10**(-3), 45*10**(-3), 1, Max)
     print(DO)
     # print(OutOfPlaneDistance(orb1, orb2)[1], "hello")
     # print(OutOfPlaneDistance(orb2, orb3)[1], "nice")
